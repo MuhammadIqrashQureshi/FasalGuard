@@ -1,0 +1,33 @@
+<svg viewBox="0 0 800 520" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img">
+  <defs>
+    <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#c9efcf"/>
+      <stop offset="100%" stop-color="#a6e4b2"/>
+    </linearGradient>
+    <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#e3f7e6"/>
+      <stop offset="100%" stop-color="#f8fffa"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="520" fill="url(#sky)"/>
+  <!-- hills -->
+  <ellipse cx="100" cy="380" rx="260" ry="120" fill="url(#g1)"/>
+  <ellipse cx="420" cy="400" rx="340" ry="140" fill="#8dd9aa" opacity="0.9"/>
+  <ellipse cx="700" cy="420" rx="220" ry="120" fill="#6ecb93" opacity="0.9"/>
+  <!-- fields stripes -->
+  <g stroke="#5fb97f" stroke-width="4" opacity="0.5">
+    <path d="M0 420 C 140 380, 260 420, 400 410" fill="none"/>
+    <path d="M0 440 C 160 400, 280 440, 420 430" fill="none"/>
+    <path d="M0 460 C 180 420, 320 460, 460 450" fill="none"/>
+    <path d="M0 480 C 200 440, 360 480, 520 470" fill="none"/>
+  </g>
+  <!-- plant -->
+  <g transform="translate(560,320)">
+    <rect x="34" y="120" width="12" height="60" rx="6" fill="#2a9150"/>
+    <path d="M40 120 C 10 110, 6 84, 28 70 C 52 58, 64 78, 40 120" fill="#57cc78"/>
+    <path d="M46 120 C 80 110, 84 84, 64 68 C 44 54, 30 76, 46 120" fill="#38b564"/>
+  </g>
+  <!-- sun -->
+  <circle cx="120" cy="120" r="26" fill="#ffd36b"/>
+</svg>
+

@@ -1,70 +1,204 @@
-# Getting Started with Create React App
+# FasalGuard - Agricultural Monitoring System
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A complete authentication system for FasalGuard with React frontend and Node.js backend.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- ✅ User Registration and Login
+- ✅ JWT Token Authentication
+- ✅ Password Hashing with bcrypt
+- ✅ MongoDB Database Integration
+- ✅ Responsive UI with Dark Mode
+- ✅ Protected Routes
+- ✅ User Dashboard
+- ✅ Form Validation
+- ✅ Error Handling
 
-### `npm start`
+## Project Structure
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+```
+fasal-guard/
+├── src/                    # React Frontend
+│   ├── App.js             # Main App Component
+│   ├── FasalGuardAuth.js  # Authentication Component
+│   ├── Dashboard.js       # User Dashboard
+│   └── ...
+├── backend/               # Node.js Backend
+│   ├── controllers/       # Route Controllers
+│   ├── middleware/        # Authentication Middleware
+│   ├── models/           # Database Models
+│   ├── routes/           # API Routes
+│   ├── server.js         # Express Server
+│   └── package.json      # Backend Dependencies
+└── package.json          # Frontend Dependencies
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Prerequisites
 
-### `npm test`
+- Node.js (v14 or higher)
+- MongoDB (local installation or MongoDB Atlas)
+- npm or yarn
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Installation & Setup
 
-### `npm run build`
+### 1. Install Frontend Dependencies
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+npm install
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 2. Install Backend Dependencies
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+cd backend
+npm install
+```
 
-### `npm run eject`
+### 3. Database Setup
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+**Option A: MongoDB Atlas (Recommended - Cloud Database)**
+1. Go to [MongoDB Atlas](https://www.mongodb.com/atlas) in Chrome
+2. Create a free account and cluster
+3. Follow the detailed guide: [MONGODB_ATLAS_SETUP.md](MONGODB_ATLAS_SETUP.md)
+4. Or use the setup helper: `node setup-atlas.js`
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+**Option B: Local MongoDB**
+```bash
+# Install MongoDB locally and start service
+mongod
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### 4. Environment Configuration
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+**For MongoDB Atlas (Recommended):**
+```env
+PORT=5000
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/fasalguard?retryWrites=true&w=majority
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+JWT_EXPIRE=7d
+NODE_ENV=development
+```
 
-## Learn More
+**For Local MongoDB:**
+```env
+PORT=5000
+MONGODB_URI=mongodb://localhost:27017/fasalguard
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+JWT_EXPIRE=7d
+NODE_ENV=development
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### 5. Start the Application
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+**Terminal 1 - Backend Server:**
+```bash
+cd backend
+npm run dev
+```
 
-### Code Splitting
+**Terminal 2 - Frontend:**
+```bash
+npm start
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+The application will be available at:
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:5000
 
-### Analyzing the Bundle Size
+## API Endpoints
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### Authentication Routes
 
-### Making a Progressive Web App
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|---------|
+| POST | `/api/auth/register` | Register new user | Public |
+| POST | `/api/auth/login` | Login user | Public |
+| GET | `/api/auth/me` | Get current user | Private |
+| PUT | `/api/auth/profile` | Update user profile | Private |
+| POST | `/api/auth/logout` | Logout user | Private |
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### Example API Usage
 
-### Advanced Configuration
+**Register User:**
+```bash
+curl -X POST http://localhost:5000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "John Doe",
+    "email": "john@example.com",
+    "password": "password123"
+  }'
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+**Login User:**
+```bash
+curl -X POST http://localhost:5000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "john@example.com",
+    "password": "password123"
+  }'
+```
 
-### Deployment
+## Usage
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+1. **Registration**: Create a new account with name, email, and password
+2. **Login**: Sign in with your email and password
+3. **Dashboard**: Access your personalized dashboard after login
+4. **Logout**: Sign out from your account
 
-### `npm run build` fails to minify
+## Security Features
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- Password hashing with bcrypt
+- JWT token authentication
+- Input validation and sanitization
+- CORS protection
+- Error handling without sensitive data exposure
+
+## Development
+
+### Backend Development
+```bash
+cd backend
+npm run dev  # Uses nodemon for auto-restart
+```
+
+### Frontend Development
+```bash
+npm start  # Starts React development server
+```
+
+## Production Deployment
+
+1. Update environment variables for production
+2. Build the frontend: `npm run build`
+3. Set up MongoDB Atlas for production database
+4. Deploy backend to your preferred hosting service
+5. Configure CORS for your production domain
+
+## Technologies Used
+
+**Frontend:**
+- React 19
+- Lucide React (Icons)
+- CSS-in-JS (Inline Styles)
+
+**Backend:**
+- Node.js
+- Express.js
+- MongoDB with Mongoose
+- JWT (jsonwebtoken)
+- bcryptjs
+- express-validator
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## License
+
+MIT License - see LICENSE file for details
