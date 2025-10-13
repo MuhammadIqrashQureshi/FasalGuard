@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import FasalGuardAuth from './FasalGuardAuth';
 import HomePage from './HomePage';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import ContactPage from './ContactPage';
+import AboutUs from './AboutUs';
+import Profile from './Profile';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { CSSTransition, SwitchTransition } from 'react-transition-group';
 import './App.css';
 
 function App() {
@@ -9,6 +13,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     // Check if user is logged in
@@ -76,8 +81,8 @@ function App() {
   }
 
   return (
-    <div className="App">
-      <Routes>
+    <div className="App" style={{ minHeight: '100vh' }}>
+      <Routes location={location}>
         <Route path="/login" element={
           isAuthenticated ? <Navigate to="/home" replace /> : <FasalGuardAuth onLogin={handleLogin} initialView="login" />
         } />
@@ -87,11 +92,19 @@ function App() {
         <Route path="/verify" element={
           isAuthenticated ? <Navigate to="/home" replace /> : <FasalGuardAuth onLogin={handleLogin} initialView="otp" />
         } />
+        <Route path="/forgot-password" element={
+          isAuthenticated ? <Navigate to="/home" replace /> : <FasalGuardAuth onLogin={handleLogin} initialView="forgot-password" />
+        } />
+        <Route path="/reset-password" element={
+          isAuthenticated ? <Navigate to="/home" replace /> : <FasalGuardAuth onLogin={handleLogin} initialView="reset-password" />
+        } />
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/home" element={
           isAuthenticated ? <HomePage user={user} onLogout={handleLogout} /> : <Navigate to="/login" replace />
         } />
-        {/* fallback - redirect unknown routes to home or login */}
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/about" element={<AboutUs onLogout={handleLogout} />} />
+        <Route path="/profile" element={<Profile user={user} />} />
         <Route path="*" element={
           isAuthenticated ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />
         } />

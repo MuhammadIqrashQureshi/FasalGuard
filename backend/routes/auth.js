@@ -1,4 +1,5 @@
 const express = require('express');
+const router = express.Router();
 const { body } = require('express-validator');
 const {
   register,
@@ -7,15 +8,13 @@ const {
   updateProfile,
   logout,
   verifyEmail,
-  resendVerification
-  ,
+  resendVerification,
   googleAuth,
   forgotPasswordRequest,
-  resetPassword
+  resetPassword,
+  verifyReset
 } = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
-
-const router = express.Router();
 
 // Validation rules
 const registerValidation = [
@@ -79,6 +78,7 @@ router.post('/login', loginValidation, login);
 router.post('/verify-email', verifyEmailValidation, verifyEmail);
 router.post('/forgot-password', forgotPasswordValidation, forgotPasswordRequest);
 router.post('/reset-password', resetPasswordValidation, resetPassword);
+router.post('/verify-reset', verifyReset);
 
 // Protected routes
 router.get('/me', protect, getMe);

@@ -1,3 +1,35 @@
+// Helper for strong password validation
+function isStrongPassword(password) {
+  // At least 8 chars, one uppercase, one lowercase, one number, one special char
+  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/.test(password);
+}
+// @desc    Verify OTP for password reset
+// @route   POST /api/auth/verify-reset
+// @access  Public
+exports.verifyReset = async (req, res) => {
+  try {
+    const { email, code } = req.body;
+    if (!email || !code) {
+      return res.status(400).json({ success: false, message: 'Email and code are required' });
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ success: false, message: 'User not found' });
+    }
+    if (
+      !user.verificationToken ||
+      user.verificationToken !== code ||
+      !user.verificationTokenExpiresAt ||
+      user.verificationTokenExpiresAt.getTime() <= Date.now()
+    ) {
+      return res.status(400).json({ success: false, message: 'Invalid or expired code' });
+    }
+    return res.status(200).json({ success: true, message: 'OTP verified' });
+  } catch (error) {
+    console.error('Verify reset error:', error);
+    return res.status(500).json({ success: false, message: 'Server error during OTP verification' });
+  }
+};
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const User = require('../models/User');
@@ -139,13 +171,17 @@ exports.register = async (req, res) => {
         message: 'User already exists with this email'
       });
     }
-
+    // Strong password validation
+    if (!isStrongPassword(password)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 8 characters and include uppercase, lowercase, number, and special character.'
+      });
+    }
     // Remove any previous pending registration for same email
     await PendingUser.deleteOne({ email });
-
     // Generate verification token (6-digit OTP)
     const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
-    
     // Create PendingUser (do not create actual User yet)
     const pending = await PendingUser.create({
       name,
@@ -276,9 +312,10 @@ exports.getMe = async (req, res) => {
 // @access  Private
 exports.updateProfile = async (req, res) => {
   try {
-    const { name, email } = req.body;
+  const { name, email, currentPassword, newPassword } = req.body;
     
-    const user = await User.findById(req.user.id);
+  // Always select password for password change
+  const user = await User.findById(req.user.id).select('+password');
     
     if (!user) {
       return res.status(404).json({
@@ -298,29 +335,57 @@ exports.updateProfile = async (req, res) => {
       }
     }
 
-    // Update user
-    const updatedUser = await User.findByIdAndUpdate(
-      req.user.id,
-      { name: name || user.name, email: email || user.email },
-      { new: true, runValidators: true }
-    );
-
+    // Password change logic
+    if (currentPassword && newPassword) {
+      // Only allow password change for non-Google users
+      if (user.provider === 'google') {
+        return res.status(400).json({ success: false, message: 'Google users cannot change password.' });
+      }
+      // Validate current password
+      const isMatch = await user.comparePassword(currentPassword);
+      if (!isMatch) {
+        return res.status(400).json({ success: false, message: 'Current password is incorrect.' });
+      }
+      // Strong password validation
+      if (!isStrongPassword(newPassword)) {
+        return res.status(400).json({ success: false, message: 'Password must be at least 8 characters and include uppercase, lowercase, number, and special character.' });
+      }
+      user.password = newPassword;
+      await user.save();
+    }
+    // Update name/email if provided
+    if (name || email) {
+      user.name = name || user.name;
+      if (email && email !== user.email) {
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+          return res.status(400).json({ success: false, message: 'Email already in use' });
+        }
+        user.email = email;
+      }
+      await user.save();
+    }
     res.status(200).json({
       success: true,
       message: 'Profile updated successfully',
       user: {
-        id: updatedUser._id,
-        name: updatedUser.name,
-        email: updatedUser.email,
-        role: updatedUser.role,
-        isEmailVerified: updatedUser.isEmailVerified
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isEmailVerified: user.isEmailVerified
       }
     });
   } catch (error) {
     console.error('Update profile error:', error);
+    console.error('Request body:', req.body);
+    if (error && error.stack) {
+      console.error('Error stack:', error.stack);
+    }
     res.status(500).json({
       success: false,
-      message: 'Server error'
+      message: 'Server error',
+      error: error.message || error
     });
   }
 };
@@ -475,10 +540,9 @@ exports.forgotPasswordRequest = async (req, res) => {
     }
 
     const user = await User.findOne({ email });
-    if (!user) {
-      // Do not reveal whether user exists
-      return res.status(200).json({ success: true, message: 'If an account exists, an OTP has been sent' });
-    }
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'No account found with this email address.' });
+      }
 
     // Generate 6-digit OTP and set expiry (15 minutes)
     const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
@@ -513,7 +577,7 @@ exports.resetPassword = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Email, code and new password are required' });
     }
 
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ success: false, message: 'Invalid or expired code' });
     }
@@ -528,12 +592,18 @@ exports.resetPassword = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid or expired code' });
     }
 
+    // Strong password validation
+    if (!isStrongPassword(newPassword)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 8 characters and include uppercase, lowercase, number, and special character.'
+      });
+    }
     // Update password and clear token
     user.password = newPassword;
     user.verificationToken = undefined;
     user.verificationTokenExpiresAt = undefined;
     await user.save();
-
     return res.status(200).json({ success: true, message: 'Password has been reset successfully' });
   } catch (error) {
     console.error('Reset password error:', error);

@@ -1,84 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Leaf, Moon, Sun, ArrowRight, User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Leaf, Moon, Sun, ArrowRight, User, Mail, Lock, Eye, EyeOff, Info } from 'lucide-react';
 import { GoogleLogin, useGoogleLogin } from '@react-oauth/google';
 
+const passwordRequirements = [
+  { label: 'At least 8 characters', test: (v) => v.length >= 8 },
+  { label: 'One uppercase letter', test: (v) => /[A-Z]/.test(v) },
+  { label: 'One lowercase letter', test: (v) => /[a-z]/.test(v) },
+  { label: 'One number', test: (v) => /\d/.test(v) },
+  { label: 'One special character', test: (v) => /[^A-Za-z\d]/.test(v) },
+];
+
 const FasalGuardAuth = ({ onLogin, initialView = 'login' }) => {
+  const [showPasswordInfo, setShowPasswordInfo] = useState(false);
   const navigate = useNavigate();
   const [currentView, setCurrentView] = useState(initialView || 'login');
+  const [flow, setFlow] = useState('verify'); // 'verify' or 'reset'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [verifiedOtp, setVerifiedOtp] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [letters, setLetters] = useState([]);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [showSplash, setShowSplash] = useState(true);
-  const [splashPhase, setSplashPhase] = useState('animation'); // 'animation' -> 'complete' -> 'transitioning'
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [newPassword1, setNewPassword1] = useState('');
   const [newPassword2, setNewPassword2] = useState('');
-
-  useEffect(() => {
-    const text = 'FASALGUARD';
-    const initialLetters = text.split('').map((letter, index) => ({
-      char: letter,
-      id: index,
-      x: Math.random() * 90 + 5,
-      y: Math.random() * 90 + 5,
-      rotation: Math.random() * 720 - 360,
-      scale: Math.random() * 0.5 + 0.5,
-    }));
-    setLetters(initialLetters);
-
-    // First animation - letters come together with proper spacing
-    const timer = setTimeout(() => {
-      setLetters(prev => prev.map((letter, index) => ({
-        ...letter,
-        x: 50 - (text.length * 2.5) + (index * 5), // Increased spacing from 2.4 to 5
-        y: 15,
-        rotation: 0,
-        scale: 1,
-      })));
-    }, 500);
-
-    // Show complete splash with image
-    const completeTimer = setTimeout(() => {
-      setSplashPhase('complete');
-    }, 3000);
-
-    // Start transition animation
-    const transitionTimer = setTimeout(() => {
-      setSplashPhase('transitioning');
-    }, 4000);
-
-    // Final transition to login
-    const finalTimer = setTimeout(() => {
-      setShowSplash(false);
-    }, 5000);
-
-    return () => {
-      clearTimeout(timer);
-      clearTimeout(completeTimer);
-      clearTimeout(transitionTimer);
-      clearTimeout(finalTimer);
-    };
-  }, []);
+  const isDarkMode = false;
 
   const handleTransition = (view) => {
     clearMessages();
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrentView(view);
-      // update URL to match view
-      if (view === 'login') navigate('/login', { replace: true });
-      if (view === 'signup') navigate('/signup', { replace: true });
-      if (view === 'otp') navigate('/verify', { replace: true });
-      setIsTransitioning(false);
-    }, 600);
+    setCurrentView(view);
+  };
+
+  const clearMessages = () => {
+    setError('');
+    setSuccess('');
   };
 
   // keep URL in sync when initialView changes
@@ -86,12 +44,10 @@ const FasalGuardAuth = ({ onLogin, initialView = 'login' }) => {
     if (currentView === 'login') navigate('/login', { replace: true });
     if (currentView === 'signup') navigate('/signup', { replace: true });
     if (currentView === 'otp') navigate('/verify', { replace: true });
+    if (currentView === 'forgot-password') navigate('/forgot-password', { replace: true });
+    if (currentView === 'reset-password') navigate('/reset-password', { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-  };
+  }, [currentView]);
 
   const handleOtpChange = (index, value) => {
     if (value.length <= 1 && /^\d*$/.test(value)) {
@@ -208,6 +164,7 @@ const FasalGuardAuth = ({ onLogin, initialView = 'login' }) => {
       console.log('Register response:', data); // Debug log
 
       if (data.success && data.pending) {
+        setFlow('verify');
         setSuccess('OTP sent to your email. Please verify to continue.');
         setTimeout(() => {
           handleTransition('otp');
@@ -233,28 +190,35 @@ const FasalGuardAuth = ({ onLogin, initialView = 'login' }) => {
     setError('');
     setSuccess('');
     try {
-      const response = await fetch('http://localhost:5000/api/auth/verify-email', {
+      const endpoint = flow === 'verify' ? '/api/auth/verify-email' : '/api/auth/verify-reset';
+      const response = await fetch(`http://localhost:5000${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, code })
       });
       const data = await response.json();
-      if (data.success && data.user) {
-        // After verification, auto-login
-        try {
-          const loginRes = await fetch('http://localhost:5000/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-          });
-          const loginData = await loginRes.json();
-          if (loginData.success && loginData.token && loginData.user) {
-            onLogin(loginData.user, loginData.token);
-            return;
-          }
-        } catch(e) {}
-        setSuccess('Email verified! Please log in.');
-        setTimeout(() => handleTransition('login'), 700);
+      if (data.success) {
+        if (flow === 'verify') {
+          // After verification, auto-login
+          try {
+            const loginRes = await fetch('http://localhost:5000/api/auth/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email, password })
+            });
+            const loginData = await loginRes.json();
+            if (loginData.success && loginData.token && loginData.user) {
+              onLogin(loginData.user, loginData.token);
+              return;
+            }
+          } catch(e) {}
+          setSuccess('Email verified! Please log in.');
+          setTimeout(() => handleTransition('login'), 700);
+        } else {
+          setSuccess('Code verified! Set your new password.');
+          setVerifiedOtp(code);
+          handleTransition('reset-password');
+        }
       } else {
         setError(data.message || 'Verification failed');
       }
@@ -270,14 +234,15 @@ const FasalGuardAuth = ({ onLogin, initialView = 'login' }) => {
     setError('');
     setSuccess('');
     try {
-      const response = await fetch('http://localhost:5000/api/auth/resend-verification', {
+      const endpoint = flow === 'verify' ? '/api/auth/resend-verification' : '/api/auth/resend-reset';
+      const response = await fetch(`http://localhost:5000/api/auth${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
       });
       const data = await response.json();
       if (data.success) {
-        setSuccess('Verification code resent. Check your email.');
+        setSuccess(flow === 'verify' ? 'Verification code resent. Check your email.' : 'Reset code resent. Check your email.');
       } else {
         setError(data.message || 'Failed to resend code');
       }
@@ -288,100 +253,95 @@ const FasalGuardAuth = ({ onLogin, initialView = 'login' }) => {
     }
   };
 
-  const clearMessages = () => {
+  const handleResetPassword = async () => {
+    if (newPassword1 !== newPassword2) {
+      setError('Passwords do not match');
+      return;
+    }
+    if (newPassword1.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+    setLoading(true);
     setError('');
     setSuccess('');
+    try {
+      // Use the verified OTP from previous step
+      const code = verifiedOtp;
+      const response = await fetch('http://localhost:5000/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code, newPassword: newPassword1 })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setSuccess('Password reset successful! Please log in.');
+        setTimeout(() => {
+          handleTransition('login');
+        }, 1000);
+      } else {
+        setError(data.message || 'Reset failed');
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = (e) => {
+    e?.preventDefault(); // Prevent page refresh if event exists
+    if (!email) {
+      setError('Please enter your email to reset your password.');
+      return;
+    }
+    handleTransition('forgot-password');
+  };
+
+  const handleSendResetOTP = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        setFlow('reset');
+        setSuccess('OTP has been sent to your email.');
+        setCurrentView('otp');
+        navigate('/verify', { replace: true });
+      } else {
+        setError('No account found with this email address.');
+        return;
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const styles = {
-    splashContainer: {
-      minHeight: '100vh',
-      width: '100%',
-      background: isDarkMode 
-        ? 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)'
-        : 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 50%, #99f6e4 100%)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      position: 'relative',
-      overflow: 'hidden',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-      transition: 'background 0.6s ease',
-    },
-    splashContent: {
-      position: 'relative',
-      width: '100%',
-      maxWidth: '1400px',
-      padding: '2rem',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      transform: splashPhase === 'transitioning' ? 'translateX(-120%)' : 'translateX(0)', // Moved further left
-      transition: 'transform 1s cubic-bezier(0.4, 0, 0.2, 1)',
-    },
-    logoAnimationContainer: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      pointerEvents: 'none',
-      zIndex: 10,
-    },
-    animatedLetter: {
-      position: 'absolute',
-      fontSize: 'clamp(2rem, 8vw, 5rem)',
-      fontWeight: 'bold',
-      color: isDarkMode ? '#10b981' : '#059669',
-      textShadow: isDarkMode 
-        ? '0 0 30px rgba(16, 185, 129, 0.6)' 
-        : '0 0 20px rgba(5, 150, 105, 0.4)',
-      transition: 'all 2s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
-      willChange: 'transform',
-      letterSpacing: '0.1em', // Added letter spacing for better readability
-    },
-    heroImageContainer: {
-      position: 'relative',
-      width: '100%',
-      maxWidth: '800px',
-      marginTop: '8rem',
-      opacity: splashPhase === 'animation' ? 0 : 1,
-      transform: splashPhase === 'animation' ? 'translateY(30px)' : 'translateY(0)',
-      transition: 'all 1s ease-out',
-    },
-    heroImage: {
-      width: '100%',
-      height: '400px',
-      objectFit: 'cover',
-      borderRadius: '24px',
-      boxShadow: isDarkMode 
-        ? '0 30px 60px -12px rgba(0, 0, 0, 0.8)' 
-        : '0 30px 60px -12px rgba(0, 0, 0, 0.3)',
-      transition: 'box-shadow 0.3s ease',
-    },
     mainContainer: {
       minHeight: '100vh',
       display: 'flex',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
       position: 'relative',
-      backgroundColor: isDarkMode ? '#0f172a' : '#ffffff',
-      transition: 'background-color 0.3s ease',
-      opacity: isTransitioning ? 0 : 1,
-      transform: isTransitioning ? 'scale(1.05)' : 'scale(1)',
+      backgroundColor: '#ffffff',
     },
     leftSection: {
       flex: 1,
       position: 'relative',
-      background: isDarkMode 
-        ? 'linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%)'
-        : 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 30%, #bbf7d0 60%, #86efac 100%)',
+      background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 30%, #bbf7d0 60%, #86efac 100%)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       padding: '2rem',
-      transform: showSplash ? 'translateX(-100%)' : 'translateX(0)',
-      transition: 'transform 1s cubic-bezier(0.4, 0, 0.2, 1)',
-      transitionDelay: showSplash ? '0s' : '0.2s', // Delay entrance for smoother effect
+      transform: 'translateX(0)',
     },
     imageBox: {
       position: 'relative',
@@ -393,9 +353,7 @@ const FasalGuardAuth = ({ onLogin, initialView = 'login' }) => {
       height: '400px',
       objectFit: 'cover',
       borderRadius: '20px',
-      boxShadow: isDarkMode 
-        ? '0 25px 50px -12px rgba(0, 0, 0, 0.6)' 
-        : '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
     },
     leftLogoText: {
       position: 'absolute',
@@ -404,11 +362,9 @@ const FasalGuardAuth = ({ onLogin, initialView = 'login' }) => {
       transform: 'translateX(-50%)',
       fontSize: 'clamp(1.75rem, 4vw, 3rem)',
       fontWeight: 'bold',
-      color: isDarkMode ? '#ffffff' : '#065f46',
+      color: '#065f46',
       letterSpacing: '0.15em',
-      textShadow: isDarkMode 
-        ? '0 4px 20px rgba(16, 185, 129, 0.5)' 
-        : '0 4px 20px rgba(16, 185, 129, 0.3)',
+      textShadow: '0 4px 20px rgba(16, 185, 129, 0.3)',
       whiteSpace: 'nowrap',
     },
     rightSection: {
@@ -417,30 +373,9 @@ const FasalGuardAuth = ({ onLogin, initialView = 'login' }) => {
       alignItems: 'center',
       justifyContent: 'center',
       padding: '2rem',
-      backgroundColor: isDarkMode ? '#0f172a' : '#ffffff',
+      backgroundColor: '#ffffff',
       position: 'relative',
-      transform: showSplash ? 'translateX(100%)' : 'translateX(0)',
-      transition: 'transform 1s cubic-bezier(0.4, 0, 0.2, 1)',
-      transitionDelay: showSplash ? '0s' : '0.4s', // Delayed entrance for staggered effect
-    },
-    darkModeToggle: {
-      position: 'absolute',
-      top: '2rem',
-      right: '2rem',
-      width: '50px',
-      height: '50px',
-      borderRadius: '50%',
-      border: isDarkMode ? '2px solid #334155' : '2px solid #e5e7eb',
-      backgroundColor: isDarkMode ? '#1e293b' : '#f9fafb',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      cursor: 'pointer',
-      transition: 'all 0.3s ease',
-      boxShadow: isDarkMode 
-        ? '0 4px 12px rgba(0, 0, 0, 0.4)' 
-        : '0 4px 12px rgba(0, 0, 0, 0.1)',
-      zIndex: 10,
+      transform: 'translateX(0)',
     },
     formCard: {
       width: '100%',
@@ -471,13 +406,13 @@ const FasalGuardAuth = ({ onLogin, initialView = 'login' }) => {
     title: {
       fontSize: 'clamp(1.5rem, 4vw, 1.875rem)',
       fontWeight: 'bold',
-      color: isDarkMode ? '#ffffff' : '#1f2937',
+      color: '#1f2937',
       margin: 0,
       marginBottom: '0.25rem',
       textAlign: 'left',
     },
     subtitle: {
-      color: isDarkMode ? '#94a3b8' : '#6b7280',
+      color: '#6b7280',
       margin: 0,
       fontSize: '0.875rem',
       textAlign: 'left',
@@ -490,7 +425,7 @@ const FasalGuardAuth = ({ onLogin, initialView = 'login' }) => {
       display: 'block',
       fontSize: '0.875rem',
       fontWeight: '500',
-      color: isDarkMode ? '#cbd5e1' : '#374151',
+      color: '#374151',
       marginBottom: '0.5rem',
       textAlign: 'left',
     },
@@ -510,9 +445,9 @@ const FasalGuardAuth = ({ onLogin, initialView = 'login' }) => {
       padding: '0.875rem 1rem 0.875rem 3rem',
       fontSize: '1rem',
       borderRadius: '8px',
-      border: isDarkMode ? '2px solid #334155' : '2px solid #e5e7eb',
-      backgroundColor: isDarkMode ? '#1e293b' : '#ffffff',
-      color: isDarkMode ? '#ffffff' : '#1f2937',
+      border: '2px solid #e5e7eb',
+      backgroundColor: '#ffffff',
+      color: '#1f2937',
       outline: 'none',
       transition: 'all 0.3s ease',
       boxSizing: 'border-box',
@@ -523,7 +458,7 @@ const FasalGuardAuth = ({ onLogin, initialView = 'login' }) => {
       top: '50%',
       transform: 'translateY(-50%)',
       cursor: 'pointer',
-      color: isDarkMode ? '#64748b' : '#9ca3af',
+      color: '#9ca3af',
     },
     button: {
       width: '100%',
@@ -557,14 +492,14 @@ const FasalGuardAuth = ({ onLogin, initialView = 'login' }) => {
     footer: {
       textAlign: 'center',
       fontSize: '0.875rem',
-      color: isDarkMode ? '#94a3b8' : '#6b7280',
+      color: '#6b7280',
       marginTop: '1.5rem',
     },
     backButton: {
       display: 'flex',
       alignItems: 'center',
       gap: '0.5rem',
-      color: isDarkMode ? '#94a3b8' : '#6b7280',
+      color: '#6b7280',
       background: 'none',
       border: 'none',
       cursor: 'pointer',
@@ -586,134 +521,64 @@ const FasalGuardAuth = ({ onLogin, initialView = 'login' }) => {
       fontWeight: 'bold',
       textAlign: 'center',
       borderRadius: '8px',
-      border: isDarkMode ? '2px solid #334155' : '2px solid #e5e7eb',
-      backgroundColor: isDarkMode ? '#1e293b' : '#ffffff',
-      color: isDarkMode ? '#ffffff' : '#1f2937',
+      border: '2px solid #e5e7eb',
+      backgroundColor: '#ffffff',
+      color: '#1f2937',
       outline: 'none',
       transition: 'all 0.3s ease',
     },
     resendText: {
       textAlign: 'center',
       fontSize: '0.875rem',
-      color: isDarkMode ? '#94a3b8' : '#6b7280',
+      color: '#6b7280',
       marginBottom: '1rem',
     },
   };
 
-  const getLetterStyle = (letter) => ({
-    ...styles.animatedLetter,
-    left: `${letter.x}%`,
-    top: `${letter.y}%`,
-    transform: `translate(-50%, -50%) rotate(${letter.rotation}deg) scale(${letter.scale})`,
-  });
-
-  if (showSplash) {
-    return (
-      <div style={styles.splashContainer}>
-        <style>{`
-          @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-          @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-          }
-          @media (max-width: 768px) {
-            .hero-image-container {
-              margin-top: 6rem;
-            }
-          }
-        `}</style>
-        <button 
-          style={styles.darkModeToggle}
-          onClick={toggleDarkMode}
-          className="dark-mode-toggle"
-        >
-          {isDarkMode ? <Sun size={24} color="#10b981" /> : <Moon size={24} color="#6b7280" />}
-        </button>
-        <div style={styles.splashContent}>
-          <div style={styles.logoAnimationContainer}>
-            {letters.map((letter) => (
-              <span key={letter.id} style={getLetterStyle(letter)}>
-                {letter.char}
-              </span>
-            ))}
-          </div>
-          <div style={styles.heroImageContainer} className="hero-image-container">
-            <img src="/hero.webp" alt="Farm field" style={styles.heroImage} />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+  // Main render
   return (
     <div style={styles.mainContainer}>
-      <style>{`
-        input:focus {
-          border-color: #10b981 !important;
-          box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-        }
-        button:hover {
-          transform: translateY(-2px);
-        }
-        .dark-mode-toggle:hover {
-          transform: scale(1.1);
-        }
-        .link-button:hover {
-          color: #059669;
-        }
-        .back-button:hover {
-          color: #10b981;
-        }
-        .otp-input:focus {
-          border-color: #10b981 !important;
-          box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-        }
-        @media (max-width: 1024px) {
-          .left-section {
-            display: none !important;
-          }
-        }
-        @media (max-width: 640px) {
-          .otp-container {
-            gap: 0.5rem;
-          }
-          .otp-input {
-            width: 40px;
-            height: 40px;
-            font-size: 1.25rem;
-          }
-        }
-      `}</style>
-      <div style={styles.leftSection} className="left-section">
+      <div style={styles.leftSection}>
         <div style={styles.imageBox}>
-          <div style={styles.leftLogoText}>FASALGUARD</div>
-          <img src="/hero.webp" alt="Farm field" style={styles.leftHeroImage} />
+          <img style={styles.leftHeroImage} src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449" alt="Aerial view of green corn field" />
+
+            <div style={styles.leftLogoText}>FasalGuard</div>
         </div>
       </div>
       <div style={styles.rightSection}>
-        <button 
-          style={styles.darkModeToggle}
-          onClick={toggleDarkMode}
-          className="dark-mode-toggle"
-        >
-          {isDarkMode ? <Sun size={24} color="#10b981" /> : <Moon size={24} color="#6b7280" />}
-        </button>
         <div style={styles.formCard}>
           {currentView === 'login' && (
-            <>
+            <React.Fragment>
               <div style={styles.header}>
                 <div style={styles.logoIcon}>
                   <Leaf color="white" size={32} />
                 </div>
-                <div style={{...styles.headerText, textAlign: 'left'}}>
-                  <h1 style={{...styles.title, textAlign: 'left'}}>Welcome to FasalGuard</h1>
-                  <p style={{...styles.subtitle, textAlign: 'left'}}>Sign in to continue</p>
+                <div style={styles.headerText}>
+                  <h1 style={styles.title}>Welcome to FasalGuard</h1>
+                  <p style={styles.subtitle}>Sign in to continue</p>
                 </div>
               </div>
               <div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+                  <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#10b981',
+                      cursor: 'pointer',
+                      padding: '0.5rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      fontWeight: 500,
+                    }}
+                  >
+                    <Lock size={16} />
+                    Forgot Password?
+                  </button>
+                </div>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Email</label>
                   <div style={styles.inputWrapper}>
@@ -730,7 +595,39 @@ const FasalGuardAuth = ({ onLogin, initialView = 'login' }) => {
                   </div>
                 </div>
                 <div style={styles.formGroup}>
-                  <label style={styles.label}>Password</label>
+                  <label style={styles.label}>
+                    Password
+                    <span style={{ marginLeft: 6, cursor: 'pointer', position: 'relative' }}
+                      onMouseEnter={() => setShowPasswordInfo(true)}
+                      onMouseLeave={() => setShowPasswordInfo(false)}>
+                      <Info size={16} color="#10b981" />
+                      {showPasswordInfo && (
+                        <div style={{
+                          position: 'absolute',
+                          left: 20,
+                          top: 0,
+                          background: '#fff',
+                          color: '#222',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: 6,
+                          padding: '0.75rem',
+                          fontSize: '0.95rem',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                          zIndex: 10,
+                          minWidth: 220
+                        }}>
+                          <b>Password requirements:</b>
+                          <ul style={{ margin: '0.5rem 0 0 0', padding: 0, listStyle: 'none' }}>
+                            {passwordRequirements.map((req, i) => (
+                              <li key={i} style={{ color: req.test(password) ? '#10b981' : '#dc2626', fontWeight: req.test(password) ? 600 : 400 }}>
+                                {req.label}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </span>
+                  </label>
                   <div style={styles.inputWrapper}>
                     <div style={styles.inputIcon}>
                       <Lock size={20} />
@@ -810,32 +707,24 @@ const FasalGuardAuth = ({ onLogin, initialView = 'login' }) => {
                     <span style={{ color: '#111827', fontWeight: 600 }}>Sign in with Google</span>
                   </button>
                 </div>
-                <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-                  <button 
-                    style={styles.linkButton} 
-                    className="link-button"
-                    onClick={() => handleTransition('signup')}
-                  >
-                    Create an account
+                <div style={styles.footer}>
+                  Don't have an account?{' '}
+                  <button style={styles.linkButton} onClick={() => handleTransition('signup')}>
+                    Sign up
                   </button>
                 </div>
-                <div style={styles.footer}>
-                  By continuing, you agree to our{' '}
-                  <button style={styles.linkButton} className="link-button">Terms</button>.
-                </div>
               </div>
-            </>
+            </React.Fragment>
           )}
-          
           {currentView === 'signup' && (
-            <>
+            <React.Fragment>
               <div style={styles.header}>
                 <div style={styles.logoIcon}>
                   <Leaf color="white" size={32} />
                 </div>
-                <div style={{...styles.headerText, textAlign: 'left'}}>
-                  <h1 style={{...styles.title, textAlign: 'left'}}>Create Account</h1>
-                  <p style={{...styles.subtitle, textAlign: 'left'}}>Join FasalGuard today</p>
+                <div style={styles.headerText}>
+                  <h1 style={styles.title}>Join FasalGuard</h1>
+                  <p style={styles.subtitle}>Create your account</p>
                 </div>
               </div>
               <div>
@@ -870,7 +759,39 @@ const FasalGuardAuth = ({ onLogin, initialView = 'login' }) => {
                   </div>
                 </div>
                 <div style={styles.formGroup}>
-                  <label style={styles.label}>Password</label>
+                  <label style={styles.label}>
+                    Password
+                    <span style={{ marginLeft: 6, cursor: 'pointer', position: 'relative' }}
+                      onMouseEnter={() => setShowPasswordInfo(true)}
+                      onMouseLeave={() => setShowPasswordInfo(false)}>
+                      <Info size={16} color="#10b981" />
+                      {showPasswordInfo && (
+                        <div style={{
+                          position: 'absolute',
+                          left: 20,
+                          top: 0,
+                          background: '#fff',
+                          color: '#222',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: 6,
+                          padding: '0.75rem',
+                          fontSize: '0.95rem',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                          zIndex: 10,
+                          minWidth: 220
+                        }}>
+                          <b>Password requirements:</b>
+                          <ul style={{ margin: '0.5rem 0 0 0', padding: 0, listStyle: 'none' }}>
+                            {passwordRequirements.map((req, i) => (
+                              <li key={i} style={{ color: req.test(password) ? '#10b981' : '#dc2626', fontWeight: req.test(password) ? 600 : 400 }}>
+                                {req.label}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </span>
+                  </label>
                   <div style={styles.inputWrapper}>
                     <div style={styles.inputIcon}>
                       <Lock size={20} />
@@ -926,18 +847,9 @@ const FasalGuardAuth = ({ onLogin, initialView = 'login' }) => {
                     }}
                     disabled={loading}
                   >
-                    {loading ? 'Creating Account...' : 'Create Account'} <ArrowRight size={20} />
+                    {loading ? 'Creating...' : 'Create Account'} <ArrowRight size={20} />
                   </button>
                 </form>
-                <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-                  <button 
-                    style={styles.linkButton} 
-                    className="link-button"
-                    onClick={() => handleTransition('login')}
-                  >
-                    Already have an account? Sign in
-                  </button>
-                </div>
                 <div style={{ display: 'flex', justifyContent: 'center', margin: '0.75rem 0' }}>
                   <div style={{ width: '85%', height: '1px', background: '#e5e7eb', alignSelf: 'center' }} />
                 </div>
@@ -960,35 +872,104 @@ const FasalGuardAuth = ({ onLogin, initialView = 'login' }) => {
                   </button>
                 </div>
                 <div style={styles.footer}>
-                  By creating an account, you agree to our{' '}
-                  <button style={styles.linkButton} className="link-button">Terms</button>.
+                  Already have an account?{' '}
+                  <button style={styles.linkButton} onClick={() => handleTransition('login')}>
+                    Sign in
+                  </button>
                 </div>
               </div>
-              <button 
-                style={styles.backButton}
-                className="back-button"
-                onClick={() => handleTransition('login')}
-              >
-                ← Back
-              </button>
-            </>
+            </React.Fragment>
           )}
-
+          {currentView === 'forgot-password' && (
+            <React.Fragment>
+              <div style={styles.header}>
+                <div style={styles.logoIcon}>
+                  <Lock color="white" size={32} />
+                </div>
+                <div style={styles.headerText}>
+                  <h1 style={styles.title}>Reset Password</h1>
+                  <p style={styles.subtitle}>Enter your email to receive a reset code</p>
+                </div>
+              </div>
+              <div>
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>Email</label>
+                  <div style={styles.inputWrapper}>
+                    <div style={styles.inputIcon}>
+                      <Mail size={20} />
+                    </div>
+                    <input
+                      type="email"
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      style={styles.input}
+                    />
+                  </div>
+                </div>
+                {error && (
+                  <div style={{
+                    backgroundColor: '#fef2f2',
+                    color: '#dc2626',
+                    padding: '0.75rem',
+                    borderRadius: '6px',
+                    marginBottom: '1rem',
+                    fontSize: '0.875rem',
+                    border: '1px solid #fecaca'
+                  }}>
+                    {error}
+                  </div>
+                )}
+                {success && (
+                  <div style={{
+                    backgroundColor: '#f0fdf4',
+                    color: '#16a34a',
+                    padding: '0.75rem',
+                    borderRadius: '6px',
+                    marginBottom: '1rem',
+                    fontSize: '0.875rem',
+                    border: '1px solid #bbf7d0'
+                  }}>
+                    {success}
+                  </div>
+                )}
+                <button 
+                  onClick={handleSendResetOTP}
+                  style={{
+                    ...styles.button,
+                    opacity: loading ? 0.7 : 1,
+                    cursor: loading ? 'not-allowed' : 'pointer'
+                  }}
+                  disabled={loading}
+                >
+                  {loading ? 'Sending...' : 'Send Reset Code'} <ArrowRight size={20} />
+                </button>
+                <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+                  <button 
+                    style={styles.linkButton} 
+                    onClick={() => handleTransition('login')}
+                  >
+                    Back to Login
+                  </button>
+                </div>
+              </div>
+            </React.Fragment>
+          )}
           {currentView === 'otp' && (
-            <>
+            <React.Fragment>
               <div style={styles.header}>
                 <div style={styles.logoIcon}>
                   <Leaf color="white" size={32} />
                 </div>
                 <div style={styles.headerText}>
-                  <h1 style={styles.title}>Verify Your Email</h1>
+                  <h1 style={styles.title}>{flow === 'reset' ? 'Verify Reset Code' : 'Verify Your Email'}</h1>
                   <p style={styles.subtitle}>Enter the 6-digit code sent to {email}</p>
                 </div>
               </div>
               <div>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Verification Code</label>
-                  <div style={styles.otpContainer} className="otp-container">
+                  <div style={styles.otpContainer}>
                     {otp.map((digit, index) => (
                       <input
                         key={index}
@@ -999,17 +980,42 @@ const FasalGuardAuth = ({ onLogin, initialView = 'login' }) => {
                         onChange={(e) => handleOtpChange(index, e.target.value)}
                         onKeyDown={(e) => handleOtpKeyDown(index, e)}
                         style={styles.otpInput}
-                        className="otp-input"
                       />
                     ))}
                   </div>
                 </div>
+                {error && (
+                  <div style={{
+                    backgroundColor: '#fef2f2',
+                    color: '#dc2626',
+                    padding: '0.75rem',
+                    borderRadius: '6px',
+                    marginBottom: '1rem',
+                    fontSize: '0.875rem',
+                    border: '1px solid #fecaca'
+                  }}>
+                    {error}
+                  </div>
+                )}
+                {success && (
+                  <div style={{
+                    backgroundColor: '#f0fdf4',
+                    color: '#16a34a',
+                    padding: '0.75rem',
+                    borderRadius: '6px',
+                    marginBottom: '1rem',
+                    fontSize: '0.875rem',
+                    border: '1px solid #bbf7d0'
+                  }}>
+                    {success}
+                  </div>
+                )}
                 <button style={{...styles.button, opacity: loading ? 0.7 : 1, cursor: loading ? 'not-allowed' : 'pointer'}} onClick={handleVerify} disabled={loading}>
                   {loading ? 'Verifying...' : 'Verify & Continue'} <ArrowRight size={20} />
                 </button>
                 <div style={styles.resendText}>
                   Didn't receive the code?{' '}
-                  <button style={styles.linkButton} className="link-button" onClick={handleResend}>
+                  <button style={styles.linkButton} onClick={handleResend} disabled={loading}>
                     Resend
                   </button>
                 </div>
@@ -1019,12 +1025,151 @@ const FasalGuardAuth = ({ onLogin, initialView = 'login' }) => {
               </div>
               <button 
                 style={styles.backButton}
-                className="back-button"
-                onClick={() => handleTransition('login')}
+                onClick={() => handleTransition(flow === 'reset' ? 'forgot-password' : 'signup')}
               >
-                ← Back to Login
+                ← Back
               </button>
-            </>
+            </React.Fragment>
+          )}
+          {currentView === 'reset-password' && (
+            <React.Fragment>
+              <div style={styles.header}>
+                <div style={styles.logoIcon}>
+                  <Lock color="white" size={32} />
+                </div>
+                <div style={styles.headerText}>
+                  <h1 style={styles.title}>Set New Password</h1>
+                  <p style={styles.subtitle}>Choose a strong password</p>
+                </div>
+              </div>
+              <div>
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>
+                    New Password
+                    <span style={{ marginLeft: 6, cursor: 'pointer', position: 'relative' }}
+                      onMouseEnter={() => setShowPasswordInfo(true)}
+                      onMouseLeave={() => setShowPasswordInfo(false)}>
+                      <Info size={16} color="#10b981" />
+                      {showPasswordInfo && (
+                        <div style={{
+                          position: 'absolute',
+                          left: 20,
+                          top: 0,
+                          background: '#fff',
+                          color: '#222',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: 6,
+                          padding: '0.75rem',
+                          fontSize: '0.95rem',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                          zIndex: 10,
+                          minWidth: 220
+                        }}>
+                          <b>Password requirements:</b>
+                          <ul style={{ margin: '0.5rem 0 0 0', padding: 0, listStyle: 'none' }}>
+                            {passwordRequirements.map((req, i) => (
+                              <li key={i} style={{ color: req.test(newPassword1) ? '#10b981' : '#dc2626', fontWeight: req.test(newPassword1) ? 600 : 400 }}>
+                                {req.label}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </span>
+                  </label>
+                  <div style={styles.inputWrapper}>
+                    <div style={styles.inputIcon}>
+                      <Lock size={20} />
+                    </div>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="••••••••"
+                      value={newPassword1}
+                      onChange={(e) => setNewPassword1(e.target.value)}
+                      style={styles.input}
+                    />
+                    <div 
+                      style={styles.eyeIcon}
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </div>
+                  </div>
+                </div>
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>Confirm New Password</label>
+                  <div style={styles.inputWrapper}>
+                    <div style={styles.inputIcon}>
+                      <Lock size={20} />
+                    </div>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="••••••••"
+                      value={newPassword2}
+                      onChange={(e) => setNewPassword2(e.target.value)}
+                      style={styles.input}
+                    />
+                    <div 
+                      style={styles.eyeIcon}
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </div>
+                  </div>
+                </div>
+                {error && (
+                  <div style={{
+                    backgroundColor: '#fef2f2',
+                    color: '#dc2626',
+                    padding: '0.75rem',
+                    borderRadius: '6px',
+                    marginBottom: '1rem',
+                    fontSize: '0.875rem',
+                    border: '1px solid #fecaca'
+                  }}>
+                    {error}
+                  </div>
+                )}
+                {success && (
+                  <div style={{
+                    backgroundColor: '#f0fdf4',
+                    color: '#16a34a',
+                    padding: '0.75rem',
+                    borderRadius: '6px',
+                    marginBottom: '1rem',
+                    fontSize: '0.875rem',
+                    border: '1px solid #bbf7d0'
+                  }}>
+                    {success}
+                  </div>
+                )}
+                <button 
+                  onClick={handleResetPassword}
+                  style={{
+                    ...styles.button,
+                    opacity: loading ? 0.7 : 1,
+                    cursor: loading ? 'not-allowed' : 'pointer'
+                  }}
+                  disabled={loading}
+                >
+                  {loading ? 'Resetting...' : 'Reset Password'} <ArrowRight size={20} />
+                </button>
+                <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+                  <button 
+                    style={styles.linkButton} 
+                    onClick={() => handleTransition('login')}
+                  >
+                    Back to Login
+                  </button>
+                </div>
+              </div>
+              <button 
+                style={styles.backButton}
+                onClick={() => handleTransition('otp')}
+              >
+                ← Back
+              </button>
+            </React.Fragment>
           )}
         </div>
       </div>

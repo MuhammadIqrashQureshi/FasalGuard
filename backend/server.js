@@ -6,6 +6,7 @@ require('dotenv').config({ path: './config.env' });
 
 // Import routes
 const authRoutes = require('./routes/auth');
+const contactRoutes = require('./routes/contact');
 
 const app = express();
 
@@ -35,6 +36,7 @@ mongoose.connect(mongoUri)
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/contact', contactRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
