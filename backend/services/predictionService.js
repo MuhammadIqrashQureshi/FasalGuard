@@ -11,7 +11,8 @@ class PredictionService {
       console.log(`🌤️ Fetching weather data for ${city}...`);
       
       // 1. Get weather forecast
-      const weatherData = await this.weather.getRealTimeWeather(city, days);
+      const weatherResponse = await this.weather.getRealTimeWeather(city, days);
+      const weatherData = weatherResponse.forecast || weatherResponse; // Handle both array and object formats
       
       // 2. Get ML predictions for all crops
       const crops = ['cotton', 'wheat', 'maize', 'rice', 'sugarcane'];
@@ -50,6 +51,7 @@ class PredictionService {
           coordinates: this.weather.getCityData(city)
         },
         forecast: weatherData,
+        weather_summary: weatherResponse.summary,
         predictions: predictions,
         recommendations: recommendations,
         timestamp: new Date().toISOString(),
