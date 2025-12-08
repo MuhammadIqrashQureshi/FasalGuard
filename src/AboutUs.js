@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Leaf } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Leaf, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const styles = {
@@ -18,11 +18,11 @@ const styles = {
     left: 0,
     right: 0,
     padding: '2rem 3rem',
-    zIndex: 100,
+    zIndex: 1000,
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    background: 'rgba(255,255,255,0.95)',
+    background: 'rgba(255,255,255,0.98)',
     backdropFilter: 'blur(10px)',
     borderBottom: '1px solid rgba(16,185,129,0.1)',
   },
@@ -64,108 +64,140 @@ const styles = {
     outline: 'none',
     padding: 0,
   },
-  container: {
-    maxWidth: '1400px',
-    margin: '0 auto',
-    padding: '8rem 2rem 4rem 2rem',
-  },
-  labelSection: {
+  heroSection: {
+    height: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
     textAlign: 'center',
-    marginBottom: '2rem',
+    padding: '0 2rem',
+    background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
   },
   label: {
     fontSize: '0.9rem',
     fontWeight: 400,
-    color: '#9ca3af',
+    color: '#10b981',
     letterSpacing: '4px',
     textTransform: 'uppercase',
-  },
-  titleSection: {
-    textAlign: 'center',
     marginBottom: '1rem',
   },
   title: {
-    fontSize: '3.5rem',
+    fontSize: '4rem',
     fontWeight: 300,
     color: '#111',
-    lineHeight: '1.2',
-    marginBottom: '1rem',
-    letterSpacing: '1px',
+    lineHeight: '1.1',
+    marginBottom: '1.5rem',
+    letterSpacing: '-0.5px',
   },
   subtitle: {
-    fontSize: '1.1rem',
+    fontSize: '1.2rem',
     color: '#374151',
     fontWeight: 300,
-    marginBottom: '5rem',
+    maxWidth: '600px',
+    marginBottom: '3rem',
+    lineHeight: '1.6',
   },
-  teamGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-    gap: '3rem',
-    marginTop: '4rem',
+  scrollIndicator: {
+    position: 'absolute',
+    bottom: '3rem',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    animation: 'bounce 2s infinite',
   },
-  teamCard: {
-    position: 'relative',
-    background: '#f9fafb',
-    borderRadius: '1rem',
-    overflow: 'hidden',
-    transition: 'transform 0.3s, box-shadow 0.3s',
+  teamMemberSection: {
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    padding: '8rem 2rem',
+    maxWidth: '1400px',
+    margin: '0 auto',
+    opacity: 0,
+    transform: 'translateY(50px)',
+    transition: 'opacity 0.8s ease, transform 0.8s ease',
   },
-  imageWrapper: {
+  memberContent: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6rem',
     width: '100%',
-    height: '400px',
-    background: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)',
+  },
+  memberImageWrapper: {
+    flex: 1,
+    position: 'relative',
+  },
+  memberImage: {
+    width: '100%',
+    maxWidth: '500px',
+    height: '600px',
+    objectFit: 'cover',
+    borderRadius: '2rem',
+    boxShadow: '0 20px 60px rgba(16,185,129,0.15)',
+  },
+  memberInfo: {
+    flex: 1,
+  },
+  memberNumber: {
+    fontSize: '1rem',
+    fontWeight: 400,
+    color: '#10b981',
+    letterSpacing: '2px',
+    textTransform: 'uppercase',
+    marginBottom: '1rem',
+  },
+  memberName: {
+    fontSize: '3rem',
+    fontWeight: 500,
+    color: '#111',
+    marginBottom: '0.5rem',
+    lineHeight: '1.1',
+  },
+  memberRole: {
+    fontSize: '1.25rem',
+    fontWeight: 400,
+    color: '#374151',
+    marginBottom: '2rem',
+    paddingBottom: '1rem',
+    borderBottom: '1px solid rgba(16,185,129,0.2)',
+  },
+  memberDescription: {
+    fontSize: '1.1rem',
+    color: '#6b7280',
+    lineHeight: '1.7',
+    marginBottom: '3rem',
+    fontWeight: 300,
+  },
+  servicesList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1.5rem',
+  },
+  serviceItem: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '1rem',
+  },
+  serviceIcon: {
+    width: '24px',
+    height: '24px',
+    background: '#10b981',
+    borderRadius: '50%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    position: 'relative',
-    overflow: 'hidden',
+    flexShrink: 0,
+    marginTop: '0.25rem',
   },
-  placeholderImage: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
+  serviceContent: {
+    flex: 1,
   },
-  badge: {
-    position: 'absolute',
-    bottom: '1.5rem',
-    right: '1.5rem',
-    background: '#fff',
-    padding: '0.5rem 1rem',
-    borderRadius: '2rem',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-  },
-  badgeIcon: {
-    width: '8px',
-    height: '8px',
-    background: '#10b981',
-    borderRadius: '50%',
-  },
-  badgeName: {
-    fontSize: '0.85rem',
-    fontWeight: 500,
-    color: '#374151',
-  },
-  cardContent: {
-    padding: '2rem',
-    background: '#f0fdf4',
-  },
-  cardNumber: {
-    fontSize: '2rem',
-    fontWeight: 300,
-    color: '#10b981',
-    marginBottom: '1rem',
-  },
-  cardTitle: {
-    fontSize: '1.5rem',
+  serviceTitle: {
+    fontSize: '1.1rem',
     fontWeight: 500,
     color: '#111',
-    marginBottom: '0.75rem',
+    marginBottom: '0.5rem',
   },
-  cardDescription: {
+  serviceDescription: {
     fontSize: '0.95rem',
     color: '#6b7280',
     lineHeight: '1.6',
@@ -173,130 +205,250 @@ const styles = {
   },
 };
 
+const TeamMember = ({ member, isVisible, reverse }) => {
+  return (
+    <div style={{
+      ...styles.teamMemberSection,
+      opacity: isVisible ? 1 : 0,
+      transform: isVisible ? 'translateY(0)' : 'translateY(50px)',
+    }}>
+      <div style={{
+        ...styles.memberContent,
+        flexDirection: reverse ? 'row-reverse' : 'row'
+      }}>
+        <div style={styles.memberImageWrapper}>
+          <img 
+            src={member.image} 
+            alt={member.name}
+            style={styles.memberImage}
+          />
+        </div>
+        
+        <div style={styles.memberInfo}>
+          <div style={styles.memberNumber}>0{member.id}</div>
+          <h2 style={styles.memberName}>{member.name}</h2>
+          <h3 style={styles.memberRole}>{member.role}</h3>
+          <p style={styles.memberDescription}>{member.description}</p>
+          
+          <div style={styles.servicesList}>
+            {member.services.map((service, index) => (
+              <div key={index} style={styles.serviceItem}>
+                <div style={styles.serviceIcon}>
+                  <div style={{ width: '8px', height: '8px', background: '#fff', borderRadius: '50%' }} />
+                </div>
+                <div style={styles.serviceContent}>
+                  <h4 style={styles.serviceTitle}>{service.title}</h4>
+                  <p style={styles.serviceDescription}>{service.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function AboutUs({ onLogout }) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [visibleSections, setVisibleSections] = useState([false, false, false]);
+  const sectionRefs = [useRef(null), useRef(null), useRef(null)];
+
   useEffect(() => {
     setTimeout(() => setLoading(false), 400);
   }, []);
-    const [showDropdown, setShowDropdown] = useState(false);
-    useEffect(() => {
-      const handleClick = (e) => {
-        if (!e.target.closest('.profileIcon')) setShowDropdown(false);
-      };
-      document.addEventListener('mousedown', handleClick);
-      return () => document.removeEventListener('mousedown', handleClick);
-    }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          const index = sectionRefs.findIndex(ref => ref.current === entry.target);
+          if (index !== -1 && entry.isIntersecting) {
+            setVisibleSections(prev => {
+              const newVisible = [...prev];
+              newVisible[index] = true;
+              return newVisible;
+            });
+          }
+        });
+      },
+      {
+        threshold: 0.3,
+        rootMargin: '50px',
+      }
+    );
+
+    sectionRefs.forEach(ref => {
+      if (ref.current) observer.observe(ref.current);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   const teamMembers = [
     {
       id: 1,
       name: 'Hammad',
-      role: 'Climate Modeling',
-      description: 'Leads the climate risk prediction and modeling for FasalGuard, integrating weather data and forecasting to help farmers mitigate climate-related risks.',
+      role: 'Climate Modeling Expert',
+      description: 'Leads the climate risk prediction and modeling for FasalGuard, integrating weather data and forecasting to help farmers mitigate climate-related risks through advanced AI algorithms.',
       image: 'https://i.ibb.co/spyZ5Cpr/hammad.jpg',
+      services: [
+        {
+          title: 'Climate Risk Prediction',
+          description: 'Developing AI models to predict climate risks and provide early warnings to farmers'
+        },
+        {
+          title: 'Weather Data & Backend Integration',
+          description: 'Integrating real-time weather data with agricultural models for precision forecasting'
+        },
+        {
+          title: 'Testing & Validation',
+          description: 'Rigorous testing phase to ensure model accuracy and reliability across different regions'
+        }
+      ]
     },
     {
       id: 2,
       name: 'Daniyal',
-      role: 'Satellite Imagery & Analysis',
+      role: 'Satellite Imagery Specialist',
       description: 'Handles the satellite image processing and analysis, generating stress maps and actionable insights for precision agriculture in FasalGuard.',
       image: 'https://i.ibb.co/NdcFn8qF/dani2.png',
+      services: [
+        {
+          title: 'Satellite Image Processing',
+          description: 'Processing high-resolution satellite imagery to detect crop stress and growth patterns'
+        },
+        {
+          title: 'Stress Map Generation',
+          description: 'Creating detailed stress maps to identify areas needing attention in agricultural fields'
+        },
+        {
+          title: 'App Development',
+          description: 'Developing mobile applications to deliver insights directly to farmers\' devices'
+        }
+      ]
     },
     {
       id: 3,
       name: 'Iqrash',
-      role: 'Soil Health & Analytics',
+      role: 'Soil Health Analyst',
       description: 'Responsible for soil data analytics, monitoring soil health parameters, and developing models to optimize fertilizer and irrigation for FasalGuard.',
       image: 'https://i.ibb.co/F48fjvbW/iqrash.jpg',
+      services: [
+        {
+          title: 'Soil Data Analytics',
+          description: 'Analyzing soil health parameters to optimize fertilizer and irrigation strategies'
+        },
+        {
+          title: 'Health Monitoring',
+          description: 'Continuous monitoring of soil conditions and providing actionable recommendations'
+        },
+        {
+          title: 'Frontend Development',
+          description: 'Building intuitive user interfaces to visualize soil data and insights effectively'
+        }
+      ]
     },
   ];
 
   return (
     <div style={{ ...styles.page, opacity: loading ? 0 : 1, transition: 'opacity 0.6s cubic-bezier(.4,0,.2,1)' }}>
       <style>{`
+        @keyframes bounce {
+          0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0) translateX(-50%);
+          }
+          40% {
+            transform: translateY(-10px) translateX(-50%);
+          }
+          60% {
+            transform: translateY(-5px) translateX(-50%);
+          }
+        }
+        
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
         body {
           margin: 0;
           padding: 0;
           overflow-x: hidden;
+          scroll-behavior: smooth;
         }
+        
         ::-webkit-scrollbar {
-          width: 0px;
-          background: transparent;
+          width: 8px;
         }
-        * {
-          scrollbar-width: none;
-          -ms-overflow-style: none;
+        
+        ::-webkit-scrollbar-track {
+          background: #f1f1f1;
         }
+        
+        ::-webkit-scrollbar-thumb {
+          background: #10b981;
+          border-radius: 4px;
+        }
+        
         .navLink:hover {
           color: #10b981;
         }
-        .teamCard:hover {
-          transform: translateY(-8px);
-          box-shadow: 0 12px 24px rgba(16,185,129,0.15);
+        
+        .fade-in {
+          animation: fadeInUp 0.8s ease-out forwards;
         }
       `}</style>
 
       <header style={styles.header}>
-  <div style={{ ...styles.logo, cursor: 'pointer' }} onClick={() => navigate('/home')} role="button" tabIndex={0} aria-label="Go to homepage">
+        <div style={{ ...styles.logo, cursor: 'pointer' }} onClick={() => navigate('/home')}>
           <span style={styles.logoIcon}>
             <Leaf size={20} color="#10b981" />
           </span>
           <span style={styles.logoText}>FASALGUARD</span>
         </div>
         <nav style={styles.nav}>
-          <button style={styles.navLink} type="button" onClick={() => navigate('/about')}>About Us</button>
-          <a
-            style={styles.navLink}
-            onClick={e => {
-              e.preventDefault();
-              document.body.style.scrollBehavior = 'auto';
-              navigate('/contact');
-              setTimeout(() => {
-                document.body.style.scrollBehavior = 'smooth';
-              }, 500);
-            }}
-            href="/contact"
-          >Contact Us</a>
-        </nav>
+          <button style={styles.navLink} onClick={() => navigate('/home')}>Home</button>
+          <button style={styles.navLink} type="button" onClick={() => navigate('/services')}>Services</button> 
+          <button style={styles.navLink} type="button" onClick={() => navigate('/contact')}>Contact Us</button>
+          <button style={styles.navLink} type="button" onClick={() => navigate('/past-trends')}>Past Trends</button>  
+           <button style={{...styles.navLink, background: 'linear-gradient(90deg, #10b981 0%, #059669 100%)', color: '#fff', padding: '0.7rem 1.5rem', borderRadius: '50px'}} onClick={() => navigate('/crop-prediction')}>
+            🌱 Predict Crops
+          </button>     </nav>
       </header>
 
-      <div style={styles.container}>
-        <div style={styles.labelSection}>
-          <div style={styles.label}>ABOUT</div>
+      {/* Hero Section */}
+      <section style={styles.heroSection}>
+        <div style={styles.label}>MEET THE TEAM</div>
+        <h1 style={styles.title}>
+          Precision Agriculture<br />Powered by Innovation
+        </h1>
+        <p style={styles.subtitle}>
+          A multidisciplinary team dedicated to revolutionizing farming in Pakistan through AI, 
+          satellite technology, and climate intelligence. Scroll to meet our experts.
+        </p>
+        <div style={styles.scrollIndicator}>
+          <ChevronDown size={32} color="#10b981" />
         </div>
+      </section>
 
-        <div style={styles.titleSection}>
-          <h1 style={styles.title}>
-            The dream team of<br />precision agriculture.
-          </h1>
-          <p style={styles.subtitle}>
-            Empowering Pakistan's Farmers with AI. Innovation. Impact.
-          </p>
+      {/* Team Members */}
+      {teamMembers.map((member, index) => (
+        <div key={member.id} ref={sectionRefs[index]}>
+          <TeamMember 
+            member={member} 
+            isVisible={visibleSections[index]}
+            reverse={index % 2 === 1}
+          />
         </div>
-
-        <div style={styles.teamGrid}>
-          {teamMembers.map((member) => (
-            <div key={member.id} style={styles.teamCard} className="teamCard">
-              <div style={styles.imageWrapper}>
-                <img 
-                  src={member.image} 
-                  alt={member.name}
-                  style={styles.placeholderImage}
-                />
-                <div style={styles.badge}>
-                  <div style={styles.badgeIcon}></div>
-                  <span style={styles.badgeName}>{member.name}</span>
-                </div>
-              </div>
-              <div style={styles.cardContent}>
-                <div style={styles.cardNumber}>0{member.id}</div>
-                <h3 style={styles.cardTitle}>{member.role}</h3>
-                <p style={styles.cardDescription}>{member.description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      ))}
     </div>
   );
 }

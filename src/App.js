@@ -4,10 +4,17 @@ import HomePage from './HomePage';
 import ContactPage from './ContactPage';
 import AboutUs from './AboutUs';
 import Profile from './Profile';
+import PastTrends from './PastTrends'; 
+import PredictionResults from './PredictionResults';
+import CropPredictionPage from './CropPredictionPage';
+import Services from './Service';
+
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { CSSTransition, SwitchTransition } from 'react-transition-group';
 import './App.css';
+import AdminDashboard from './AdminDashboard';
 
+// In your routes
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
@@ -52,13 +59,15 @@ function App() {
     localStorage.setItem('token', token);
     setUser(userData);
     setIsAuthenticated(true);
-    // Navigate to the homepage after login/signup/verification
-    navigate('/home');
+    // Check if user is admin and redirect accordingly
+    if (userData.role === 'admin') {
+      navigate('/admin');
+    } else {
+      navigate('/home');
+    }
   };
 
-  // no logout on homepage currently
   const handleLogout = () => {
-    // clear local auth state and token, then redirect to login
     localStorage.removeItem('token');
     setUser(null);
     setIsAuthenticated(false);
@@ -105,9 +114,20 @@ function App() {
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/about" element={<AboutUs onLogout={handleLogout} />} />
         <Route path="/profile" element={<Profile user={user} />} />
+        {/* Add PastTrends route here */}
+        <Route path="/past-trends" element={
+          isAuthenticated ? <PastTrends onLogout={handleLogout} /> : <Navigate to="/login" replace />
+        } />
         <Route path="*" element={
           isAuthenticated ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />
         } />
+         <Route path="/prediction-results" element={<PredictionResults />} />
+         <Route path="/crop-prediction" element={<CropPredictionPage />} />
+         <Route path="/services" element={<Services />} />
+        <Route path="/admin" element={
+          isAuthenticated && user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/login" replace />
+        } />
+
       </Routes>
     </div>
   );

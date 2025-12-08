@@ -32,6 +32,23 @@ exports.protect = async (req, res, next) => {
       });
     }
 
+    // Check if account is suspended or banned
+    if (user.accountStatus === 'suspended') {
+      return res.status(403).json({
+        success: false,
+        message: 'Your account has been suspended. Please contact support.',
+        accountStatus: 'suspended'
+      });
+    }
+
+    if (user.accountStatus === 'banned') {
+      return res.status(403).json({
+        success: false,
+        message: 'Your account has been permanently banned.',
+        accountStatus: 'banned'
+      });
+    }
+
     req.user = user;
     next();
   } catch (error) {
