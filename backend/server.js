@@ -25,13 +25,14 @@ const authRoutes = require('./routes/auth');
 const contactRoutes = require('./routes/contact');
 const predictionRoutes = require('./routes/predictionRoutes');
 const feedbackRoutes = require('./routes/feedbackRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+const analysisRoutes = require('./routes/analysisRoutes'); // Added this line
+
 const WeatherController = require('./controllers/weatherController');
 
-// And when attaching to app.locals:
 const app = express();
-const adminRoutes = require('./routes/adminRoutes');
 
-// Middleware
+// Middleware - MOVE THIS BEFORE ROUTES
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
     ? ['https://your-frontend-domain.com'] 
@@ -56,8 +57,8 @@ mongoose.connect(mongoUri)
 });
 
 // Import and attach helper functions
-const cropHelpers = require('./utils/cropHelpers'); // We'll create this file
-const weatherHelpers = require('./utils/weatherHelpers'); // We'll create this file
+const cropHelpers = require('./utils/cropHelpers');
+const weatherHelpers = require('./utils/weatherHelpers');
 
 // Attach helpers to app locals for use in routes
 app.locals.getCropSpecificRecommendations = cropHelpers.getCropSpecificRecommendations;
@@ -69,12 +70,13 @@ app.locals.generateRealisticWeather = weatherHelpers.generateRealisticWeather;
 app.locals.getWeatherDescription = weatherHelpers.getWeatherDescription;
 app.locals.weatherController = new WeatherController();
 
-// Routes
+// Routes - UPDATED ORDER
 app.use('/api/auth', authRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/predict', predictionRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/feedback', feedbackRoutes);
+app.use('/api/analysis', analysisRoutes); // Added this line
 
 // Weather API endpoint
 app.get('/api/weather', async (req, res) => {
@@ -141,6 +143,7 @@ app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
   console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
+  console.log(`🔧 Analysis routes: http://localhost:${PORT}/api/analysis/*`);
 });
 
 module.exports = app;

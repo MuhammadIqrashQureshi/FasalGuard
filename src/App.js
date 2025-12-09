@@ -8,6 +8,12 @@ import PastTrends from './PastTrends';
 import PredictionResults from './PredictionResults';
 import CropPredictionPage from './CropPredictionPage';
 import Services from './Service';
+import WeatherVisualizations from './WeatherVisualizations';
+import IrrigationCalculator from './IrrigationCalculator'
+import CropComparisonMatrix from './CropComparisonMatrix';
+import ReportGenerator from './ReportGenerator';
+
+import './global.css';
 
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { CSSTransition, SwitchTransition } from 'react-transition-group';
@@ -127,10 +133,83 @@ function App() {
         <Route path="/admin" element={
           isAuthenticated && user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/login" replace />
         } />
+         <Route path="/prediction-results" element={<PredictionResults />} />
+        
+        {/* Individual pages that need to receive props */}
+        <Route path="/prediction-results/weather" element={
+          <WeatherVisualizationsDarkWrapper />
+        } />
+        
+        <Route path="/prediction-results/irrigation" element={
+          <IrrigationCalculatorDarkWrapper />
+        } />
+        
+        <Route path="/prediction-results/matrix" element={
+          <CropComparisonMatrixDarkWrapper />
+        } />
+        
+        <Route path="/prediction-results/report" element={
+          <ReportGeneratorDarkWrapper />
+        } />
 
       </Routes>
     </div>
+
   );
+
+  function WeatherVisualizationsDarkWrapper() {
+  const location = useLocation();
+  const { predictionData } = location.state || {
+    predictionData: JSON.parse(localStorage.getItem('predictionData'))
+  };
+  
+  return <WeatherVisualizations forecast={predictionData?.forecast || []} />;
+}
+
+function IrrigationCalculatorDarkWrapper() {
+  const location = useLocation();
+  const { predictionData, inputData } = location.state || {
+    predictionData: JSON.parse(localStorage.getItem('predictionData')),
+    inputData: JSON.parse(localStorage.getItem('inputData'))
+  };
+  
+  return (
+    <IrrigationCalculator
+      predictionData={predictionData}
+      city={predictionData?.location?.city || inputData?.city}
+    />
+  );
+}
+
+function CropComparisonMatrixDarkWrapper() {
+  const location = useLocation();
+  const { predictionData, inputData } = location.state || {
+    predictionData: JSON.parse(localStorage.getItem('predictionData')),
+    inputData: JSON.parse(localStorage.getItem('inputData'))
+  };
+  
+  return (
+    <CropComparisonMatrix
+      predictionData={predictionData}
+      city={predictionData?.location?.city || inputData?.city}
+    />
+  );
+}
+
+function ReportGeneratorDarkWrapper() {
+  const location = useLocation();
+  const { predictionData, inputData } = location.state || {
+    predictionData: JSON.parse(localStorage.getItem('predictionData')),
+    inputData: JSON.parse(localStorage.getItem('inputData'))
+  };
+  
+  return (
+    <ReportGenerator
+      predictionData={predictionData}
+      city={predictionData?.location?.city || inputData?.city}
+    />
+  );
+}
 }
 
 export default App;
