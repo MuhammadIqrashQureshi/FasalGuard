@@ -493,7 +493,7 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
               </div>
             </div>
 
-            {/* Area Input */}
+            {/* Area Input YEAH*/}
             <div>
               <label style={{
                 display: 'block',
