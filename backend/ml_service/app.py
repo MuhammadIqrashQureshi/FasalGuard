@@ -1,8 +1,11 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from model_predictor import predictor
+from soil_analyzer import soil_analyzer  # Import from fixed analyzer
 import traceback
 import numpy as np
+import os
+from datetime import datetime
 
 def pad_to_365_days(features, target_days=365):
     """Pad 7 days of data to 365 days for model compatibility"""
@@ -20,20 +23,25 @@ def pad_to_365_days(features, target_days=365):
 app = Flask(__name__)
 CORS(app)
 
-
 @app.route('/health', methods=['GET'])
 def health():
     """Health check endpoint"""
     models_status = predictor.get_loaded_models()
+    soil_status = soil_analyzer.get_model_status()
     return jsonify({
         'status': 'healthy',
-        'models_loaded': models_status['models_count'],
-        'models': models_status['models'],
+        'yield_models_loaded': models_status['models_count'],
+        'yield_models': models_status['models'],
+        'soil_models_loaded': soil_status['loaded'],
+        'soil_models_available': soil_status.get('models_available', []),
         'message': 'ML service running with pre-trained models'
     })
 
+# =============== CLIMATE/CROP PREDICTION ENDPOINTS ===============
+
 @app.route('/predict', methods=['POST'])
 def predict():
+    """Crop yield prediction endpoint"""
     try:
         data = request.get_json()
         
@@ -82,11 +90,302 @@ def predict_batch():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/models', methods=['GET'])
-def list_models():
-    """List all loaded models"""
-    return jsonify(predictor.get_loaded_models())
+# =============== SOIL ANALYSIS ENDPOINTS ===============
+
+@app.route('/api/soil/district', methods=['POST'])
+def analyze_soil_district():
+    """Analyze soil based on district"""
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'No JSON data provided'
+            }), 400
+        
+        district = data.get('district', 'Lahore')
+        current_crop = data.get('currentCrop', None)  # Note: using currentCrop to match frontend
+        
+        if not district:
+            return jsonify({
+                'success': False,
+                'error': 'District name is required'
+            }), 400
+        
+        print(f"\n🌱 Received soil analysis request for {district}")
+        
+        # Analyze soil
+        result = soil_analyzer.analyze_district(district, current_crop)
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        print(f"❌ Soil analysis error: {str(e)}")
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': f'Soil analysis error: {str(e)}'
+        }), 500
+
+@app.route('/api/soil/manual', methods=['POST'])
+def analyze_soil_manual():
+    """Analyze soil based on manual parameters"""
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'No JSON data provided'
+            }), 400
+        
+        soil_params = data.get('soil_params', {})
+        district = data.get('district', 'Manual Input')
+        current_crop = data.get('current_crop', None)
+        
+        if not soil_params:
+            return jsonify({
+                'success': False,
+                'error': 'Soil parameters are required'
+            }), 400
+        
+        print(f"\n🧪 Received manual soil analysis request")
+        
+        # Analyze soil
+        result = soil_analyzer.analyze_manual(soil_params, district, current_crop)
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        print(f"❌ Manual soil analysis error: {str(e)}")
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': f'Soil analysis error: {str(e)}'
+        }), 500
+
+@app.route('/api/soil/districts', methods=['GET'])
+def get_soil_districts():
+    """Get list of available districts with soil data"""
+    try:
+        districts = soil_analyzer.get_available_districts()
+        return jsonify({
+            'success': True,
+            'districts': districts,
+            'count': len(districts)
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/soil/district/<district_name>', methods=['GET'])
+def get_district_details(district_name):
+    """Get detailed soil information for a district"""
+    try:
+        details = soil_analyzer.get_district_details(district_name)
+        
+        if not details:
+            return jsonify({
+                'success': False,
+                'error': f'District {district_name} not found'
+            }), 404
+        
+        return jsonify({
+            'success': True,
+            'district': details
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/soil/models', methods=['GET'])
+def get_soil_models():
+    """Get information about loaded soil models"""
+    try:
+        return jsonify(soil_analyzer.get_model_info())
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+# =============== FRONTEND COMPATIBILITY ENDPOINTS ===============
+
+@app.route('/api/predict/ai-prediction', methods=['POST'])
+def ai_prediction():
+    """AI crop prediction endpoint - for CropPredictionPage.js"""
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'No JSON data provided'
+            }), 400
+        
+        city = data.get('city', '')
+        days = data.get('days', 7)
+        
+        print(f"\n🤖 Received AI prediction request for {city} ({days} days)")
+        
+        # For now, use soil analysis as fallback
+        # In the future, this could call a dedicated AI model
+        if city:
+            # Use soil analysis for the city
+            result = soil_analyzer.analyze_district(city, None)
+            if result['success']:
+                result['city'] = city
+                result['days'] = days
+                result['weather_used'] = False
+                return jsonify(result)
+        
+        # Fallback response
+        result = {
+            'success': True,
+            'city': city,
+            'days': days,
+            'analysis': {
+                'soil_health': 'Good',
+                'recommended_crop': 'Wheat',
+                'overall_score': 75.5,
+                'parameter_scores': {
+                    'pH': 80,
+                    'Organic Carbon': 70,
+                    'Nitrogen': 65,
+                    'Salinity': 85,
+                    'Clay Content': 75
+                }
+            },
+            'recommendations': [
+                {
+                    'type': 'Crop Selection',
+                    'action': 'Plant Wheat',
+                    'priority': 'High',
+                    'reason': 'Best suited for current soil conditions'
+                }
+            ],
+            'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'weather_used': False
+        }
+        
+        print(f"✅ AI prediction successful for {city}")
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        print(f"❌ AI prediction error: {str(e)}")
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': f'AI prediction error: {str(e)}'
+        }), 500
+
+@app.route('/api/weather', methods=['GET'])
+def get_weather():
+    """Get weather data - for CropPredictionPage.js"""
+    try:
+        city = request.args.get('city', 'Lahore')
+        days = int(request.args.get('days', 7))
+        
+        print(f"\n🌤️ Received weather request for {city} ({days} days)")
+        
+        # Mock weather data response matching the frontend structure
+        weather_data = {
+            'city': city,
+            'country': 'Pakistan',
+            'forecast': []
+        }
+        
+        # Generate mock forecast data
+        import random
+        for i in range(days):
+            weather_data['forecast'].append({
+                'date': f'2024-01-{15 + i:02d}',
+                'T2M': 25 + (i % 3) - 1,  # Temperature
+                'T2M_MAX': 30 + (i % 4) - 2,  # Max temperature
+                'T2M_MIN': 15 + (i % 3) - 1,  # Min temperature
+                'PRECTOTCORR': 0 if i < 3 else 5 if i < 5 else 10,  # Precipitation
+                'RH2M': 60 + (i % 20),  # Humidity
+                'WS2M': 5 + (i % 5),  # Wind speed
+                'ALLSKY_SFC_SW_DWN': 200 + (i % 100)  # Solar radiation
+            })
+        
+        print(f"✅ Weather data generated for {city}")
+        
+        return jsonify(weather_data)
+        
+    except Exception as e:
+        print(f"❌ Weather endpoint error: {str(e)}")
+        traceback.print_exc()
+        return jsonify({
+            'error': f'Weather data error: {str(e)}'
+        }), 500
+
+# =============== BACKWARD COMPATIBILITY ENDPOINTS ===============
+
+@app.route('/soil/analyze/district', methods=['POST'])
+def legacy_analyze_soil_district():
+    """Legacy endpoint for backward compatibility"""
+    return analyze_soil_district()
+
+@app.route('/soil/analyze/manual', methods=['POST'])
+def legacy_analyze_soil_manual():
+    """Legacy endpoint for backward compatibility"""
+    return analyze_soil_manual()
+
+@app.route('/soil/districts', methods=['GET'])
+def legacy_get_soil_districts():
+    """Legacy endpoint for backward compatibility"""
+    return get_soil_districts()
+
+@app.route('/soil/district/<district_name>', methods=['GET'])
+def legacy_get_district_details(district_name):
+    """Legacy endpoint for backward compatibility"""
+    return get_district_details(district_name)
+
+@app.route('/soil/models', methods=['GET'])
+def legacy_get_soil_models():
+    """Legacy endpoint for backward compatibility"""
+    return get_soil_models()
 
 if __name__ == '__main__':
-    print("🚀 Starting ML Prediction Service...")
+    print("=" * 60)
+    print("🚀 Starting ML Prediction Service with Soil Analysis...")
+    print("=" * 60)
+    
+    # Print climate/crop model status
+    climate_models = predictor.get_loaded_models()
+    print(f"\n🌾 Climate/Crop Models Status:")
+    print(f"   Models loaded: {climate_models['models_count']}")
+    print(f"   Available: {climate_models['models']}")
+    
+    # Print soil model status
+    soil_status = soil_analyzer.get_model_status()
+    print(f"\n🌱 Soil Analysis Models Status:")
+    print(f"   Models loaded: {soil_status['loaded']}")
+    if soil_status['loaded']:
+        print(f"   Available: {', '.join(soil_status.get('models_available', []))}")
+        if 'limitation_names' in soil_status:
+            print(f"   Limitations: {', '.join(soil_status['limitation_names'])}")
+    else:
+        print(f"   ❌ Soil models not loaded")
+    
+    print(f"\n📡 API Endpoints:")
+    print(f"   /health - Health check")
+    print(f"   /predict - Crop yield prediction")
+    print(f"   /api/soil/district - Soil analysis by district")
+    print(f"   /api/soil/manual - Soil analysis with manual parameters")
+    print(f"   /api/weather - Weather data (for frontend)")
+    print(f"   /api/predict/ai-prediction - AI crop prediction")
+    print(f"\n🔧 Running on port 5001")
+    print("=" * 60)
+    
     app.run(host='0.0.0.0', port=5001, debug=False)

@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
+
+
 require('dotenv').config({ path: './config.env' });
 
 // Handle uncaught exceptions
@@ -27,8 +29,9 @@ const predictionRoutes = require('./routes/predictionRoutes');
 const feedbackRoutes = require('./routes/feedbackRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const analysisRoutes = require('./routes/analysisRoutes'); // Added this line
-
 const WeatherController = require('./controllers/weatherController');
+const soilAnalysisRoutes = require('./routes/soilAnalysisRoutes');
+
 
 const app = express();
 
@@ -77,6 +80,8 @@ app.use('/api/predict', predictionRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/analysis', analysisRoutes); // Added this line
+app.use('/api/soil', soilAnalysisRoutes);
+
 
 // Weather API endpoint
 app.get('/api/weather', async (req, res) => {

@@ -1,0 +1,220 @@
+{
+  "timestamp": "20251209_231209",
+  "features": [
+    "ph",
+    "orgc",
+    "nitrogen",
+    "clay",
+    "sand",
+    "silt",
+    "cec",
+    "ec",
+    "bd",
+    "wg0033",
+    "wg1500",
+    "clay_pct",
+    "sand_pct",
+    "silt_pct",
+    "awc"
+  ],
+  "crops": [
+    "Wheat",
+    "Rice",
+    "Maize",
+    "Sugarcane",
+    "Cotton"
+  ],
+  "districts": [
+    "Sargodha",
+    "Faisalabad",
+    "Gujrat",
+    "Lahore",
+    "Multan",
+    "Bahawalpur"
+  ],
+  "model_results": {
+    "soil_health": {
+      "best_model": "RandomForest",
+      "accuracy": 0.6369479300076215,
+      "classes": [
+        "Excellent",
+        "Fair",
+        "Good",
+        "Poor",
+        "Very Poor"
+      ]
+    },
+    "crop_recommendation": {
+      "best_model": "XGBoost",
+      "accuracy": 0.7128253883445561,
+      "classes": [
+        "Cotton",
+        "Maize",
+        "Rice",
+        "Sugarcane",
+        "Wheat"
+      ]
+    },
+    "limitation_detection": {
+      "hamming_loss": 0.09987506973308924,
+      "jaccard_score": 0.7105078926071139,
+      "limitations": [
+        "pH_Problem",
+        "Low_Organic_Matter",
+        "Nitrogen_Deficiency",
+        "Salinity_Problem",
+        "Texture_Problem"
+      ]
+    }
+  },
+  "punjab_limits": {
+    "pH": {
+      "very_acidic": [
+        0,
+        5.5
+      ],
+      "acidic": [
+        5.5,
+        6.0
+      ],
+      "optimal": [
+        6.0,
+        7.5
+      ],
+      "alkaline": [
+        7.5,
+        8.0
+      ],
+      "very_alkaline": [
+        8.0,
+        14
+      ]
+    },
+    "orgc": {
+      "very_low": [
+        0,
+        0.3
+      ],
+      "low": [
+        0.3,
+        0.6
+      ],
+      "medium": [
+        0.6,
+        1.0
+      ],
+      "high": [
+        1.0,
+        2.0
+      ],
+      "very_high": [
+        2.0,
+        100
+      ]
+    },
+    "nitrogen": {
+      "deficient": [
+        0,
+        0.1
+      ],
+      "low": [
+        0.1,
+        0.15
+      ],
+      "medium": [
+        0.15,
+        0.25
+      ],
+      "high": [
+        0.25,
+        0.4
+      ],
+      "excessive": [
+        0.4,
+        100
+      ]
+    },
+    "ec": {
+      "non_saline": [
+        0,
+        2.0
+      ],
+      "slightly_saline": [
+        2.0,
+        4.0
+      ],
+      "moderately_saline": [
+        4.0,
+        8.0
+      ],
+      "strongly_saline": [
+        8.0,
+        100
+      ]
+    },
+    "clay": {
+      "sandy": [
+        0,
+        15
+      ],
+      "loamy_sand": [
+        15,
+        20
+      ],
+      "sandy_loam": [
+        20,
+        30
+      ],
+      "loam": [
+        30,
+        40
+      ],
+      "clay_loam": [
+        40,
+        100
+      ]
+    }
+  },
+  "crop_limitations": {
+    "Wheat": {
+      "pH_min": 5.5,
+      "pH_max": 8.5,
+      "ec_max": 6.0,
+      "orgc_min": 0.4,
+      "clay_min": 15,
+      "clay_max": 45
+    },
+    "Rice": {
+      "pH_min": 4.5,
+      "pH_max": 7.0,
+      "ec_max": 3.0,
+      "orgc_min": 0.6,
+      "clay_min": 25,
+      "clay_max": 55
+    },
+    "Maize": {
+      "pH_min": 5.5,
+      "pH_max": 7.5,
+      "ec_max": 4.0,
+      "orgc_min": 0.5,
+      "clay_min": 10,
+      "clay_max": 40
+    },
+    "Sugarcane": {
+      "pH_min": 5.5,
+      "pH_max": 8.5,
+      "ec_max": 8.0,
+      "orgc_min": 0.4,
+      "clay_min": 20,
+      "clay_max": 50
+    },
+    "Cotton": {
+      "pH_min": 6.0,
+      "pH_max": 8.5,
+      "ec_max": 10.0,
+      "orgc_min": 0.3,
+      "clay_min": 15,
+      "clay_max": 45
+    }
+  }
+}

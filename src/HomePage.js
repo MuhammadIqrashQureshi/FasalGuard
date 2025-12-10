@@ -461,6 +461,7 @@ export default function HomePage({ onLogout }) {
       textAlign: 'center',
       position: 'relative',
       overflow: 'visible',
+      cursor: 'pointer', // ADD THIS
     },
     featureIconCircle: {
       width: '80px',
@@ -776,7 +777,7 @@ export default function HomePage({ onLogout }) {
           <button style={styles.navLink} className="navLink" type="button" onClick={() => navigate('/about')}>About Us</button>
           <button style={styles.navLink} className="navLink" type="button" onClick={() => navigate('/services')}>Services</button>
           <button style={styles.navLink} className="navLink" type="button" onClick={() => navigate('/contact')}>Contact Us</button>
-
+          <button style={styles.navLink} className="navLink" type="button" onClick={() => navigate('/soil-analysis')}>Soil Analysis</button>
           <div style={{ position: 'relative', marginLeft: '1.5rem' }}>
             <span
               style={{ color: scrolled ? '#374151' : '#fff', fontSize: '1.5rem', cursor: 'pointer', transition: 'color 0.3s' }}
@@ -1182,12 +1183,42 @@ export default function HomePage({ onLogout }) {
           
           <div style={styles.featuresGrid}>
             {[
-              { icon: BarChart, title: "Yield Prediction", desc: "Know your harvest in advance" },
-              { icon: Map, title: "Field Mapping", desc: "See problem areas instantly" },
-              { icon: Sun, title: "Soil Analysis", desc: "Optimize fertilizer usage" },
-              { icon: AlertCircle, title: "Smart Alerts", desc: "Get notified when it matters" },
-              { icon: CloudRain, title: "Weather Forecast", desc: "Plan ahead with confidence" },
-              { icon: Smartphone, title: "Mobile Access", desc: "Farm management on the go" },
+              { 
+                icon: BarChart, 
+                title: "Yield Prediction", 
+                desc: "Know your harvest in advance",
+                onClick: () => navigate('/crop-prediction') // ADDED
+              },
+              { 
+                icon: Map, 
+                title: "Field Mapping", 
+                desc: "See problem areas instantly",
+                onClick: () => navigate('/services') // ADDED
+              },
+              { 
+                icon: Sun, 
+                title: "Soil Analysis", 
+                desc: "Optimize fertilizer usage",
+                onClick: () => navigate('/soil-analysis') // ADDED
+              },
+              { 
+                icon: AlertCircle, 
+                title: "Smart Alerts", 
+                desc: "Get notified when it matters",
+                onClick: () => navigate('/services') // ADDED
+              },
+              { 
+                icon: CloudRain, 
+                title: "Weather Forecast", 
+                desc: "Plan ahead with confidence",
+                onClick: () => navigate('/prediction-results') // ADDED
+              },
+              { 
+                icon: Smartphone, 
+                title: "Mobile Access", 
+                desc: "Farm management on the go",
+                onClick: () => navigate('/services') // ADDED
+              },
             ].map((item, index) => (
               <motion.div 
                 key={index}
@@ -1197,6 +1228,7 @@ export default function HomePage({ onLogout }) {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ delay: index * 0.1, duration: 0.5, type: "spring" }}
+                onClick={item.onClick} // ADDED
               >
                 <motion.div 
                   style={styles.featureIconCircle}
@@ -1291,10 +1323,18 @@ export default function HomePage({ onLogout }) {
                   Past Trends
                 </motion.button>
                 <motion.button 
-                  style={styles.footerLink}
+                  style={styles.footerLink} 
+                  onClick={() => navigate('/soil-analysis')} // ADDED
                   whileHover={{ x: 5, color: '#10b981' }}
                 >
-                  Weather Alerts
+                  Soil Analysis
+                </motion.button>
+                <motion.button 
+                  style={styles.footerLink}
+                  onClick={() => navigate('/prediction-results')} // ADDED
+                  whileHover={{ x: 5, color: '#10b981' }}
+                >
+                  Weather Forecast
                 </motion.button>
               </div>
               
@@ -1316,9 +1356,10 @@ export default function HomePage({ onLogout }) {
                 </motion.button>
                 <motion.button 
                   style={styles.footerLink}
+                  onClick={() => navigate('/services')}
                   whileHover={{ x: 5, color: '#10b981' }}
                 >
-                  Support
+                  Services
                 </motion.button>
               </div>
               

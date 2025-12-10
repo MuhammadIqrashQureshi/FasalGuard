@@ -89,8 +89,16 @@ export default function CropPredictionPage() {
       console.log('🤖 Full AI prediction response:', result);
 
       if (result.success) {
-        navigate('/prediction-results', { 
-          state: { 
+        // Persist prediction + input so direct URL loads / refresh keep showing results
+        try {
+          localStorage.setItem('predictionData', JSON.stringify(result));
+          localStorage.setItem('inputData', JSON.stringify(predictionData));
+        } catch (e) {
+          console.warn('Could not write prediction data to localStorage', e);
+        }
+
+        navigate('/prediction-results', {
+          state: {
             predictionData: result,
             inputData: predictionData
           }
