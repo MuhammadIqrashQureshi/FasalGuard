@@ -48,14 +48,15 @@ router.post('/irrigation-calculation', async (req, res) => {
     console.log(`Getting weather for ${city}...`);
     
     // Get weather data
-    const weatherData = await weatherController.getRealTimeWeather(city, days);
+    const weatherResponse = await weatherController.getRealTimeWeather(city, days);
+    const weatherForecast = weatherResponse.forecast || [];
     
-    console.log(`Weather data received: ${weatherData.length} days`);
+    console.log(`Weather data received: ${weatherForecast.length} days`);
     
     // Calculate irrigation
     const irrigationPlan = irrigationService.calculateIrrigationSchedule(
       crop.toLowerCase(), 
-      weatherData, 
+      weatherForecast, 
       soilType, 
       area_ha
     );
@@ -93,8 +94,9 @@ router.post('/water-requirements', async (req, res) => {
       });
     }
     
-    const weatherData = await weatherController.getRealTimeWeather(city, days);
-    const waterRequirements = irrigationService.calculateMultiCropWaterRequirements(crops, weatherData, area_ha);
+    const weatherResponse = await weatherController.getRealTimeWeather(city, days);
+    const weatherForecast = weatherResponse.forecast || [];
+    const waterRequirements = irrigationService.calculateMultiCropWaterRequirements(crops, weatherForecast, area_ha);
     
     // Calculate comparison metrics
     const comparison = Object.entries(waterRequirements).map(([crop, data]) => ({
@@ -139,11 +141,12 @@ router.post('/crop-comparison', async (req, res) => {
       });
     }
     
-    const weatherData = await weatherController.getRealTimeWeather(city, days);
-    const comparisonMatrix = await comparisonService.generateComparisonMatrix(weatherData, city);
+    const weatherResponse = await weatherController.getRealTimeWeather(city, days);
+    const comparisonResult = await comparisonService.generateComparisonMatrix(city, weatherResponse);
+    const comparisonMatrix = comparisonResult.comparison_matrix || [];
     
     // Generate visualization data
-    const visualizationData = comparisonService.generateVisualizationData(comparisonMatrix);
+    const visualizationData = comparisonResult.visualization_data || comparisonService.generateVisualizationData(comparisonMatrix);
     
     res.json({
       success: true,
@@ -152,9 +155,9 @@ router.post('/crop-comparison', async (req, res) => {
       visualization_data: visualizationData,
       summary: {
         best_crop: comparisonMatrix[0]?.crop || 'N/A',
-        highest_profit: comparisonMatrix.sort((a, b) => b.profit_per_ha - a.profit_per_ha)[0]?.crop || 'N/A',
-        most_water_efficient: comparisonMatrix.sort((a, b) => b.composite_score - a.composite_score)[0]?.crop || 'N/A',
-        lowest_risk: comparisonMatrix.sort((a, b) => a.composite_score - b.composite_score)[0]?.crop || 'N/A'
+        highest_profit: [...comparisonMatrix].sort((a, b) => b.profit_per_ha - a.profit_per_ha)[0]?.crop || 'N/A',
+        most_water_efficient: [...comparisonMatrix].sort((a, b) => b.normalized_score - a.normalized_score)[0]?.crop || 'N/A',
+        lowest_risk: [...comparisonMatrix].sort((a, b) => a.normalized_score - b.normalized_score)[0]?.crop || 'N/A'
       },
       timestamp: new Date().toISOString()
     });
@@ -186,11 +189,12 @@ router.post('/generate-report', async (req, res) => {
     console.log(`📄 Generating comprehensive report for ${city}...`);
     
     // Get all necessary data
-    const weatherData = await weatherController.getRealTimeWeather(city, days);
+    const weatherResponse = await weatherController.getRealTimeWeather(city, days);
+    const weatherData = weatherResponse.forecast || [];
     
     // Get ML predictions
     const mlPredictions = await mlPredictionController.predictBatchWithML(
-      weatherData, 
+      weatherData,
       ['cotton', 'wheat', 'maize', 'rice', 'sugarcane']
     );
     
@@ -218,7 +222,7 @@ router.post('/generate-report', async (req, res) => {
     // Get comparison data if requested
     let comparisonData = null;
     if (includeComparison) {
-      comparisonData = await comparisonService.generateComparisonMatrix(weatherData, city);
+      comparisonData = await comparisonService.generateComparisonMatrix(city, weatherResponse);
     }
     
     // Prepare data for report
@@ -308,8 +312,10 @@ router.post('/visualizations', async (req, res) => {
       });
     }
     
-    const weatherData = await weatherController.getRealTimeWeather(city, days);
-    const comparisonMatrix = await comparisonService.generateComparisonMatrix(weatherData, city);
+    const weatherResponse = await weatherController.getRealTimeWeather(city, days);
+    const weatherData = weatherResponse.forecast || [];
+    const comparisonResult = await comparisonService.generateComparisonMatrix(city, weatherResponse);
+    const comparisonMatrix = comparisonResult.comparison_matrix || [];
     
     // Generate various visualization data
     const visualizations = {

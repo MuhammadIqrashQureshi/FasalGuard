@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from model_predictor import predictor
 from soil_analyzer import soil_analyzer  # Import from fixed analyzer
+from satellite_predictor import satellite_predictor
 import traceback
 import numpy as np
 import os
@@ -355,6 +356,78 @@ def legacy_get_district_details(district_name):
 def legacy_get_soil_models():
     """Legacy endpoint for backward compatibility"""
     return get_soil_models()
+
+# =============== SATELLITE ANALYSIS ENDPOINTS ===============
+
+@app.route('/satellite/analyze', methods=['POST'])
+def analyze_satellite():
+    """Satellite-based crop stress prediction using Sentinel-2 indices"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'status': 'error', 'error': 'No JSON data provided'}), 400
+
+        lat = data.get('latitude', data.get('lat'))
+        lon = data.get('longitude', data.get('lon'))
+        crop = data.get('crop', 'wheat')
+        city = data.get('city')
+        month = data.get('month', None)
+        analysis_date = data.get('analysis_date', None)
+        field_polygon = data.get('field_polygon', None)
+        weather_data = data.get('weather_data', [])
+
+        if lat is None or lon is None:
+            return jsonify({'status': 'error', 'error': 'latitude and longitude are required'}), 400
+
+        weather_context = None
+        if isinstance(weather_data, list) and weather_data:
+            weather_summary = predictor.get_weather_summary(weather_data)
+            avg_humidity = float(np.mean([day.get('RH2M', 0) for day in weather_data])) if weather_data else 0.0
+            max_wind_speed = float(max([day.get('WS2M', 0) for day in weather_data])) if weather_data else 0.0
+            rain_next_48h = float(sum([day.get('PRECTOTCORR', 0) for day in weather_data[:2]])) if weather_data else 0.0
+
+            weather_summary['avg_humidity'] = round(avg_humidity, 1)
+            weather_summary['max_wind_speed'] = round(max_wind_speed, 1)
+            weather_summary['rain_next_48h'] = round(rain_next_48h, 1)
+
+            weather_context = {
+                'summary': weather_summary,
+                'quality': predictor.assess_weather_quality(weather_data, crop),
+                'forecast_days': len(weather_data),
+                'hot_days': sum(1 for day in weather_data if day.get('T2M_MAX', 0) >= 35),
+                'very_hot_days': sum(1 for day in weather_data if day.get('T2M_MAX', 0) >= 38),
+                'dry_days': sum(1 for day in weather_data if day.get('PRECTOTCORR', 0) < 1),
+                'rainy_days': sum(1 for day in weather_data if day.get('PRECTOTCORR', 0) >= 5),
+                'heavy_rain_days': sum(1 for day in weather_data if day.get('PRECTOTCORR', 0) >= 10),
+                'rain_next_48h': round(rain_next_48h, 1),
+            }
+
+        print(f"\n🛰️  Satellite analysis: ({lat}, {lon}) crop={crop}")
+        result = satellite_predictor.analyze(
+            float(lat), float(lon), crop, city, month, analysis_date, field_polygon, weather_context
+        )
+        # Use Response with json.dumps instead of jsonify to preserve all fields
+        import json
+        from flask import Response
+        return Response(json.dumps(result), mimetype='application/json')
+
+    except Exception as e:
+        print(f"❌ Satellite analysis error: {str(e)}")
+        traceback.print_exc()
+        return jsonify({'status': 'error', 'error': str(e)}), 500
+
+
+@app.route('/satellite/health', methods=['GET'])
+def satellite_health():
+    """Health check for satellite analysis service"""
+    status = satellite_predictor.get_status()
+    return jsonify({
+        'success': True,
+        'model_loaded': status['model_loaded'],
+        'gee_initialized': status['gee_initialized'],
+        'gee_last_error': status.get('gee_last_error'),
+        'gee_credentials_used': status.get('gee_credentials_used'),
+    })
 
 if __name__ == '__main__':
     print("=" * 60)

@@ -778,6 +778,7 @@ export default function HomePage({ onLogout }) {
           <button style={styles.navLink} className="navLink" type="button" onClick={() => navigate('/services')}>Services</button>
           <button style={styles.navLink} className="navLink" type="button" onClick={() => navigate('/contact')}>Contact Us</button>
           <button style={styles.navLink} className="navLink" type="button" onClick={() => navigate('/soil-analysis')}>Soil Analysis</button>
+          <button style={styles.navLink} className="navLink" type="button" onClick={() => navigate('/satellite-analysis')}>Satellite</button>
           <div style={{ position: 'relative', marginLeft: '1.5rem' }}>
             <span
               style={{ color: scrolled ? '#374151' : '#fff', fontSize: '1.5rem', cursor: 'pointer', transition: 'color 0.3s' }}

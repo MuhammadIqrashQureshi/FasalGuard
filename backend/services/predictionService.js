@@ -4,6 +4,14 @@ const mlPredictionController = require('../controllers/mlPredictionController');
 class PredictionService {
   constructor() {
     this.weather = new weatherController();
+    this.cropEconomics = {
+      cotton: { pricePerTonPkr: 137500, inputCostPerHaPkr: 120000 },
+      wheat: { pricePerTonPkr: 80000, inputCostPerHaPkr: 80000 },
+      maize: { pricePerTonPkr: 50000, inputCostPerHaPkr: 90000 },
+      rice: { pricePerTonPkr: 95000, inputCostPerHaPkr: 110000 },
+      sugarcane: { pricePerTonPkr: 4500, inputCostPerHaPkr: 180000 }
+    };
+    this.hectareToAcre = 2.47105;
   }
 
   async getUnifiedPredictions(city, days = 7) {
@@ -26,6 +34,7 @@ class PredictionService {
           
           if (mlResult.success && mlResult.prediction && !mlResult.prediction.error) {
             predictions[crop] = {
+              success: true,
               predicted_yield: mlResult.prediction.predicted_yield,
               confidence: mlResult.prediction.confidence,
               recommendation: mlResult.prediction.recommendation,
@@ -33,16 +42,29 @@ class PredictionService {
               model_used: mlResult.prediction.model_used
             };
           } else {
-            predictions[crop] = this.getFallbackPrediction(crop, weatherData);
+            predictions[crop] = {
+              success: false,
+              error: mlResult?.prediction?.error || mlResult?.error || 'ML prediction failed',
+              model_used: null
+            };
           }
         } catch (error) {
           console.error(`Error predicting for ${crop}:`, error.message);
-          predictions[crop] = this.getFallbackPrediction(crop, weatherData);
+          predictions[crop] = {
+            success: false,
+            error: error.message,
+            model_used: null
+          };
         }
       }
       
       // 3. Process results into recommendations
       const recommendations = this.processPredictions(predictions, weatherData, city);
+      if (recommendations.length === 0) {
+        throw new Error('No ML crop predictions were available; cannot generate trustworthy recommendations');
+      }
+
+      const successfulPredictionCount = Object.values(predictions).filter((p) => p.success).length;
       
       return {
         success: true,
@@ -57,9 +79,12 @@ class PredictionService {
         timestamp: new Date().toISOString(),
         analysis: {
           total_crops: crops.length,
-          ml_predictions: Object.values(predictions).filter(p => p.model_used && !p.model_used.includes('fallback')).length,
+          ml_predictions: successfulPredictionCount,
           weather_days: weatherData.length
-        }
+        },
+        unavailable_crops: Object.entries(predictions)
+          .filter(([, prediction]) => !prediction.success)
+          .map(([crop, prediction]) => ({ crop, reason: prediction.error || 'Unavailable' }))
       };
       
     } catch (error) {
@@ -68,76 +93,43 @@ class PredictionService {
     }
   }
 
-  getFallbackPrediction(crop, weatherData) {
-    const baseYields = {
-      cotton: 4.3, wheat: 3.2, maize: 5.1, rice: 2.8, sugarcane: 65.0
-    };
-    
-    const avgTemp = weatherData.reduce((sum, day) => sum + day.T2M, 0) / weatherData.length;
-    const totalRain = weatherData.reduce((sum, day) => sum + day.PRECTOTCORR, 0);
-    
-    let adjustment = 1.0;
-    
-    // Simple adjustment based on weather
-    if (avgTemp > 25 && avgTemp < 35) adjustment *= 1.1;
-    if (totalRain > 20 && totalRain < 100) adjustment *= 1.05;
-    
-    return {
-      predicted_yield: baseYields[crop] * adjustment,
-      confidence: 0.65,
-      model_used: 'fallback_model',
-      note: 'Using rule-based estimation'
-    };
-  }
-
 processPredictions(predictions, weatherData, city) {
   const recommendations = [];
   
   for (const [crop, prediction] of Object.entries(predictions)) {
-    // ✅ FIX: Check if prediction exists
-    let currentPrediction = prediction;
-    
-    if (!currentPrediction || !currentPrediction.predicted_yield) {
-      console.warn(`⚠️ No prediction available for ${crop}, using fallback`);
-      currentPrediction = this.getFallbackPrediction(crop, weatherData);
-      predictions[crop] = currentPrediction; // Update the predictions object
+    if (!prediction || !prediction.success || typeof prediction.predicted_yield !== 'number') {
+      console.warn(`⚠️ Skipping ${crop} because ML prediction is unavailable`);
+      continue;
     }
-    
-    // ✅ FIX: Check if prediction has required properties
+
+    const currentPrediction = prediction;
     const score = this.calculateCropScore(crop, currentPrediction, weatherData);
-    
-    // ✅ FIX: Safely check model_used property
-    let predictionSource = 'Rule-based';
-    let mlModelUsed = 'fallback_model';
-    
-    if (currentPrediction.model_used) {
-      if (typeof currentPrediction.model_used === 'string') {
-        mlModelUsed = currentPrediction.model_used;
-        predictionSource = currentPrediction.model_used.includes('fallback') 
-          ? 'Rule-based' 
-          : 'AI Model';
-      }
-    }
+    const economicImpact = this.calculateEconomicImpact(crop, currentPrediction, city);
     
     recommendations.push({
       cropKey: crop,
       crop: this.getCropName(crop),
       score: score,
       suitability: this.getSuitabilityLevel(score),
-      predictionSource: predictionSource,
-      mlModelUsed: mlModelUsed,
+      predictionSource: 'AI Model',
+      mlModelUsed: currentPrediction.model_used || 'gru',
       advantages: this.getAdvantages(crop, weatherData),
       issues: this.getIssues(crop, weatherData),
       recommendation: this.generateRecommendations(crop, currentPrediction, weatherData),
+      economicImpact,
       metrics: {
         ml_predicted_yield: currentPrediction.predicted_yield || 0,
-        ml_confidence: currentPrediction.confidence || 0.65,
-        predicted_yield_units: 'tons/ha'
+        ml_confidence: currentPrediction.confidence || 0,
+        predicted_yield_units: 'tons/ha',
+        impact_pkr_per_acre: economicImpact.expectedNetImpactPkrPerAcre,
+        impact_range_pkr_per_acre: economicImpact.expectedRangePkrPerAcre,
+        upside_pkr_per_acre: economicImpact.upsidePkrPerAcre,
+        downside_pkr_per_acre: economicImpact.downsidePkrPerAcre
       },
       plantingWindow: this.getPlantingWindow(crop),
       riskFactors: this.assessRisks(crop, weatherData),
       historicalYield: this.getHistoricalYield(city, crop),
-      mlSuccess: currentPrediction.model_used && !currentPrediction.model_used.includes('fallback')
+      mlSuccess: true
     });
   }
   
@@ -346,6 +338,44 @@ processPredictions(predictions, weatherData, city) {
     }
     
     return risks;
+  }
+
+  calculateEconomicImpact(crop, prediction, city) {
+    const economics = this.cropEconomics[crop] || { pricePerTonPkr: 50000, inputCostPerHaPkr: 90000 };
+    const historicalYield = this.getHistoricalYield(city, crop);
+    const predictedYield = prediction.predicted_yield;
+    const confidence = Math.max(0, Math.min(1, prediction.confidence || 0.6));
+
+    const predictedRevenuePerHa = predictedYield * economics.pricePerTonPkr;
+    const historicalRevenuePerHa = historicalYield * economics.pricePerTonPkr;
+
+    const predictedNetPerHa = predictedRevenuePerHa - economics.inputCostPerHaPkr;
+    const historicalNetPerHa = historicalRevenuePerHa - economics.inputCostPerHaPkr;
+
+    const expectedNetImpactPkrPerAcre = (predictedNetPerHa - historicalNetPerHa) / this.hectareToAcre;
+    const expectedNetReturnPkrPerAcre = predictedNetPerHa / this.hectareToAcre;
+
+    const uncertaintyFraction = 0.15 + (1 - confidence) * 0.35;
+    const uncertaintyAbs = Math.abs(expectedNetImpactPkrPerAcre) * uncertaintyFraction + 1500;
+
+    const lower = expectedNetImpactPkrPerAcre - uncertaintyAbs;
+    const upper = expectedNetImpactPkrPerAcre + uncertaintyAbs;
+
+    return {
+      expectedNetReturnPkrPerAcre: Math.round(expectedNetReturnPkrPerAcre),
+      expectedNetImpactPkrPerAcre: Math.round(expectedNetImpactPkrPerAcre),
+      expectedRangePkrPerAcre: {
+        lower: Math.round(lower),
+        upper: Math.round(upper)
+      },
+      upsidePkrPerAcre: Math.max(0, Math.round(upper)),
+      downsidePkrPerAcre: Math.max(0, Math.round(-lower)),
+      pricingAssumptions: {
+        pricePerTonPkr: economics.pricePerTonPkr,
+        inputCostPerHaPkr: economics.inputCostPerHaPkr,
+        baselineYieldTonsPerHa: Number(historicalYield.toFixed(2))
+      }
+    };
   }
 }
 

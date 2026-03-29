@@ -73,7 +73,45 @@ const userSchema = new mongoose.Schema({
   },
   lastLogin: {
     type: Date
-  }
+  },
+  farmLocations: [{
+    _id: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: () => new mongoose.Types.ObjectId()
+    },
+    name: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    description: {
+      type: String,
+      trim: true
+    },
+    latitude: {
+      type: Number,
+      required: true
+    },
+    longitude: {
+      type: Number,
+      required: true
+    },
+    polygon: [{
+      lat: Number,
+      lon: Number
+    }],
+    city: {
+      type: String
+    },
+    crop: {
+      type: String,
+      enum: ['wheat', 'maize', 'sugarcane', 'rice', 'cotton']
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }]
 });
 
 // Hash password before saving

@@ -1,7 +1,7 @@
 const axios = require('axios');
 const NodeCache = require('node-cache');
 const cache = new NodeCache({ stdTTL: 3600 }); // Cache for 1 hour
-const { getWeatherDescription, generateRealisticWeather } = require('../utils/weatherHelpers');
+const { getWeatherDescription } = require('../utils/weatherHelpers');
 
 // City coordinates and climate data for Pakistan regions
 const CITY_DATA = {
@@ -60,6 +60,18 @@ class WeatherController {
     this.apiKey = process.env.OPENWEATHER_API_KEY;
   }
 
+  async fetchOpenWeatherForecast(lat, lon, cityLabel, days = 7) {
+    if (!this.apiKey) {
+      throw new Error('OPENWEATHER_API_KEY is missing; real weather forecast is unavailable');
+    }
+
+    const response = await axios.get(
+      `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${this.apiKey}&units=metric`
+    );
+
+    return this.processWeatherData(response.data, cityLabel, days);
+  }
+
   async getRealTimeWeather(city, days = 7) {
     const cacheKey = `weather_${city}_${days}`;
     const cached = cache.get(cacheKey);
@@ -69,19 +81,18 @@ class WeatherController {
       const cityData = CITY_DATA[city];
       if (!cityData) throw new Error(`City data not found for ${city}`);
 
-      // Using OpenWeatherMap API - 7 day forecast
-      const response = await axios.get(
-        `https://api.openweathermap.org/data/2.5/forecast?lat=${cityData.lat}&lon=${cityData.lon}&appid=${this.apiKey}&units=metric`
+      const processedWeather = await this.fetchOpenWeatherForecast(
+        cityData.lat,
+        cityData.lon,
+        city,
+        days
       );
-
-      const processedWeather = this.processWeatherData(response.data, city, days);
       cache.set(cacheKey, processedWeather);
       return processedWeather;
 
     } catch (error) {
       console.error('Weather API error:', error.message);
-      // Fallback to city-specific weather generation
-      return await this.getCitySpecificWeather(city, days);
+      throw new Error(`Unable to fetch real weather for ${city}: ${error.message}`);
     }
   }
 
@@ -159,71 +170,18 @@ class WeatherController {
 
   async getRealTimeWeatherByCoords(lat, lon, days = 7) {
     try {
-      // Find the closest city to the coordinates
       const closestCity = this.findClosestCity(lat, lon);
-      if (closestCity) {
-        return await this.getCitySpecificWeather(closestCity, days);
-      }
-      
-      // Use generic weather generation for unknown coordinates
-      return this.generateGenericWeather(lat, lon, days);
+
+      return await this.fetchOpenWeatherForecast(
+        lat,
+        lon,
+        closestCity || `Lat:${lat},Lon:${lon}`,
+        days
+      );
     } catch (error) {
-      console.error('Weather API error:', error);
-      return this.generateGenericWeather(lat, lon, days);
+      console.error('Weather API error:', error.message);
+      throw new Error(`Unable to fetch real weather by coordinates: ${error.message}`);
     }
-  }
-
-  // City-specific weather generation based on climate data
-  async getCitySpecificWeather(city, days = 7) {
-    const cityData = CITY_DATA[city];
-    if (!cityData) {
-      return this.generateGenericWeather(31.5497, 74.3436, days); // Default to Lahore
-    }
-
-    const currentDate = new Date();
-    const weatherData = [];
-    
-    for (let i = 0; i < days; i++) {
-      const date = new Date(currentDate);
-      date.setDate(currentDate.getDate() + i);
-      
-      const month = date.getMonth();
-      const seasonalVariation = this.getSeasonalVariation(month, cityData.climate);
-      
-      // Base temperature with seasonal adjustment
-      const baseTemp = cityData.avgTemp + seasonalVariation;
-      const temp = baseTemp + (Math.random() * 6 - 3); // ±3°C variation
-      const maxTemp = temp + 4 + Math.random() * 3; // 4-7°C higher than average
-      const minTemp = temp - 4 - Math.random() * 3; // 4-7°C lower than average
-      
-      // Rainfall based on city's average and season
-      const rainChance = this.getRainChance(month, cityData.climate);
-      const rainfall = Math.random() < rainChance ? 
-        (Math.random() * cityData.avgRain * 3).toFixed(1) : 0;
-      
-      weatherData.push({
-        date: date.toISOString().split('T')[0],
-        T2M: Number(temp.toFixed(1)),
-        T2M_MAX: Number(maxTemp.toFixed(1)),
-        T2M_MIN: Number(minTemp.toFixed(1)),
-        PRECTOTCORR: Number(rainfall),
-        RH2M: this.getHumidity(cityData.climate, temp),
-        WS2M: Number((2 + Math.random() * 4).toFixed(1)),
-        DAILY_GDD: Number((Math.max(0, temp - 10)).toFixed(1)),
-        DRY_DAY: Number(rainfall) === 0,
-        weatherDescription: getWeatherDescription(temp, rainfall)
-      });
-    }
-    
-    return {
-      forecast: weatherData,
-      summary: {
-        city,
-        days: weatherData.length,
-        avgTemp: (weatherData.reduce((sum, d) => sum + d.T2M, 0) / weatherData.length).toFixed(1),
-        totalRainfall: weatherData.reduce((sum, d) => sum + d.PRECTOTCORR, 0).toFixed(1)
-      }
-    };
   }
 
   // Helper methods for city-specific weather
@@ -254,69 +212,6 @@ class WeatherController {
     return R * c;
   }
 
-  getSeasonalVariation(month, climate) {
-    // Seasonal temperature variation based on month and climate
-    const variations = {
-      'arid': [0, 2, 5, 8, 10, 12, 12, 10, 8, 5, 2, 0], // Hotter summers
-      'semi-arid': [-2, 0, 3, 6, 8, 10, 10, 8, 6, 3, 0, -2] // Moderate variation
-    };
-    
-    return (variations[climate] || variations['semi-arid'])[month] || 0;
-  }
-
-  getRainChance(month, climate) {
-    // Rain probability based on month and climate
-    const monsoonMonths = [6, 7, 8]; // June, July, August
-    const isMonsoon = monsoonMonths.includes(month);
-    
-    if (climate === 'arid') {
-      return isMonsoon ? 0.3 : 0.1;
-    } else { // semi-arid
-      return isMonsoon ? 0.5 : 0.2;
-    }
-  }
-
-  getHumidity(climate, temp) {
-    // Humidity based on climate and temperature
-    const baseHumidity = climate === 'arid' ? 35 : 45;
-    const tempEffect = temp > 30 ? -10 : temp < 20 ? 10 : 0;
-    return Math.max(20, Math.min(80, baseHumidity + tempEffect + (Math.random() * 20 - 10)));
-  }
-
-  // Generic weather generation for unknown locations
-  generateGenericWeather(lat, lon, days) {
-    const weatherData = [];
-    const baseDate = new Date();
-    
-    for (let i = 0; i < days; i++) {
-      const date = new Date(baseDate);
-      date.setDate(baseDate.getDate() + i);
-      
-      const month = date.getMonth();
-      const baseTemp = 25 + (Math.random() - 0.5) * 10;
-      const temp = baseTemp + (Math.random() - 0.5) * 8;
-      const maxTemp = temp + 3 + Math.random() * 4;
-      const minTemp = temp - 3 - Math.random() * 4;
-      
-      const rainChance = 0.2;
-      const rainfall = Math.random() < rainChance ? (Math.random() * 5).toFixed(1) : 0;
-      
-      weatherData.push({
-        date: date.toISOString().split('T')[0],
-        T2M: Number(temp.toFixed(1)),
-        T2M_MAX: Number(maxTemp.toFixed(1)),
-        T2M_MIN: Number(minTemp.toFixed(1)),
-        PRECTOTCORR: Number(rainfall),
-        RH2M: Math.floor(40 + Math.random() * 40),
-        WS2M: Number((2 + Math.random() * 4).toFixed(1)),
-        DAILY_GDD: Number((temp - 10).toFixed(1)),
-        DRY_DAY: rainfall === 0,
-        weatherDescription: getWeatherDescription(temp, rainfall)
-      });
-    }
-    
-    return weatherData;
-  }
 
   // Get list of supported cities
   getSupportedCities() {

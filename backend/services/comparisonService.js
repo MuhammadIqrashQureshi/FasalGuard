@@ -65,13 +65,11 @@ async generateComparisonMatrix(city, weatherData) {
     } else if (weatherData && weatherData.days && Array.isArray(weatherData.days)) {
       forecastArray = weatherData.days;
     } else {
-      console.warn('⚠️ Invalid weather data format, using fallback');
-      return this.generateMockComparisonData(city);
+      throw new Error('Invalid weather data format for comparison matrix');
     }
     
     if (!forecastArray || forecastArray.length === 0) {
-      console.warn('⚠️ Empty weather data, using fallback');
-      return this.generateMockComparisonData(city);
+      throw new Error('Weather forecast is empty; cannot generate comparison matrix');
     }
     
     console.log(`📈 Analyzing ${forecastArray.length} days of weather data`);
@@ -93,7 +91,7 @@ async generateComparisonMatrix(city, weatherData) {
     
   } catch (error) {
     console.error('❌ Error generating comparison matrix:', error);
-    return this.generateMockComparisonData(city);
+    throw error;
   }
 }
 
@@ -274,7 +272,8 @@ calculatePredictedYield(crop, stats, forecastArray) {
     };
     
     const req = waterRequirements[crop] || 500;
-    const totalRain = weatherData.reduce((sum, day) => sum + day.PRECTOTCORR, 0) || 0;
+    const normalizedWeather = Array.isArray(weatherData) ? weatherData : [];
+    const totalRain = normalizedWeather.reduce((sum, day) => sum + (day.PRECTOTCORR || day.totalRainfall || 0), 0);
     
     // Calculate water efficiency based on rainfall
     const efficiencyRatio = (totalRain / req) * 100;

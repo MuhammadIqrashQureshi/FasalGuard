@@ -73,10 +73,11 @@ class SoilAnalyzer:
     def load_models(self):
         """Load trained soil analysis models from correct path"""
         try:
-            # Correct path to your trained models
-            base_path = 'd:/FasalGuard/FasalGuard/backend'
-            model_path = os.path.join(base_path, 'ml_models', 'soil_models')
-            
+            # Resolve model path relative to this file for portability
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            # ml_service is inside backend/, so go up one level to reach ml_models/
+            model_path = os.path.abspath(os.path.join(current_dir, '..', 'ml_models', 'soil_models'))
+
             print(f"🔍 Looking for models in: {model_path}")
             
             # Check if models exist

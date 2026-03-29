@@ -99,22 +99,46 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
   const generateIrrigationSchedule = (data) => {
     const schedule = [];
     const today = new Date();
+    const soilMoistureOffset = {
+      sandy: -8,
+      loamy: 0,
+      clay: 6,
+      silty: 3
+    };
+    let previousSoilMoisture = 70 + (soilMoistureOffset[soilType] || 0);
     
     for (let i = 0; i < 7; i++) {
       const date = new Date(today);
       date.setDate(date.getDate() + i);
       
       // Use actual data if available, otherwise use defaults
-      const waterReq = data?.current_daily_water_req_mm || 8;
+      const baseWaterReq = Number(data?.current_daily_water_req_mm || 8);
+      const baselineEt0 = Number(data?.et0 || 5);
       const rainfall = predictionData?.forecast?.[i]?.PRECTOTCORR || 0;
+      const temp = predictionData?.forecast?.[i]?.T2M;
+      const evapotranspiration = Number(
+        (temp ? Math.max(2.5, Math.min(7, 0.18 * temp)) : baselineEt0).toFixed(2)
+      );
+
+      const waterRequirement = Number(
+        Math.max(0, baseWaterReq + (evapotranspiration - baselineEt0) * 0.6 - rainfall * 0.35).toFixed(2)
+      );
+
+      const soilMoisture = Number(
+        Math.max(
+          40,
+          Math.min(90, previousSoilMoisture + rainfall * 1.8 - waterRequirement * 0.9)
+        ).toFixed(1)
+      );
+      previousSoilMoisture = soilMoisture;
       
       schedule.push({
         date: date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
-        waterRequirement: waterReq + (Math.random() * 0.5 - 0.25), // Small random variation
-        soilMoisture: Math.max(40, Math.min(90, 70 + (Math.random() * 10 - 5))),
-        evapotranspiration: 4 + (Math.random() * 0.5 - 0.25),
+        waterRequirement,
+        soilMoisture,
+        evapotranspiration,
         rainfall: rainfall,
-        irrigationNeeded: rainfall < 3
+        irrigationNeeded: waterRequirement > rainfall + 1.5
       });
     }
     

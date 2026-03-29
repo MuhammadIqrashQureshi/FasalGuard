@@ -5,3 +5,4 @@ numpy==1.26.4
 pandas==2.2.2
 scikit-learn==1.4.2
 joblib==1.4.2
+earthengine-api>=0.1.370

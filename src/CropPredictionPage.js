@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sprout, MapPin, Navigation, Calendar, Leaf, ArrowLeft, CloudRain, Droplets, Thermometer, Sun, CloudLightning, Eye, Wind, BarChart3 } from 'lucide-react';
+import { useLanguage } from './context/LanguageContext';
 
 export default function CropPredictionPage() {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [predictionData, setPredictionData] = useState({
     city: '',
@@ -53,12 +55,12 @@ export default function CropPredictionPage() {
 
   const handleCropPrediction = async () => {
     if (!predictionData.city && (!predictionData.latitude || !predictionData.longitude)) {
-      alert('Please enter either city name or coordinates');
+      alert(t('pleaseSelectLocation', 'Please enter either city name or coordinates'));
       return;
     }
 
     if (predictionData.city && !supportedCities.find(c => c.name === predictionData.city)) {
-      alert(`Please select one of the supported cities: ${supportedCities.map(c => c.name).join(', ')}`);
+      alert(`${t('selectSupportedCity', 'Please select one of the supported cities')}: ${supportedCities.map(c => c.name).join(', ')}`);
       return;
     }
 
@@ -104,11 +106,11 @@ export default function CropPredictionPage() {
           }
         });
       } else {
-        alert('Prediction failed: ' + (result.error || 'Unknown error'));
+        alert(`${t('predictionFailed', 'Prediction failed')}: ${result.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('❌ AI Prediction error:', error);
-      alert('Failed to get prediction. Please check if backend is running on port 5000');
+      alert(t('backendCheck', 'Failed to get prediction. Please check if backend is running on port 5000'));
     } finally {
       setIsLoading(false);
     }
@@ -636,7 +638,7 @@ export default function CropPredictionPage() {
             whileTap={{ scale: 0.95 }}
           >
             <BarChart3 size={20} />
-            Past Trends
+            {t('pastTrends', 'Past Trends')}
           </motion.button>
         </nav>
       </header>
@@ -651,7 +653,7 @@ export default function CropPredictionPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              Smart Crop Insights
+              {t('cropPredictionTitle', 'Smart Crop Insights')}
             </motion.h1>
             <motion.p 
               style={styles.pageSubtitle}
@@ -659,7 +661,7 @@ export default function CropPredictionPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              Harness weather data and AI to discover the perfect crops for your region. Start by selecting your city below.
+              {t('cropPredictionSubtitle', 'Harness weather data and AI to discover the perfect crops for your region. Start by selecting your city below.')}
             </motion.p>
           </div>
 
@@ -671,7 +673,7 @@ export default function CropPredictionPage() {
             transition={{ duration: 0.5, delay: 0.4 }}
           >
             <MapPin size={20} color="#22c55e" />
-            <span style={{ fontWeight: '500' }}>{predictionData.city || 'Choose a city'}</span>, Pakistan
+            <span style={{ fontWeight: '500' }}>{predictionData.city || t('chooseCity', 'Choose a city')}</span>, Pakistan
           </motion.div>
 
           {/* City Selector - Only if no city selected */}
@@ -686,7 +688,7 @@ export default function CropPredictionPage() {
               >
                 <div style={styles.citiesHeader}>
                   <Sprout size={24} color="#22c55e" />
-                  Select Your Growing Region
+                  {t('selectGrowingRegion', 'Select Your Growing Region')}
                 </div>
                 <div style={styles.citiesRow}>
                   {supportedCities.map((city, index) => (
@@ -753,7 +755,7 @@ export default function CropPredictionPage() {
                     <div style={{ fontSize: '2.5rem', color: '#94a3b8', fontWeight: '300' }}>C</div>
                   </div>
                   <div style={styles.weatherTitle}>
-                    {loadingWeather ? 'Loading...' : weatherData?.forecast?.[0]?.PRECTOTCORR > 5 ? 'Rainy Day' : weatherData?.forecast?.[0]?.T2M > 30 ? 'Hot & Sunny' : 'Pleasant Day'}
+                    {loadingWeather ? t('loading', 'Loading...') : weatherData?.forecast?.[0]?.PRECTOTCORR > 5 ? 'Rainy Day' : weatherData?.forecast?.[0]?.T2M > 30 ? 'Hot & Sunny' : 'Pleasant Day'}
                   </div>
                   <div style={styles.weatherDesc}>
                     {loadingWeather ? 'Fetching weather data...' : 

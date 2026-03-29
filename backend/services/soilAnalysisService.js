@@ -24,17 +24,28 @@ class SoilAnalysisService {
                 current_crop: currentCrop
             });
 
+            // If ML service responded but indicates models not loaded, use local mock fallback
+            if (response.data && response.data.success === false) {
+                const errMsg = response.data.error || response.data.message || '';
+                if (errMsg.toLowerCase().includes('models not loaded') || errMsg.toLowerCase().includes('soil analysis models not loaded')) {
+                    return {
+                        success: false,
+                        message: 'Soil ML models are not loaded. Start the ML service with trained soil models.',
+                        error: errMsg
+                    };
+                }
+            }
+
             return response.data;
 
         } catch (error) {
             console.error('District analysis error:', error.message);
-            
-            // Fallback to mock data if ML service is unavailable
-            if (error.code === 'ECONNREFUSED' || error.response?.status >= 500) {
-                return this.getMockDistrictAnalysis(districtName, currentCrop);
-            }
 
-            throw error;
+            return {
+                success: false,
+                message: 'Unable to perform district soil analysis using ML service',
+                error: error.response?.data?.error || error.message
+            };
         }
     }
 
@@ -46,17 +57,28 @@ class SoilAnalysisService {
                 current_crop: currentCrop
             });
 
+            // If ML service responded but indicates models not loaded, use local mock fallback
+            if (response.data && response.data.success === false) {
+                const errMsg = response.data.error || response.data.message || '';
+                if (errMsg.toLowerCase().includes('models not loaded') || errMsg.toLowerCase().includes('soil analysis models not loaded')) {
+                    return {
+                        success: false,
+                        message: 'Soil ML models are not loaded. Start the ML service with trained soil models.',
+                        error: errMsg
+                    };
+                }
+            }
+
             return response.data;
 
         } catch (error) {
             console.error('Manual analysis error:', error.message);
-            
-            // Fallback to mock data if ML service is unavailable
-            if (error.code === 'ECONNREFUSED' || error.response?.status >= 500) {
-                return this.getMockManualAnalysis(soilParams, district, currentCrop);
-            }
 
-            throw error;
+            return {
+                success: false,
+                message: 'Unable to perform manual soil analysis using ML service',
+                error: error.response?.data?.error || error.message
+            };
         }
     }
 
@@ -66,17 +88,11 @@ class SoilAnalysisService {
             return response.data;
         } catch (error) {
             console.error('Get districts error:', error.message);
-            
-            // Fallback to hardcoded districts
+
             return {
-                success: true,
-                districts: this.districts.map(name => ({
-                    name,
-                    samples: 50,
-                    overall_score: 60,
-                    soil_health: 'Fair'
-                })),
-                count: this.districts.length
+                success: false,
+                message: 'Unable to fetch districts from soil ML service',
+                error: error.response?.data?.error || error.message
             };
         }
     }

@@ -70,7 +70,8 @@ const SoilAnalysis = () => {
             console.error('Full error:', err);
             
             if (err.response) {
-                setError(`Server error: ${err.response.status} - ${err.response.data?.message || 'Unknown error'}`);
+                const serverMsg = err.response.data?.message || err.response.data?.error || JSON.stringify(err.response.data) || 'Unknown error';
+                setError(`Server error: ${err.response.status} - ${serverMsg}`);
             } else if (err.request) {
                 setError('Cannot connect to server. Please make sure backend is running on port 5000.');
             } else {

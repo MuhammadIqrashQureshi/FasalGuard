@@ -1,0 +1,9248 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap');
+
+/* SatelliteAnalysis.css - light, high-contrast, action-first design */
+
+:root {
+  --sat-bg: #f8f9fa;
+  --sat-surface: #ffffff;
+  --sat-surface-soft: #f3f6f9;
+  --sat-border: #d8dee6;
+  --sat-text: #1f2937;
+  --sat-text-strong: #0f172a;
+  --sat-text-muted: #5f6b7a;
+  --sat-primary: #2d6a4f;
+  --sat-primary-strong: #1b4332;
+  --sat-success: #188038;
+  --sat-warning: #52796f;
+  --sat-danger: #2d6a4f;
+  --sat-shadow-1: 0 1px 3px rgba(15, 23, 42, 0.08), 0 8px 20px rgba(15, 23, 42, 0.06);
+  --sat-shadow-2: 0 2px 8px rgba(15, 23, 42, 0.1), 0 18px 40px rgba(15, 23, 42, 0.08);
+  --sat-radius-lg: 20px;
+  --sat-radius-md: 14px;
+  --sat-radius-sm: 10px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.sat-page {
+  min-height: 100vh;
+  background: var(--sat-bg);
+  color: var(--sat-text);
+  font-family: "Google Sans", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+.sat-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--sat-border);
+}
+
+.sat-nav {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0.85rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.sat-logo-btn {
+  border: none;
+  background: transparent;
+  color: var(--sat-primary-strong);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.2rem 0;
+}
+
+.sat-nav-links {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.sat-nav-btn {
+  border: 1px solid var(--sat-border);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--sat-text);
+  font-weight: 600;
+  font-size: 0.83rem;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+}
+
+.sat-nav-btn:hover {
+  border-color: #a8cdb0;
+  background: #e9f5ec;
+}
+
+.sat-theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-weight: 700;
+}
+
+.sat-theme-toggle-track {
+  width: 40px;
+  height: 22px;
+  border-radius: 999px;
+  background: #dbe4ee;
+  border: 1px solid #c6d1dd;
+  padding: 2px;
+  display: inline-flex;
+  align-items: center;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.sat-theme-toggle-track.is-dark {
+  background: #1f4d35;
+  border-color: #2d6a4f;
+  justify-content: flex-end;
+}
+
+.sat-theme-toggle-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.25);
+}
+
+.sat-theme-toggle-text {
+  line-height: 1;
+}
+
+main {
+  padding: 1.25rem 0.9rem 3rem;
+}
+
+.sat-container {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.sat-welcome {
+  margin-bottom: 1rem;
+}
+
+.sat-title {
+  margin: 0;
+  color: var(--sat-text-strong);
+  font-size: clamp(1.5rem, 2.6vw, 2.2rem);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.sat-subtitle {
+  margin: 0.35rem 0 0.8rem;
+  color: var(--sat-text-muted);
+  font-size: 0.97rem;
+}
+
+.sat-workflow-strip {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  background: #fff;
+  border: 1px solid var(--sat-border);
+  border-radius: 999px;
+  padding: 0.35rem;
+}
+
+.sat-workflow-chip {
+  border-radius: 999px;
+  border: 1px solid #e5eaf0;
+  background: #f8fafc;
+  color: #6b7280;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.32rem 0.62rem;
+}
+
+.sat-workflow-chip.done {
+  color: #0f5132;
+  border-color: #b8e6cb;
+  background: #e8f5ee;
+}
+
+.sat-main-card,
+.sat-results {
+  background: linear-gradient(160deg, #ffffff 0%, #f7fbf8 100%);
+  border: 1px solid var(--sat-border);
+  border-radius: var(--sat-radius-lg);
+  box-shadow: var(--sat-shadow-1);
+}
+
+.sat-main-card {
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.sat-results {
+  margin-top: 1.2rem;
+  padding: 1.2rem;
+}
+
+.sat-section {
+  border: 1px solid var(--sat-border);
+  border-radius: var(--sat-radius-md);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: #fff;
+}
+
+.sat-section:last-of-type {
+  margin-bottom: 0;
+}
+
+.sat-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0 0.8rem;
+  font-size: 0.94rem;
+  color: var(--sat-text-strong);
+  font-weight: 700;
+}
+
+/* Setup chips */
+.sat-chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.sat-chip-grid-city {
+  gap: 0.55rem;
+}
+
+.sat-select-chip {
+  border: 1px solid var(--sat-border);
+  background: #fff;
+  border-radius: 12px;
+  color: var(--sat-text);
+  padding: 0.7rem 0.85rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 600;
+  min-height: 46px;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+  position: relative;
+}
+
+.sat-select-chip:hover:not(.disabled) {
+  border-color: #b0d4b8;
+  background: #f4faf6;
+}
+
+.sat-select-chip.active {
+  border-color: var(--sat-primary);
+  background: #e4f3e8;
+  color: var(--sat-primary-strong);
+}
+
+.sat-select-chip.disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.sat-select-chip-city {
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 172px;
+  gap: 0.15rem;
+}
+
+.sat-chip-icon {
+  font-size: 1.05rem;
+}
+
+.sat-chip-text {
+  font-size: 0.87rem;
+}
+
+.sat-chip-text-strong {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--sat-text-strong);
+}
+
+.sat-chip-subtext {
+  font-size: 0.73rem;
+  color: var(--sat-text-muted);
+}
+
+.sat-coming-soon {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  font-size: 0.58rem;
+  border-radius: 999px;
+  background: #eef2f7;
+  color: #5f6b7a;
+  padding: 0.11rem 0.37rem;
+}
+
+.sat-lang-toggle {
+  display: inline-flex;
+  gap: 0.35rem;
+  border: 1px solid var(--sat-border);
+  border-radius: 999px;
+  padding: 0.2rem;
+  margin-bottom: 0.8rem;
+  background: #fff;
+}
+
+.sat-lang-btn {
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 999px;
+  padding: 0.3rem 0.65rem;
+  color: var(--sat-text-muted);
+  font-size: 0.79rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sat-lang-btn.active {
+  background: #e4f3e8;
+  border-color: #a8cdb0;
+  color: var(--sat-primary-strong);
+}
+
+.sat-location-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 390px) 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+.sat-location-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sat-control-group {
+  border: 1px solid var(--sat-border);
+  background: #fdfefe;
+  border-radius: var(--sat-radius-md);
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.sat-control-group-primary {
+  border-color: #b7d4bf;
+  background: #f4faf6;
+}
+
+.sat-farmer-locate-hint {
+  border: 1px solid #c9dfd0;
+  border-radius: 10px;
+  background: #f8fdf9;
+  color: #2a5f42;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  padding: 0.5rem 0.65rem;
+}
+
+.sat-geo-btn,
+.sat-go-btn,
+.sat-analyze-btn,
+.sat-action-btn {
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sat-geo-btn,
+.sat-go-btn {
+  width: 100%;
+  border: 1px solid #b0d4b8;
+  background: #e9f5ec;
+  color: var(--sat-primary-strong);
+  padding: 0.62rem 0.9rem;
+}
+
+.sat-geo-btn:hover:not(:disabled),
+.sat-go-btn:hover:not(:disabled) {
+  background: #d8f0de;
+  border-color: #88c099;
+}
+
+.sat-geo-btn:disabled,
+.sat-go-btn:disabled,
+.sat-analyze-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.sat-coord-row,
+.sat-coord-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.33rem;
+}
+
+.sat-coord-field label,
+.sat-history-row label {
+  font-size: 0.76rem;
+  color: #5f6b7a;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.sat-input,
+.sat-history-select {
+  width: 100%;
+  border: 1px solid #ccd4de;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--sat-text-strong);
+  font-size: 0.89rem;
+  padding: 0.6rem 0.72rem;
+  outline: none;
+}
+
+.sat-input:focus,
+.sat-history-select:focus {
+  border-color: #80c49b;
+  box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.13);
+}
+
+.sat-analysis-date-field small,
+.sat-boundary-status-detail,
+.sat-heatmap-hint,
+.sat-confidence,
+.sat-index-hint,
+.sat-bench-desc,
+.sat-soil-note,
+.sat-rec-detail,
+.sat-rec-reason,
+.sat-report-summary-text {
+  color: var(--sat-text-muted);
+}
+
+.sat-season-note {
+  font-size: 0.64rem;
+  line-height: 1.25;
+}
+
+.sat-season-warning {
+  font-size: 0.66rem;
+  line-height: 1.25;
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.sat-recent-coords {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.sat-recent-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.sat-recent-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.42rem;
+}
+
+.sat-recent-chip {
+  border: 1px solid #b0d4b8;
+  border-radius: 999px;
+  background: #e9f5ec;
+  color: #1b5e38;
+  padding: 0.24rem 0.56rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sat-recent-chip:hover {
+  background: #d4eeda;
+}
+
+.sat-boundary-status {
+  border: 1px solid #ced6e0;
+  border-radius: 10px;
+  padding: 0.58rem 0.7rem;
+  background: #fff;
+}
+
+.sat-boundary-status.ready {
+  border-color: #b5dcc3;
+  background: #edf8f1;
+}
+
+.sat-boundary-status.pending {
+  border-color: #f0d2a6;
+  background: #fff7eb;
+}
+
+.sat-boundary-status-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--sat-text-strong);
+}
+
+.sat-coord-warning,
+.sat-boundary-required,
+.sat-boundary-help {
+  border-radius: 10px;
+  padding: 0.58rem 0.72rem;
+  line-height: 1.45;
+  font-size: 0.8rem;
+}
+
+.sat-coord-warning,
+.sat-boundary-required {
+  border: 1px solid #b7d4bf;
+  background: #f0faf3;
+  color: #2d6a4f;
+}
+
+.sat-coord-warning.sat-coord-warning-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border: 1.5px solid #d97706;
+  background: #fef3c7;
+  color: #92400e;
+  font-weight: 600;
+  padding: 0.75rem 0.9rem;
+}
+
+.sat-warning-icon {
+  display: inline-flex;
+  align-items: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.sat-warning-text {
+  display: block;
+  font-weight: 600;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.sat-coord-warning span {
+  display: block;
+  margin-top: 0.2rem;
+  color: #52796f;
+  font-size: 0.73rem;
+}
+
+.sat-map-wrapper,
+.sat-heatmap-map-wrapper {
+  position: relative;
+  border: 1px solid #d2dae4;
+  border-radius: var(--sat-radius-md);
+  overflow: hidden;
+  box-shadow: var(--sat-shadow-1);
+}
+
+.sat-map-wrapper {
+  height: 430px;
+}
+
+.sat-heatmap-map-wrapper {
+  height: 320px;
+}
+
+.sat-map,
+.sat-heatmap-map {
+  width: 100%;
+  height: 100%;
+}
+
+.sat-draw-toolbar-warning {
+  position: absolute;
+  top: 74px;
+  left: 42px;
+  z-index: 700;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid #d17f00;
+  background: #fff0d7;
+  color: #9b5a00;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.sat-draw-toolbar-warning.pulse {
+  animation: satDrawWarningPulse 650ms ease-in-out 3;
+}
+
+@keyframes satDrawWarningPulse {
+  0%,
+  100% { transform: scale(1); opacity: 0.95; }
+  50% { transform: scale(1.2); opacity: 1; }
+}
+
+.sat-city-overlay-name,
+.sat-heat-legend {
+  position: absolute;
+  z-index: 600;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #cfd8e3;
+  border-radius: 9px;
+  backdrop-filter: blur(8px);
+}
+
+.sat-city-overlay-name {
+  top: 10px;
+  right: 10px;
+  color: #1f2937;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.35rem 0.6rem;
+}
+
+.sat-heat-legend {
+  left: 10px;
+  bottom: 10px;
+  width: 180px;
+  padding: 0.45rem 0.55rem;
+}
+
+.sat-heat-legend-panel {
+  left: 14px;
+  bottom: 14px;
+}
+
+.sat-heat-legend-title {
+  color: #334155;
+  font-size: 0.72rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.sat-heat-legend-bar {
+  height: 10px;
+  border-radius: 999px;
+  border: 1px solid #d2dae4;
+}
+
+.sat-heat-legend-scale {
+  display: flex;
+  justify-content: space-between;
+  color: #5f6b7a;
+  font-size: 0.68rem;
+  margin-top: 0.2rem;
+}
+
+.sat-city-label-icon {
+  background: transparent;
+  border: none;
+}
+
+.sat-city-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 92px;
+  padding: 0.22rem 0.52rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #ccd4de;
+  color: #1f2937;
+  font-size: 0.74rem;
+  font-weight: 700;
+  box-shadow: 0 6px 12px rgba(15, 23, 42, 0.08);
+  white-space: nowrap;
+}
+
+.sat-city-label.urdu {
+  direction: rtl;
+  font-family: "Noto Nastaliq Urdu", "Segoe UI", serif;
+}
+
+.sat-city-label.english {
+  font-family: "Google Sans", "Segoe UI", sans-serif;
+}
+
+/* Leaflet draw polish for light UI */
+.leaflet-draw-toolbar a {
+  background-color: #ffffff !important;
+  border-color: #cfd8e3 !important;
+}
+
+.leaflet-draw-toolbar a:hover {
+  background-color: #f6f9fd !important;
+}
+
+.leaflet-draw-actions {
+  background: #ffffff !important;
+  border: 1px solid #cfd8e3 !important;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.leaflet-draw-actions a {
+  color: #1f2937 !important;
+}
+
+.sat-analyze-btn {
+  width: 100%;
+  margin-top: 0.9rem;
+  border: none;
+  background: linear-gradient(180deg, #2d6a4f, #1e5438);
+  color: #ffffff;
+  font-size: 1rem;
+  padding: 0.9rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  box-shadow: 0 10px 20px rgba(45, 106, 79, 0.26);
+}
+
+.sat-analyze-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #357a5a, #2d6a4f);
+}
+
+.sat-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.sat-error {
+  margin-top: 0.85rem;
+  border: 1px solid #b7d4bf;
+  border-radius: 12px;
+  background: #f0faf3;
+  color: #1b4332;
+  padding: 0.8rem 0.95rem;
+  font-size: 0.9rem;
+}
+
+.sat-results-header {
+  position: relative;
+  margin-bottom: 1rem;
+  padding: 0.9rem 0.95rem;
+  border: 1px solid #dfe8e2;
+  border-radius: 14px;
+  background: linear-gradient(120deg, #f8fcf9, #f2f8f4);
+}
+
+.sat-results-title {
+  margin: 0 0 0.55rem;
+  font-size: 1.45rem;
+  color: var(--sat-text-strong);
+}
+
+.sat-results-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  color: #4b5563;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+}
+
+.sat-results-meta > span {
+  background: #f4f8f5;
+  border: 1px solid #d0dfd4;
+  border-radius: 999px;
+  padding: 0.28rem 0.62rem;
+  font-weight: 700;
+}
+
+.sat-meta-item {
+  color: #355446;
+}
+
+.sat-data-badge.real {
+  background: #e9f6ee;
+  border-color: #b4ddc3;
+  color: #0f6b2e;
+}
+
+.sat-data-badge.simulated {
+  background: #e4f3e8;
+  border-color: #b7d4bf;
+  color: #2d6a4f;
+}
+
+.sat-simulated-notice {
+  margin-top: 0.55rem;
+  padding: 0.5rem 0.72rem;
+  border-radius: 10px;
+  border: 1px solid #b7d4bf;
+  background: #f0faf3;
+  color: #2d6a4f;
+  font-size: 0.8rem;
+}
+
+.sat-non-field-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  border-radius: 12px;
+  border: 1px solid #b7d4bf;
+  background: #f4faf6;
+  padding: 1rem;
+}
+
+.sat-non-field-icon {
+  font-size: 1.65rem;
+  flex-shrink: 0;
+}
+
+.sat-non-field-text h3 {
+  margin: 0 0 0.35rem;
+  color: #1b4332;
+  font-size: 1rem;
+}
+
+.sat-non-field-text p {
+  margin: 0.16rem 0;
+  color: #374151;
+  font-size: 0.84rem;
+}
+
+.sat-non-field-help {
+  color: #5f6b7a !important;
+  font-style: italic;
+}
+
+.sat-field-report {
+  border: 1px solid var(--sat-border);
+  border-radius: var(--sat-radius-md);
+  background: #fff;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--sat-shadow-1);
+}
+
+.sat-report-score-section {
+  display: block;
+}
+
+.sat-report-summary {
+  flex: 1;
+  min-width: 220px;
+}
+
+.sat-report-label {
+  font-size: 1.22rem;
+  font-weight: 800;
+  color: var(--sat-text-strong);
+  margin-bottom: 0.28rem;
+}
+
+.sat-risk-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.18rem 0.68rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-bottom: 0.52rem;
+  border: 1px solid transparent;
+}
+
+.sat-risk-badge.risk-critical,
+.sat-risk-badge.risk-high {
+  background: #d4edda;
+  color: #1b4332;
+  border-color: #a5c9af;
+}
+
+.sat-risk-badge.risk-elevated,
+.sat-risk-badge.risk-moderate {
+  background: #e4f3e8;
+  color: #2d6a4f;
+  border-color: #b7d4bf;
+}
+
+.sat-risk-badge.risk-low {
+  background: #eaf6ee;
+  color: #0f6b2e;
+  border-color: #b7dfc5;
+}
+
+.sat-critical-alert {
+  border: 1px solid #a5c9af;
+  border-radius: 9px;
+  background: #e4f3e8;
+  color: #1b4332;
+  font-size: 0.81rem;
+  font-weight: 700;
+  padding: 0.45rem 0.65rem;
+  margin-bottom: 0.56rem;
+}
+
+.sat-yield-row {
+  display: flex;
+  gap: 0;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.sat-yield-item {
+  min-width: 88px;
+  padding: 0 0.75rem 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sat-yield-val {
+  font-size: 0.94rem;
+  font-weight: 800;
+  color: var(--sat-text-strong);
+}
+
+.sat-yield-lbl {
+  font-size: 0.63rem;
+  color: #64748b;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.sat-yield-sep {
+  width: 1px;
+  height: 30px;
+  margin-right: 0.75rem;
+  background: #e4e9f0;
+}
+
+.sat-quick-actions {
+  margin-top: 1rem;
+  border-top: 1px solid #e7ebf1;
+  padding-top: 0.9rem;
+}
+
+.sat-quick-actions-title {
+  font-size: 0.73rem;
+  color: #64748b;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-bottom: 0.55rem;
+}
+
+.sat-quick-action-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.sat-quick-action {
+  border: 1px solid #e1e7ef;
+  border-radius: 10px;
+  background: #fafbfd;
+  padding: 0.55rem 0.62rem;
+  display: flex;
+  gap: 0.62rem;
+  align-items: flex-start;
+}
+
+.sat-qa-badge {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #d4edda;
+  color: #1b4332;
+  font-size: 0.72rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+.sat-quick-action.priority-critical .sat-qa-badge,
+.sat-quick-action.priority-high .sat-qa-badge {
+  background: #c3e6cc;
+  color: #1b4332;
+}
+
+.sat-quick-action.priority-medium .sat-qa-badge {
+  background: #d4edda;
+  color: #2d6a4f;
+}
+
+.sat-qa-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.14rem;
+}
+
+.sat-qa-type {
+  font-size: 0.83rem;
+  color: var(--sat-text-strong);
+  font-weight: 700;
+}
+
+.sat-qa-action {
+  font-size: 0.77rem;
+  color: var(--sat-text-muted);
+  line-height: 1.4;
+}
+
+.sat-qa-timing {
+  font-size: 0.7rem;
+  color: #2d6a4f;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.sat-recommendations {
+  margin: 0 0 1rem;
+}
+
+.sat-recommendations-top {
+  margin-top: 0.2rem;
+}
+
+.sat-soil-panel-top {
+  margin-bottom: 1rem;
+}
+
+.sat-recommendation-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.sat-rec-group {
+  border: 1px solid #dce3ed;
+  border-radius: 12px;
+  background: #fbfcfd;
+  padding: 0.72rem;
+}
+
+.sat-rec-group.immediate {
+  border-color: #b7d4bf;
+  background: #f4faf6;
+}
+
+.sat-rec-group.planned {
+  border-color: #c8dfc8;
+  background: #f1f8f3;
+}
+
+.sat-rec-group-title {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #334155;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin: 0 0 0.62rem;
+}
+
+.sat-rec-empty {
+  border: 1px dashed #d8dee6;
+  border-radius: 8px;
+  background: #fff;
+  color: #64748b;
+  font-size: 0.79rem;
+  padding: 0.58rem 0.65rem;
+}
+
+.sat-rec-card {
+  border: 1px solid #dce3ed;
+  border-left: 4px solid #8fa2bd;
+  border-radius: 10px;
+  background: #fff;
+  padding: 0.94rem 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.sat-rec-card.priority-critical,
+.sat-rec-card.priority-high {
+  border-left-color: #1b4332;
+}
+
+.sat-rec-card.priority-medium {
+  border-left-color: #52796f;
+}
+
+.sat-rec-card.priority-low {
+  border-left-color: #2a7a3f;
+}
+
+.sat-rec-header,
+.sat-rec-type-row,
+.sat-rec-badges,
+.sat-rec-confidence,
+.sat-rec-impact,
+.sat-rec-evidence,
+.sat-evidence-item {
+  display: flex;
+}
+
+.sat-rec-header {
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.32rem;
+}
+
+.sat-rec-type-row {
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.sat-rec-cat-icon {
+  font-size: 1rem;
+}
+
+.sat-rec-type {
+  font-size: 0.98rem;
+  color: var(--sat-text-strong);
+  font-weight: 700;
+}
+
+.sat-rec-badges {
+  gap: 0.32rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.sat-priority-badge,
+.sat-rec-timing-badge {
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 800;
+  padding: 0.16rem 0.5rem;
+  border: 1px solid transparent;
+  text-transform: uppercase;
+}
+
+.sat-priority-badge.priority-critical,
+.sat-priority-badge.priority-high {
+  background: #d4edda;
+  color: #1b4332;
+  border-color: #a5c9af;
+}
+
+.sat-priority-badge.priority-medium {
+  background: #e4f3e8;
+  color: #2d6a4f;
+  border-color: #b7d4bf;
+}
+
+.sat-priority-badge.priority-low {
+  background: #eaf6ee;
+  color: #0f6b2e;
+  border-color: #b7dfc5;
+}
+
+.sat-rec-timing-badge {
+  background: #e4f3e8;
+  color: #2d6a4f;
+  border-color: #b7d4bf;
+}
+
+.sat-rec-cost-badge,
+.sat-rec-benefit-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.17rem 0.48rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 0.66rem;
+  font-weight: 700;
+}
+
+.sat-rec-cost-badge {
+  background: #fff7ed;
+  border-color: #fed7aa;
+  color: #9a3412;
+}
+
+.sat-rec-benefit-badge {
+  background: #ecfdf3;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+.sat-rec-action {
+  margin: 0.26rem 0 0.36rem;
+  font-size: 0.95rem;
+  color: #1f2937;
+  line-height: 1.62;
+  font-weight: 600;
+}
+
+.sat-rec-weather-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 6px 0 2px;
+  padding: 5px 9px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: #0369a1;
+  background: #eff6ff;
+  border-left: 3px solid #60a5fa;
+  border-radius: 0 4px 4px 0;
+}
+.sat-rec-weather-note-icon {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+}
+
+.sat-rec-detail {
+  margin: 0.15rem 0;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.sat-rec-brief {
+  margin-top: 0.45rem;
+  border: 1px solid #e5eaf0;
+  border-radius: 8px;
+  background: #fafbfd;
+  padding: 0.35rem 0.5rem;
+  display: grid;
+  grid-template-rows: repeat(3, minmax(42px, auto));
+  gap: 0.2rem;
+}
+
+.sat-rec-brief-row {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  align-items: start;
+  gap: 0.35rem;
+}
+
+.sat-rec-brief-label {
+  font-size: 0.73rem;
+  font-weight: 800;
+  color: #4b5563;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  line-height: 1.35;
+}
+
+.sat-rec-brief-text {
+  font-size: 0.8rem;
+  line-height: 1.38;
+  color: #334155;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.sat-rec-evidence {
+  flex-direction: column;
+  gap: 0.26rem;
+  border: 1px solid #e5eaf0;
+  border-radius: 8px;
+  background: #fafbfd;
+  padding: 0.45rem 0.55rem;
+  margin-top: 0.55rem;
+}
+
+.sat-evidence-item {
+  align-items: flex-start;
+  gap: 0.33rem;
+  font-size: 0.73rem;
+  color: #475569;
+}
+
+.sat-rec-impact {
+  align-items: flex-start;
+  gap: 0.33rem;
+  margin-top: 0.46rem;
+  color: #475569;
+  font-size: 0.74rem;
+  font-style: italic;
+}
+
+.sat-rec-confidence {
+  align-items: center;
+  gap: 0.48rem;
+  margin-top: 0.56rem;
+}
+
+.sat-rec-more {
+  margin-top: 0.45rem;
+}
+
+.sat-rec-more summary {
+  cursor: pointer;
+  color: #2d6a4f;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.sat-rec-more[open] summary {
+  margin-bottom: 0.4rem;
+}
+
+.sat-conf-label {
+  font-size: 0.64rem;
+  color: #64748b;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.sat-conf-bar-track {
+  flex: 1;
+  height: 5px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #dde4ee;
+}
+
+.sat-conf-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.sat-conf-value {
+  min-width: 30px;
+  text-align: right;
+  font-size: 0.7rem;
+  color: #5f6b7a;
+  font-weight: 700;
+}
+
+.sat-output-command {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin: 0 0 1rem;
+}
+
+.sat-output-card {
+  border: 1px solid #dce3ed;
+  border-radius: 12px;
+  background: #fcfdff;
+  padding: 0.72rem 0.82rem;
+}
+
+.sat-output-card.priority {
+  background: #f0faf3;
+  border-color: #c2ddc5;
+}
+
+.sat-output-card.timeline {
+  background: #f4faf6;
+  border-color: #b7d4bf;
+}
+
+.sat-output-card.focus {
+  background: #eaf6ee;
+  border-color: #b7dfc5;
+}
+
+.sat-output-kicker {
+  font-size: 0.65rem;
+  color: #64748b;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.sat-output-value {
+  margin-top: 0.16rem;
+  font-size: 1.18rem;
+  font-weight: 800;
+  color: var(--sat-text-strong);
+}
+
+.sat-output-value-sm {
+  font-size: 0.96rem;
+}
+
+.sat-output-sub {
+  font-size: 0.74rem;
+  color: #5f6b7a;
+  line-height: 1.38;
+  margin-top: 0.2rem;
+}
+
+.sat-engine-strip {
+  margin: 0 0 1rem;
+  border: 1px solid #dbe4ee;
+  border-radius: 14px;
+  background: linear-gradient(165deg, #f9fcfa 0%, #f2f8f4 100%);
+  padding: 0.85rem;
+}
+
+.sat-engine-strip-title {
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #334155;
+  margin-bottom: 0.65rem;
+}
+
+.sat-engine-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(205px, 1fr));
+  gap: 0.55rem;
+}
+
+.sat-engine-card {
+  border: 1px solid #d5e1d8;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 0.58rem 0.62rem;
+}
+
+.sat-engine-label {
+  font-size: 0.65rem;
+  color: #64748b;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sat-engine-value {
+  margin-top: 0.22rem;
+  font-size: 0.88rem;
+  color: #163020;
+  font-weight: 800;
+  line-height: 1.34;
+}
+
+.sat-engine-source {
+  margin-top: 0.22rem;
+  font-size: 0.68rem;
+  color: #5f6b7a;
+}
+
+.sat-weather-impact {
+  display: block;
+  margin: 0 0 1rem;
+}
+
+.sat-weather-impact-panel {
+  border: 1px solid #dce3ed;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #f7fbf8, #eef6f0);
+  padding: 0.9rem;
+}
+
+.sat-weather-impact-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.sat-weather-impact-kicker {
+  font-size: 0.64rem;
+  color: #64748b;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.sat-weather-impact-title {
+  margin-top: 0.18rem;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--sat-text-strong);
+}
+
+.sat-weather-impact-summary {
+  margin-top: 0.2rem;
+  font-size: 0.73rem;
+  color: #5f6b7a;
+}
+
+.sat-compact-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.15rem;
+}
+
+.sat-weather-impact-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+  gap: 0.52rem;
+  margin-bottom: 0.45rem;
+}
+
+.sat-weather-metric-card {
+  border: 1px solid #dce4ef;
+  border-radius: 10px;
+  background: #fff;
+  padding: 0.52rem 0.58rem;
+}
+
+.sat-weather-metric-label {
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #64748b;
+}
+
+.sat-weather-metric-value {
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: #163020;
+  margin-top: 0.14rem;
+}
+
+.sat-weather-metric-note {
+  font-size: 0.71rem;
+  line-height: 1.35;
+  color: #5f6b7a;
+  margin-top: 0.18rem;
+}
+
+.sat-weather-impact-pill {
+  border-radius: 999px;
+  padding: 0.24rem 0.62rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+}
+
+.sat-weather-impact-pill.risk-high {
+  background: #dcefe2;
+  border-color: #b6d4bf;
+  color: #1b4332;
+}
+
+.sat-weather-impact-pill.risk-moderate {
+  background: #e9f5ec;
+  border-color: #c1dac8;
+  color: #2d6a4f;
+}
+
+.sat-weather-impact-pill.risk-low {
+  background: #f2faf4;
+  border-color: #d7e8dc;
+  color: #2d6a4f;
+}
+
+.sat-weather-impact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.sat-weather-impact-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.68rem 0.72rem;
+  border: 1px solid #dde6ef;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.sat-weather-impact-row.accent {
+  background: #ffffff;
+  border-color: #c6d7cb;
+}
+
+.sat-weather-impact-row-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #e8f3ec;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.sat-weather-impact-row-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.sat-weather-impact-row-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  align-items: baseline;
+}
+
+.sat-weather-impact-row-label {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #334155;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sat-weather-impact-row-value {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--sat-text-strong);
+  white-space: nowrap;
+}
+
+.sat-weather-impact-row-bar {
+  height: 7px;
+  border-radius: 999px;
+  background: #dbe5ee;
+  overflow: hidden;
+  margin-top: 0.4rem;
+}
+
+.sat-weather-impact-row-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #84cc16, #2d6a4f);
+}
+
+.sat-weather-impact-sub {
+  font-size: 0.72rem;
+  color: #5f6b7a;
+  line-height: 1.35;
+  margin-top: 0.28rem;
+}
+
+.sat-weather-impact-insights {
+  margin-top: 0.72rem;
+  border-top: 1px dashed #cfd8e3;
+  padding-top: 0.62rem;
+}
+
+.sat-weather-impact-insights-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #334155;
+  letter-spacing: 0.05em;
+}
+
+.sat-weather-impact-insight-list {
+  margin-top: 0.45rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.sat-weather-impact-insight-item {
+  border: 1px solid #dce5ef;
+  border-radius: 10px;
+  background: #fff;
+  padding: 0.55rem 0.62rem;
+}
+
+.sat-weather-impact-insight-head {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #163020;
+}
+
+.sat-weather-impact-insight-reason,
+.sat-weather-impact-insight-action {
+  margin-top: 0.25rem;
+  font-size: 0.73rem;
+  line-height: 1.4;
+  color: #5f6b7a;
+}
+
+.sat-weather-impact-insight-action {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.sat-weather-farmer-plan {
+  margin-top: 0.62rem;
+  border-top: 1px dashed #cfd8e3;
+  padding-top: 0.6rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+  gap: 0.55rem;
+}
+
+.sat-weather-plan-col {
+  border: 1px solid #dae4ee;
+  border-radius: 10px;
+  background: #fff;
+  padding: 0.5rem 0.58rem;
+}
+
+.sat-weather-plan-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #334155;
+  letter-spacing: 0.04em;
+}
+
+.sat-weather-plan-item {
+  margin-top: 0.3rem;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: #475569;
+}
+
+.sat-results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(265px, 1fr));
+  gap: 0.8rem;
+  margin-bottom: 0.8rem;
+}
+
+.sat-result-card,
+.sat-diagnosis-block,
+.sat-soil-panel,
+.sat-heatmap-panel,
+.sat-technical-section {
+  border: 1px solid #dbe2ec;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.sat-result-card {
+  padding: 0.9rem;
+}
+
+.sat-result-card h3 {
+  margin: 0 0 0.7rem;
+  font-size: 0.77rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sat-stress-card {
+  text-align: center;
+}
+
+.sat-stress-circle {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 0.8rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sat-stress-inner {
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid #e3e8ef;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.sat-stress-pct {
+  font-size: 1.45rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.sat-stress-label {
+  font-size: 0.7rem;
+  color: #64748b;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.sat-status-badge {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 0.3rem 0.9rem;
+  color: #fff;
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
+.sat-growth-stage {
+  text-align: center;
+}
+
+.sat-stage-name {
+  font-size: 1.12rem;
+  color: var(--sat-text-strong);
+  font-weight: 800;
+}
+
+.sat-stage-month {
+  margin-top: 0.18rem;
+  font-size: 0.76rem;
+  color: #64748b;
+}
+
+.sat-stage-timeline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  padding: 0 4px;
+  margin-top: 0.8rem;
+}
+
+.sat-stage-timeline::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 4px;
+  right: 4px;
+  height: 2px;
+  background: #d9e1eb;
+  transform: translateY(-50%);
+}
+
+.sat-stage-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #c2cedd;
+  background: #f3f6fa;
+  z-index: 1;
+}
+
+.sat-stage-dot.done {
+  background: #1e8e3e;
+  border-color: #1e8e3e;
+}
+
+.sat-stage-dot.active {
+  background: #2d6a4f;
+  border-color: #2d6a4f;
+  box-shadow: 0 0 0 4px rgba(45, 106, 79, 0.2);
+}
+
+.sat-diag-mini {
+  margin-top: 0.7rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid #e4e9f0;
+}
+
+.sat-diag-mini-label {
+  font-size: 0.67rem;
+  color: #64748b;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.sat-diag-mini-val {
+  font-size: 0.83rem;
+  color: #334155;
+}
+
+.sat-driver-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.42rem;
+  margin: -0.25rem 0 0.8rem;
+}
+
+.sat-driver-pill {
+  border: 1px solid #b7d4bf;
+  background: #e9f5ec;
+  color: #2d6a4f;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.22rem 0.55rem;
+}
+
+.sat-technical-section {
+  padding: 0.85rem;
+  margin-top: 0.7rem;
+  background: #f9fbfd;
+}
+
+.sat-technical-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 0.75rem;
+}
+
+.sat-index-bar {
+  margin-bottom: 0.7rem;
+}
+
+.sat-index-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.28rem;
+  color: #475569;
+  font-size: 0.8rem;
+}
+
+.sat-bar-track {
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #fee2e2 0%, #fef3c7 38%, #dcfce7 100%);
+  overflow: hidden;
+}
+
+.sat-bar-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.sat-bar-fill.critical {
+  box-shadow: 0 0 0 1px rgba(127, 29, 29, 0.18);
+}
+
+.sat-bar-fill.watch {
+  box-shadow: 0 0 0 1px rgba(146, 64, 14, 0.18);
+}
+
+.sat-bar-fill.moderate {
+  box-shadow: 0 0 0 1px rgba(77, 124, 15, 0.18);
+}
+
+.sat-bar-fill.strong {
+  box-shadow: 0 0 0 1px rgba(6, 95, 70, 0.18);
+}
+
+.sat-index-scale {
+  margin-top: 0.24rem;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.67rem;
+  color: #7b8798;
+}
+
+.sat-index-hint {
+  margin: 0.45rem 0 0;
+  font-size: 0.74rem;
+  line-height: 1.45;
+}
+
+.sat-diagnosis-block {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.6rem;
+  padding: 0.85rem;
+}
+
+.sat-diagnosis-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.sat-diag-label {
+  font-size: 0.66rem;
+  color: #64748b;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.sat-diag-value {
+  font-size: 0.89rem;
+  color: var(--sat-text-strong);
+  font-weight: 700;
+}
+
+.sat-bench-desc {
+  font-size: 0.73rem;
+  line-height: 1.35;
+}
+
+.sat-urgency-badge {
+  display: inline-block;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 0.18rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  border: 1px solid transparent;
+}
+
+.sat-urgency-badge.critical,
+.sat-urgency-badge.high {
+  background: #d4edda;
+  color: #1b4332;
+  border-color: #a5c9af;
+}
+
+.sat-urgency-badge.medium {
+  background: #e4f3e8;
+  color: #2d6a4f;
+  border-color: #b7d4bf;
+}
+
+.sat-urgency-badge.low {
+  background: #eaf6ee;
+  color: #0f6b2e;
+  border-color: #b7dfc5;
+}
+
+.sat-tech-meta-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.sat-tech-meta-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.sat-tech-meta-item {
+  border: 1px solid #e2e8ef;
+  border-radius: 10px;
+  background: #fbfcfd;
+  padding: 0.48rem 0.55rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+}
+
+.sat-tech-meta-label {
+  font-size: 0.68rem;
+  color: #64748b;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.sat-tech-meta-value {
+  font-size: 0.82rem;
+  color: #1f2937;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.sat-soil-panel {
+  padding: 0.9rem;
+  margin-top: 0.75rem;
+}
+
+.sat-soil-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.55rem;
+  margin: 0.75rem 0 0.8rem;
+}
+
+.sat-soil-stat {
+  border: 1px solid #dfe6ef;
+  border-radius: 10px;
+  background: #fafbfd;
+  text-align: center;
+  padding: 0.58rem 0.62rem;
+}
+
+.sat-soil-stat-value {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #1f2937;
+}
+
+.sat-soil-stat-label {
+  margin: 0.16rem 0;
+  font-size: 0.62rem;
+  color: #64748b;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.sat-soil-stat-status {
+  display: inline-block;
+  border-radius: 999px;
+  font-size: 0.67rem;
+  font-weight: 700;
+  padding: 0.12rem 0.45rem;
+}
+
+.sat-soil-stat-status.ok {
+  background: #eaf6ee;
+  color: #0f6b2e;
+}
+
+.sat-soil-stat-status.warning {
+  background: #e4f3e8;
+  color: #2d6a4f;
+}
+
+.sat-soil-limitation {
+  border: 1px solid #b7d4bf;
+  border-radius: 9px;
+  background: #f1f8f3;
+  color: #2d6a4f;
+  font-size: 0.8rem;
+  padding: 0.48rem 0.62rem;
+  display: flex;
+  gap: 0.35rem;
+  align-items: flex-start;
+}
+
+.sat-soil-lim-icon {
+  flex-shrink: 0;
+}
+
+.sat-soil-note {
+  margin-top: 0.45rem;
+  font-size: 0.69rem;
+  text-align: right;
+}
+
+.sat-soil-suite-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.9rem;
+  align-items: flex-start;
+}
+
+.sat-soil-suite-subtitle {
+  margin-top: 0.2rem;
+  font-size: 0.78rem;
+  color: #5f6b7a;
+}
+
+.sat-soil-suite-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.sat-soil-suite-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+  gap: 0.6rem;
+  margin-top: 0.8rem;
+}
+
+.sat-soil-suite-overview.compact {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.sat-soil-fact-grid {
+  margin-top: 0.7rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+  gap: 0.5rem;
+}
+
+.sat-soil-fact-card {
+  border: 1px solid #dde6ef;
+  border-radius: 10px;
+  background: #fff;
+  padding: 0.52rem 0.58rem;
+}
+
+.sat-soil-fact-label {
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+}
+
+.sat-soil-fact-value {
+  margin-top: 0.16rem;
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #163020;
+}
+
+.sat-soil-fact-note {
+  margin-top: 0.2rem;
+  font-size: 0.7rem;
+  line-height: 1.35;
+  color: #5f6b7a;
+}
+
+.sat-soil-suite-card {
+  border: 1px solid #dfe6ef;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffffff 0%, #f9fbfd 100%);
+  padding: 0.75rem;
+}
+
+.sat-soil-suite-card.emphasis {
+  background: linear-gradient(135deg, #f4faf6 0%, #eef7f1 100%);
+  border-color: #c8dfc8;
+}
+
+.sat-soil-suite-kicker {
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 800;
+  color: #64748b;
+}
+
+.sat-soil-suite-value {
+  margin-top: 0.2rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #163020;
+}
+
+.sat-soil-suite-value-sm {
+  font-size: 0.95rem;
+  line-height: 1.3;
+}
+
+.sat-soil-suite-meta {
+  margin-top: 0.2rem;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: #5f6b7a;
+}
+
+.sat-soil-suite-note {
+  margin-top: 0.7rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 10px;
+  border: 1px solid #dbe6f3;
+  background: #f8fbff;
+  color: #38516d;
+  font-size: 0.79rem;
+}
+
+.sat-soil-flag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.65rem;
+}
+
+.sat-soil-flag-pill {
+  padding: 0.32rem 0.62rem;
+  border-radius: 999px;
+  border: 1px solid #b7d4bf;
+  background: #eef7f1;
+  color: #2d6a4f;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.sat-soil-suite-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin-top: 0.8rem;
+}
+
+.sat-soil-suite-columns.compact {
+  grid-template-columns: 1fr;
+}
+
+.sat-soil-model-block,
+.sat-soil-trend-block {
+  border: 1px solid #dfe6ef;
+  border-radius: 12px;
+  background: #fcfdfe;
+  padding: 0.8rem;
+}
+
+.sat-soil-block-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #163020;
+  margin-bottom: 0.65rem;
+}
+
+.sat-soil-score-list,
+.sat-soil-trend-list,
+.sat-soil-rec-list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.sat-soil-score-row,
+.sat-soil-trend-row,
+.sat-soil-rec-item {
+  border: 1px solid #e4eaf0;
+  border-radius: 10px;
+  background: #fff;
+  padding: 0.62rem;
+}
+
+.sat-soil-score-top,
+.sat-soil-rec-head,
+.sat-soil-trend-main {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  align-items: flex-start;
+}
+
+.sat-soil-score-top {
+  font-size: 0.76rem;
+  color: #475569;
+  font-weight: 700;
+}
+
+.sat-soil-score-bar {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: #e7edf4;
+  overflow: hidden;
+  margin-top: 0.38rem;
+}
+
+.sat-soil-score-bar.compact {
+  height: 7px;
+  margin-top: 0.42rem;
+}
+
+.sat-soil-score-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+}
+
+.sat-soil-rec-type,
+.sat-soil-trend-label {
+  font-size: 0.79rem;
+  font-weight: 800;
+  color: #163020;
+}
+
+.sat-soil-rec-action,
+.sat-soil-trend-effect,
+.sat-soil-rec-reason,
+.sat-soil-trend-sub {
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: #5f6b7a;
+}
+
+.sat-soil-rec-action {
+  margin-top: 0.28rem;
+  color: #1f2937;
+}
+
+.sat-soil-rec-reason,
+.sat-soil-trend-effect {
+  margin-top: 0.28rem;
+}
+
+.sat-soil-trend-value-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.24rem;
+}
+
+.sat-soil-trend-value {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #163020;
+}
+
+.sat-soil-sat-impact-block {
+  background: linear-gradient(180deg, #f8fcf9 0%, #f2f9f4 100%);
+}
+
+.sat-soil-impact-list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.sat-soil-impact-item {
+  border: 1px solid #d9e6dd;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 0.62rem;
+}
+
+.sat-soil-impact-title {
+  font-size: 0.79rem;
+  font-weight: 800;
+  color: #163020;
+}
+
+.sat-soil-impact-text,
+.sat-soil-impact-action {
+  margin-top: 0.28rem;
+  font-size: 0.74rem;
+  line-height: 1.42;
+  color: #5f6b7a;
+}
+
+.sat-soil-impact-action {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.sat-heatmap-panel {
+  margin-top: 1rem;
+  padding: 0.9rem;
+}
+
+.sat-action-row {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+.sat-action-btn {
+  border: 1px solid #b0d4b8;
+  background: #e9f5ec;
+  color: #1b4332;
+  font-size: 0.84rem;
+  padding: 0.54rem 1rem;
+}
+
+.sat-action-btn:hover {
+  background: #d4eeda;
+}
+
+.sat-action-btn.secondary {
+  border-color: #d5dde8;
+  background: #f6f8fb;
+  color: #475569;
+}
+
+.sat-action-btn.secondary:hover {
+  background: #edf2f7;
+}
+
+@media (max-width: 980px) {
+  .sat-location-layout,
+  .sat-output-command,
+  .sat-weather-impact,
+  .sat-recommendation-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .sat-soil-suite-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .sat-health-ring-container,
+  .sat-health-ring-svg {
+    width: 98px;
+    height: 98px;
+  }
+
+  .sat-nav {
+    padding: 0.8rem 0.95rem;
+  }
+}
+
+@media (max-width: 768px) {
+  main {
+    padding: 1rem 0.65rem 2rem;
+  }
+
+  .sat-main-card,
+  .sat-results {
+    border-radius: 16px;
+    padding: 0.95rem;
+  }
+
+  .sat-section,
+  .sat-field-report,
+  .sat-technical-section,
+  .sat-soil-panel {
+    padding: 0.78rem;
+  }
+
+  .sat-map-wrapper {
+    height: 340px;
+  }
+
+  .sat-soil-suite-header,
+  .sat-soil-trend-main,
+  .sat-soil-rec-head {
+    flex-direction: column;
+  }
+
+  .sat-weather-farmer-plan,
+  .sat-weather-impact-metrics,
+  .sat-soil-fact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sat-draw-toolbar-warning {
+    top: 70px;
+    left: 36px;
+  }
+
+  .sat-yield-item {
+    min-width: 75px;
+  }
+}
+
+@media print {
+  .sat-header,
+  .sat-action-row,
+  .sat-analyze-btn,
+  .sat-map-wrapper,
+  .sat-heatmap-panel {
+    display: none;
+  }
+
+  .sat-page {
+    background: #fff;
+  }
+
+  .sat-main-card,
+  .sat-results,
+  .sat-section,
+  .sat-field-report,
+  .sat-result-card,
+  .sat-diagnosis-block,
+  .sat-soil-panel,
+  .sat-technical-section {
+    box-shadow: none;
+  }
+}
+
+/* Dark mode overrides */
+.sat-page.sat-theme-dark {
+  --sat-bg: #0f172a;
+  --sat-surface: #111827;
+  --sat-surface-soft: #0b1220;
+  --sat-border: #2b3445;
+  --sat-text: #e5e7eb;
+  --sat-text-strong: #f8fafc;
+  --sat-text-muted: #9aa6ba;
+}
+
+.sat-page.sat-theme-dark .sat-header {
+  background: rgba(17, 24, 39, 0.9);
+}
+
+.sat-page.sat-theme-dark .sat-nav-btn,
+.sat-page.sat-theme-dark .sat-lang-toggle,
+.sat-page.sat-theme-dark .sat-select-chip,
+.sat-page.sat-theme-dark .sat-input,
+.sat-page.sat-theme-dark .sat-history-select,
+.sat-page.sat-theme-dark .sat-result-card,
+.sat-page.sat-theme-dark .sat-diagnosis-block,
+.sat-page.sat-theme-dark .sat-soil-panel,
+.sat-page.sat-theme-dark .sat-output-card,
+.sat-page.sat-theme-dark .sat-weather-impact-panel,
+.sat-page.sat-theme-dark .sat-rec-card,
+.sat-page.sat-theme-dark .sat-tech-meta-item,
+.sat-page.sat-theme-dark .sat-technical-section,
+.sat-page.sat-theme-dark .sat-control-group,
+.sat-page.sat-theme-dark .sat-section,
+.sat-page.sat-theme-dark .sat-main-card,
+.sat-page.sat-theme-dark .sat-results {
+  background: #111827;
+  border-color: #2b3445;
+  color: #e5e7eb;
+}
+
+.sat-page.sat-theme-dark .sat-select-chip.active,
+.sat-page.sat-theme-dark .sat-lang-btn.active,
+.sat-page.sat-theme-dark .sat-rec-timing-badge,
+.sat-page.sat-theme-dark .sat-driver-pill,
+.sat-page.sat-theme-dark .sat-results-meta > span,
+.sat-page.sat-theme-dark .sat-geo-btn,
+.sat-page.sat-theme-dark .sat-go-btn {
+  background: #172b20;
+  border-color: #2f6b49;
+  color: #b6eacb;
+}
+
+.sat-page.sat-theme-dark .sat-rec-cost-badge {
+  background: #3a1f14;
+  border-color: #7c2d12;
+  color: #fdba74;
+}
+
+.sat-page.sat-theme-dark .sat-rec-benefit-badge {
+  background: #123321;
+  border-color: #166534;
+  color: #86efac;
+}
+
+.sat-page.sat-theme-dark .sat-theme-toggle-btn {
+  background: #111827;
+  border-color: #2b3445;
+  color: #e5e7eb;
+}
+
+.sat-page.sat-theme-dark .sat-results-header,
+.sat-page.sat-theme-dark .sat-growth-near-heatmap {
+  background: #0f1a2e;
+  border-color: #2f3f59;
+}
+
+.sat-page.sat-theme-dark .sat-theme-toggle-track {
+  background: #243041;
+  border-color: #364964;
+}
+
+.sat-page.sat-theme-dark .sat-theme-toggle-track.is-dark {
+  background: #1f4d35;
+  border-color: #2f6b49;
+}
+
+.sat-page.sat-theme-dark .sat-rec-group,
+.sat-page.sat-theme-dark .sat-soil-stat,
+.sat-page.sat-theme-dark .sat-soil-suite-card,
+.sat-page.sat-theme-dark .sat-soil-model-block,
+.sat-page.sat-theme-dark .sat-soil-trend-block,
+.sat-page.sat-theme-dark .sat-weather-impact-insight-item,
+.sat-page.sat-theme-dark .sat-soil-impact-item,
+.sat-page.sat-theme-dark .sat-soil-score-row,
+.sat-page.sat-theme-dark .sat-soil-trend-row,
+.sat-page.sat-theme-dark .sat-soil-rec-item,
+.sat-page.sat-theme-dark .sat-engine-strip,
+.sat-page.sat-theme-dark .sat-engine-card,
+.sat-page.sat-theme-dark .sat-quick-action,
+.sat-page.sat-theme-dark .sat-rec-evidence,
+.sat-page.sat-theme-dark .sat-stress-inner,
+.sat-page.sat-theme-dark .sat-boundary-status,
+.sat-page.sat-theme-dark .sat-city-label,
+.sat-page.sat-theme-dark .sat-city-overlay-name,
+.sat-page.sat-theme-dark .sat-heat-legend,
+.sat-page.sat-theme-dark .sat-weather-impact-row {
+  background: #0f1a2e;
+  border-color: #2f3f59;
+  color: #e5e7eb;
+}
+
+.sat-page.sat-theme-dark .sat-weather-impact-row.accent {
+  background: #132234;
+  border-color: #36506e;
+}
+
+.sat-page.sat-theme-dark .sat-weather-impact-row-icon {
+  background: #173424;
+}
+
+.sat-page.sat-theme-dark .sat-output-card.priority,
+.sat-page.sat-theme-dark .sat-rec-group.immediate {
+  background: #0d2b1a;
+  border-color: #2a5438;
+}
+
+.sat-page.sat-theme-dark .sat-output-card.timeline,
+.sat-page.sat-theme-dark .sat-soil-limitation,
+.sat-page.sat-theme-dark .sat-coord-warning {
+  background: #122a1c;
+  border-color: #2a5438;
+  color: #a7d4b5;
+}
+
+.sat-page.sat-theme-dark .sat-coord-warning.sat-coord-warning-alert {
+  background: #78350f;
+  border-color: #d97706;
+  color: #fef3c7;
+}
+
+.sat-page.sat-theme-dark .sat-output-card.focus,
+.sat-page.sat-theme-dark .sat-rec-group.planned {
+  background: #0f2318;
+  border-color: #2a5438;
+}
+
+.sat-page.sat-theme-dark .sat-soil-suite-card.emphasis,
+.sat-page.sat-theme-dark .sat-soil-flag-pill,
+.sat-page.sat-theme-dark .sat-soil-suite-note {
+  background: #122a1c;
+  border-color: #2a5438;
+  color: #a7d4b5;
+}
+
+.sat-page.sat-theme-dark .sat-soil-score-bar {
+  background: #1b2b3c;
+}
+
+.sat-page.sat-theme-dark .sat-bar-track {
+  background: linear-gradient(90deg, #2f1c1c 0%, #352a17 38%, #173424 100%);
+}
+
+.sat-page.sat-theme-dark .sat-weather-impact-insights {
+  border-top-color: #2f3f59;
+}
+
+.sat-page.sat-theme-dark .sat-weather-farmer-plan {
+  border-top-color: #2f3f59;
+}
+
+.sat-page.sat-theme-dark .sat-error,
+.sat-page.sat-theme-dark .sat-non-field-card,
+.sat-page.sat-theme-dark .sat-critical-alert {
+  background: #0d2b1a;
+  border-color: #2a5438;
+  color: #a7d4b5;
+}
+
+.sat-page.sat-theme-dark .sat-priority-badge.priority-critical,
+.sat-page.sat-theme-dark .sat-priority-badge.priority-high,
+.sat-page.sat-theme-dark .sat-risk-badge.risk-critical,
+.sat-page.sat-theme-dark .sat-risk-badge.risk-high,
+.sat-page.sat-theme-dark .sat-urgency-badge.critical,
+.sat-page.sat-theme-dark .sat-urgency-badge.high {
+  background: #1a3d28;
+  border-color: #2f6b49;
+  color: #b6eacb;
+}
+
+.sat-page.sat-theme-dark .sat-risk-badge.risk-moderate,
+.sat-page.sat-theme-dark .sat-risk-badge.risk-elevated,
+.sat-page.sat-theme-dark .sat-urgency-badge.medium,
+.sat-page.sat-theme-dark .sat-priority-badge.priority-medium,
+.sat-page.sat-theme-dark .sat-soil-stat-status.warning {
+  background: #173424;
+  border-color: #2f6b49;
+  color: #b6eacb;
+}
+
+.sat-page.sat-theme-dark .sat-risk-badge.risk-low,
+.sat-page.sat-theme-dark .sat-priority-badge.priority-low,
+.sat-page.sat-theme-dark .sat-urgency-badge.low,
+.sat-page.sat-theme-dark .sat-soil-stat-status.ok {
+  background: #173424;
+  border-color: #2f6b49;
+  color: #b6eacb;
+}
+
+/* Heatmap-adjacent insight blocks */
+.sat-heatmap-insights {
+  margin-top: 0.85rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 0.55rem;
+}
+
+.sat-indices-near-heatmap {
+  padding: 0.75rem;
+}
+
+.sat-growth-near-heatmap {
+  padding: 0.75rem;
+  background: linear-gradient(165deg, #fcfffd 0%, #eef7f1 100%);
+}
+
+.sat-capture-meta-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.8rem;
+  font-size: 0.72rem;
+  color: #5f6b7a;
+  grid-column: 1 / -1;
+}
+
+/* White + green refinement (light mode) */
+.sat-output-card.priority,
+.sat-rec-group.immediate {
+  background: #f4faf6;
+  border-color: #bcd4bf;
+}
+
+.sat-output-card.timeline,
+.sat-soil-limitation,
+.sat-coord-warning {
+  background: #f1f8f3;
+  border-color: #c8dfc8;
+  color: #2d6a4f;
+}
+
+.sat-output-card.focus,
+.sat-rec-group.planned,
+.sat-driver-pill,
+.sat-rec-timing-badge,
+.sat-results-meta > span {
+  background: #eaf6ee;
+  border-color: #b7d4bf;
+  color: #2d6a4f;
+}
+
+@media (max-width: 940px) {
+  .sat-heatmap-insights {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Dark mode text visibility hardening */
+.sat-page.sat-theme-dark .sat-section-title,
+.sat-page.sat-theme-dark .sat-rec-weather-note {
+  background: rgba(96, 165, 250, 0.12);
+  color: #93c5fd;
+  border-left-color: #3b82f6;
+}
+
+.sat-page.sat-theme-dark .sat-results-title,
+.sat-page.sat-theme-dark .sat-report-label,
+.sat-page.sat-theme-dark .sat-health-score,
+.sat-page.sat-theme-dark .sat-stage-name,
+.sat-page.sat-theme-dark .sat-rec-type,
+.sat-page.sat-theme-dark .sat-rec-action,
+.sat-page.sat-theme-dark .sat-soil-suite-value,
+.sat-page.sat-theme-dark .sat-soil-block-title,
+.sat-page.sat-theme-dark .sat-soil-trend-value,
+.sat-page.sat-theme-dark .sat-soil-rec-type,
+.sat-page.sat-theme-dark .sat-weather-impact-insight-head,
+.sat-page.sat-theme-dark .sat-soil-impact-title,
+.sat-page.sat-theme-dark .sat-diag-value,
+.sat-page.sat-theme-dark .sat-soil-stat-value,
+.sat-page.sat-theme-dark .sat-tech-meta-value,
+.sat-page.sat-theme-dark .sat-engine-strip-title,
+.sat-page.sat-theme-dark .sat-engine-value,
+.sat-page.sat-theme-dark .sat-non-field-text p,
+.sat-page.sat-theme-dark .sat-capture-meta-inline {
+  color: #e5e7eb;
+}
+
+.sat-page.sat-theme-dark .sat-subtitle,
+.sat-page.sat-theme-dark .sat-report-summary-text,
+.sat-page.sat-theme-dark .sat-bench-desc,
+.sat-page.sat-theme-dark .sat-index-hint,
+.sat-page.sat-theme-dark .sat-diag-mini-val,
+.sat-page.sat-theme-dark .sat-soil-note,
+.sat-page.sat-theme-dark .sat-soil-suite-subtitle,
+.sat-page.sat-theme-dark .sat-soil-suite-meta,
+.sat-page.sat-theme-dark .sat-soil-rec-action,
+.sat-page.sat-theme-dark .sat-soil-rec-reason,
+.sat-page.sat-theme-dark .sat-soil-trend-sub,
+.sat-page.sat-theme-dark .sat-soil-trend-effect,
+.sat-page.sat-theme-dark .sat-weather-impact-summary,
+.sat-page.sat-theme-dark .sat-weather-impact-insight-reason,
+.sat-page.sat-theme-dark .sat-weather-impact-insight-action,
+.sat-page.sat-theme-dark .sat-weather-metric-note,
+.sat-page.sat-theme-dark .sat-weather-plan-item,
+.sat-page.sat-theme-dark .sat-soil-impact-text,
+.sat-page.sat-theme-dark .sat-soil-impact-action,
+.sat-page.sat-theme-dark .sat-soil-fact-note,
+.sat-page.sat-theme-dark .sat-index-scale,
+.sat-page.sat-theme-dark .sat-output-sub,
+.sat-page.sat-theme-dark .sat-chip-subtext,
+.sat-page.sat-theme-dark .sat-qa-action,
+.sat-page.sat-theme-dark .sat-conf-value,
+.sat-page.sat-theme-dark .sat-engine-source,
+.sat-page.sat-theme-dark .sat-heat-legend-scale,
+.sat-page.sat-theme-dark .sat-rec-detail,
+.sat-page.sat-theme-dark .sat-evidence-item {
+  color: #b7c2d6;
+}
+
+.sat-page.sat-theme-dark .sat-rec-more summary,
+.sat-page.sat-theme-dark .sat-qa-timing,
+.sat-page.sat-theme-dark .sat-diag-label,
+.sat-page.sat-theme-dark .sat-tech-meta-label,
+.sat-page.sat-theme-dark .sat-output-kicker,
+.sat-page.sat-theme-dark .sat-weather-impact-kicker,
+.sat-page.sat-theme-dark .sat-weather-impact-row-label,
+.sat-page.sat-theme-dark .sat-soil-stat-label,
+.sat-page.sat-theme-dark .sat-yield-lbl,
+.sat-page.sat-theme-dark .sat-engine-label,
+.sat-page.sat-theme-dark .sat-workflow-chip,
+.sat-page.sat-theme-dark .sat-recent-label {
+  color: #9fb3d8;
+}
+
+.sat-page.sat-theme-dark .sat-weather-impact-sub {
+  color: #b7c2d6;
+}
+
+.sat-page.sat-theme-dark .sat-weather-metric-label,
+.sat-page.sat-theme-dark .sat-weather-plan-title,
+.sat-page.sat-theme-dark .sat-soil-fact-label {
+  color: #9fb3d8;
+}
+
+.sat-page.sat-theme-dark .sat-weather-metric-value,
+.sat-page.sat-theme-dark .sat-soil-fact-value {
+  color: #e5e7eb;
+}
+
+.sat-page.sat-theme-dark .sat-input::placeholder {
+  color: #8ea0bf;
+}
+
+.sat-page.sat-theme-dark .sat-rec-more {
+  border-top: 1px solid #2f3f59;
+  padding-top: 0.35rem;
+}
+
+.sat-page.sat-theme-dark .sat-rec-brief {
+  border-color: #2f3f59;
+  background: #0f1a2e;
+}
+
+.sat-page.sat-theme-dark .sat-rec-brief-label {
+  color: #9fb3d8;
+}
+
+.sat-page.sat-theme-dark .sat-rec-brief-text {
+  color: #d8e3f5;
+}
+
+.sat-page.sat-theme-dark .sat-map-wrapper,
+.sat-page.sat-theme-dark .sat-heatmap-map-wrapper,
+.sat-page.sat-theme-dark .sat-heatmap-panel,
+.sat-page.sat-theme-dark .sat-heat-legend-bar {
+  border-color: #364964;
+}
+
+.sat-page.sat-theme-dark .sat-heat-legend-title,
+.sat-page.sat-theme-dark .sat-city-overlay-name,
+.sat-page.sat-theme-dark .sat-city-label,
+.sat-page.sat-theme-dark .sat-boundary-status-title {
+  color: #e5e7eb;
+}
+
+.sat-farmer-quickview {
+  border: 1px solid #dbe4ee;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 0.9rem;
+  margin: 0 0 1rem;
+}
+
+.sat-fqv-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.8rem;
+}
+
+.sat-fqv-kicker {
+  font-size: 0.66rem;
+  color: #64748b;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.sat-fqv-title {
+  margin: 0.2rem 0 0;
+  font-size: 1rem;
+  color: var(--sat-text-strong);
+}
+
+.sat-fqv-status {
+  border: 1px solid #dbe4ee;
+  border-radius: 999px;
+  padding: 0.26rem 0.7rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.sat-fqv-status.green {
+  background: #e8f5ee;
+  border-color: #b8e6cb;
+  color: #166534;
+}
+
+.sat-fqv-status.yellow {
+  background: #fff7e6;
+  border-color: #f4d69e;
+  color: #92400e;
+}
+
+.sat-fqv-status.red {
+  background: #ffeaea;
+  border-color: #f2b5b5;
+  color: #991b1b;
+}
+
+.sat-fqv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.55rem;
+  margin-top: 0.65rem;
+}
+
+.sat-fqv-card {
+  border: 1px solid #dce5ef;
+  border-radius: 10px;
+  background: #fff;
+  padding: 0.55rem 0.62rem;
+}
+
+.sat-fqv-label {
+  font-size: 0.66rem;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sat-fqv-value {
+  margin-top: 0.2rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #163020;
+}
+
+.sat-fqv-note {
+  margin-top: 0.2rem;
+  font-size: 0.73rem;
+  color: #5f6b7a;
+  line-height: 1.38;
+}
+
+.sat-fqv-single-block {
+  margin-top: 0.6rem;
+  border: 1px solid #dce5ef;
+  border-radius: 12px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.sat-fqv-single-row {
+  padding: 0.7rem 0.75rem;
+  border-bottom: 1px solid #e6edf4;
+}
+
+.sat-fqv-single-row:last-child {
+  border-bottom: none;
+}
+
+.sat-fqv-actions {
+  margin-top: 0.72rem;
+}
+
+.sat-fqv-actions-title {
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #334155;
+  margin-bottom: 0.4rem;
+}
+
+.sat-fqv-action-item {
+  border: 1px solid #dce5ef;
+  border-radius: 10px;
+  background: #fff;
+  padding: 0.55rem 0.62rem;
+  margin-bottom: 0.42rem;
+}
+
+.sat-fqv-action-head {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.sat-fqv-action-rank {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #ecf7ef;
+  border: 1px solid #c3dcc9;
+  color: #1b4332;
+  font-size: 0.66rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sat-fqv-action-title {
+  font-size: 0.79rem;
+  font-weight: 800;
+  color: #163020;
+  flex: 1;
+}
+
+.sat-fqv-action-priority {
+  font-size: 0.66rem;
+  font-weight: 800;
+  color: #2d6a4f;
+  text-transform: uppercase;
+}
+
+.sat-fqv-action-what {
+  margin-top: 0.26rem;
+  font-size: 0.74rem;
+  color: #1f2937;
+  line-height: 1.4;
+}
+
+.sat-fqv-action-meta {
+  margin-top: 0.25rem;
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  font-size: 0.7rem;
+  color: #5f6b7a;
+}
+
+.sat-fqv-raw {
+  margin-top: 0.5rem;
+  border-top: 1px dashed #d1dbe7;
+  padding-top: 0.5rem;
+}
+
+.sat-fqv-raw-title {
+  font-size: 0.66rem;
+  color: #64748b;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.sat-fqv-raw-grid {
+  margin-top: 0.2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.36rem;
+  font-size: 0.73rem;
+  color: #334155;
+}
+
+.sat-page.sat-theme-dark .sat-farmer-quickview,
+.sat-page.sat-theme-dark .sat-fqv-card,
+.sat-page.sat-theme-dark .sat-fqv-action-item {
+  background: #0f1a2e;
+  border-color: #2f3f59;
+}
+
+/* Keep Farmer Quick View in white for readability across themes. */
+.sat-page.sat-theme-dark .sat-farmer-quickview,
+.sat-page.sat-theme-dark .sat-fqv-single-block,
+.sat-page.sat-theme-dark .sat-fqv-single-row {
+  background: #ffffff !important;
+  border-color: #dce5ef !important;
+}
+
+.sat-page.sat-theme-dark .sat-fqv-label,
+.sat-page.sat-theme-dark .sat-fqv-note {
+  color: #5f6b7a !important;
+}
+
+.sat-page.sat-theme-dark .sat-fqv-value,
+.sat-page.sat-theme-dark .sat-fqv-title {
+  color: #163020 !important;
+}
+
+.sat-page.sat-theme-dark .sat-fqv-title,
+.sat-page.sat-theme-dark .sat-fqv-value,
+.sat-page.sat-theme-dark .sat-fqv-action-title,
+.sat-page.sat-theme-dark .sat-fqv-action-what,
+.sat-page.sat-theme-dark .sat-fqv-raw-grid {
+  color: #e5e7eb;
+}
+
+.sat-page.sat-theme-dark .sat-fqv-label,
+.sat-page.sat-theme-dark .sat-fqv-kicker,
+.sat-page.sat-theme-dark .sat-fqv-raw-title,
+.sat-page.sat-theme-dark .sat-fqv-action-meta,
+.sat-page.sat-theme-dark .sat-fqv-note {
+  color: #9fb3d8;
+}
+
+@media (max-width: 980px) {
+  .sat-fqv-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* 2026 redesign v2: Desert Atlas command-center aesthetic                    */
+/* -------------------------------------------------------------------------- */
+
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Noto+Nastaliq+Urdu:wght@400;600;700&display=swap');
+
+.sat-page {
+  --atlas-bg: #f2ede2;
+  --atlas-paper: #fffdf8;
+  --atlas-ink: #1f2e3a;
+  --atlas-muted: #5c6773;
+  --atlas-navy: #26435c;
+  --atlas-clay: #b8653b;
+  --atlas-mustard: #c48a2c;
+  --atlas-teal: #0d6f6a;
+  font-family: "Manrope", "Segoe UI", sans-serif;
+  color: var(--atlas-ink);
+  background:
+    radial-gradient(900px 360px at 0% 0%, rgba(184, 101, 59, 0.18), transparent 58%),
+    radial-gradient(1200px 520px at 100% 0%, rgba(38, 67, 92, 0.17), transparent 62%),
+    linear-gradient(180deg, #ece6d9 0%, #f4efe6 38%, #f2ede2 100%);
+}
+
+.sat-header {
+  background: linear-gradient(92deg, rgba(30, 53, 72, 0.95), rgba(18, 38, 53, 0.95));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 12px 28px rgba(16, 28, 39, 0.22);
+  backdrop-filter: blur(8px);
+}
+
+.sat-nav {
+  max-width: 1340px;
+  padding: 0.8rem 1.1rem;
+}
+
+.sat-logo-btn {
+  color: #f6ead4;
+  letter-spacing: 0.12em;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.sat-nav-btn {
+  border: 1px solid rgba(244, 228, 198, 0.34);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f5e8d0;
+  font-size: 0.74rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.sat-nav-btn:hover {
+  border-color: rgba(244, 228, 198, 0.8);
+  background: rgba(244, 228, 198, 0.16);
+}
+
+.sat-theme-toggle-track {
+  background: rgba(244, 228, 198, 0.24);
+  border-color: rgba(244, 228, 198, 0.38);
+}
+
+.sat-theme-toggle-track.is-dark {
+  background: #b8653b;
+  border-color: #d88d63;
+}
+
+main {
+  padding: 1.15rem 0.95rem 2.8rem;
+}
+
+.sat-container {
+  max-width: 1340px;
+}
+
+.sat-welcome {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #d3c9b8;
+  border-radius: 26px;
+  padding: 1.05rem 1.05rem 1.15rem;
+  background:
+    linear-gradient(140deg, rgba(255, 253, 246, 0.98) 0%, rgba(249, 241, 227, 0.98) 62%, rgba(241, 234, 223, 0.98) 100%);
+  box-shadow: 0 14px 34px rgba(94, 70, 36, 0.14);
+}
+
+.sat-welcome::after {
+  content: "";
+  position: absolute;
+  right: -120px;
+  top: -100px;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(196, 138, 44, 0.22), rgba(196, 138, 44, 0));
+  pointer-events: none;
+}
+
+.sat-title {
+  color: #1e3246;
+  font-size: clamp(1.7rem, 2.4vw, 2.4rem);
+  letter-spacing: -0.02em;
+}
+
+.sat-subtitle {
+  margin-top: 0.38rem;
+  max-width: 820px;
+  color: #566270;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.sat-workflow-strip {
+  margin-top: 0.62rem;
+  border: none;
+  border-radius: 12px;
+  background: rgba(38, 67, 92, 0.06);
+  padding: 0.35rem;
+}
+
+.sat-workflow-chip {
+  border: 1px solid #d7cfbf;
+  border-radius: 7px;
+  background: #fffdf8;
+  color: #6a7380;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.sat-workflow-chip.done {
+  border-color: #b8653b;
+  background: #fff2ea;
+  color: #8f4928;
+}
+
+.sat-local-context {
+  margin-top: 0.72rem;
+  border: 1px solid #d7ccb7;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.74);
+  padding: 0.62rem;
+}
+
+.sat-local-context-title {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #22455f;
+  font-weight: 800;
+  margin-bottom: 0.34rem;
+}
+
+.sat-local-context-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.42rem;
+}
+
+.sat-local-context-item {
+  border: 1px solid #dfd5c4;
+  border-radius: 9px;
+  background: #fffdf9;
+  padding: 0.42rem 0.48rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.sat-local-context-kicker {
+  color: #6e7680;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.sat-local-context-value {
+  margin-top: 0.12rem;
+  color: #203949;
+  font-size: 0.78rem;
+  line-height: 1.34;
+  font-weight: 700;
+}
+
+.sat-main-card,
+.sat-results {
+  border: 1px solid #d8cebe;
+  border-radius: 24px;
+  background: var(--atlas-paper);
+  box-shadow: 0 16px 40px rgba(61, 42, 18, 0.14);
+}
+
+.sat-main-card {
+  margin-top: 1rem;
+  padding: 1.05rem;
+}
+
+.sat-results {
+  margin-top: 1.22rem;
+  padding: 1rem;
+}
+
+.sat-section {
+  border: 1px solid #ddd3c4;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #ffffff 0%, #fffcf7 100%);
+  padding: 0.9rem;
+}
+
+.sat-section-title {
+  color: #274862;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-size: 0.79rem;
+  font-weight: 800;
+}
+
+.sat-chip-grid {
+  gap: 0.48rem;
+}
+
+.sat-select-chip {
+  border: 1px solid #d9cfbf;
+  border-radius: 10px;
+  background: #fff;
+  min-height: 44px;
+  transition: transform 0.18s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.sat-select-chip:hover:not(.disabled) {
+  border-color: #b8653b;
+  box-shadow: 0 8px 16px rgba(184, 101, 59, 0.14);
+  transform: translateY(-2px);
+}
+
+.sat-select-chip.active {
+  border-color: #b8653b;
+  background: linear-gradient(180deg, #fff2e8, #ffe9dc);
+  color: #6b2f17;
+}
+
+.sat-chip-subtext {
+  color: #687380;
+}
+
+.sat-lang-toggle {
+  border: 1px solid #d5cab8;
+  border-radius: 10px;
+  background: #f8f2e8;
+}
+
+.sat-lang-btn {
+  border-radius: 8px;
+  font-size: 0.74rem;
+}
+
+.sat-lang-btn.active {
+  border-color: #25455f;
+  background: #e6edf3;
+  color: #1c3a50;
+}
+
+.sat-location-layout {
+  grid-template-columns: minmax(310px, 420px) 1fr;
+  gap: 0.9rem;
+}
+
+.sat-location-controls {
+  position: sticky;
+  top: 92px;
+}
+
+.sat-control-group {
+  border: 1px solid #ded4c4;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #fffdf8 0%, #f7f1e5 100%);
+}
+
+.sat-control-group-primary {
+  border-color: #d7c5ad;
+  background: linear-gradient(180deg, #fff6eb 0%, #f6ecdf 100%);
+}
+
+.sat-input,
+.sat-history-select {
+  border: 1px solid #ccc1b2;
+  border-radius: 9px;
+  background: #fffcf8;
+  color: #233746;
+}
+
+.sat-input:focus,
+.sat-history-select:focus {
+  border-color: #b8653b;
+  box-shadow: 0 0 0 3px rgba(184, 101, 59, 0.17);
+}
+
+.sat-geo-btn,
+.sat-go-btn {
+  border: 1px solid #2b5877;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #355f7f 0%, #264862 100%);
+  color: #f3e8d3;
+}
+
+.sat-geo-btn:hover:not(:disabled),
+.sat-go-btn:hover:not(:disabled) {
+  box-shadow: 0 10px 20px rgba(31, 59, 80, 0.28);
+  transform: translateY(-1px);
+}
+
+.sat-recent-chip {
+  border: 1px solid #d7b28c;
+  border-radius: 999px;
+  background: #fff4e8;
+  color: #8f4928;
+}
+
+.sat-recent-chip:hover {
+  background: #ffe9d5;
+}
+
+.sat-map-wrapper,
+.sat-heatmap-map-wrapper {
+  border: 2px solid #c9baa3;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 14px 26px rgba(64, 45, 20, 0.18);
+}
+
+.sat-map-wrapper {
+  height: 470px;
+}
+
+.sat-city-overlay-name,
+.sat-heat-legend {
+  border: 1px solid #d8cab6;
+  background: rgba(255, 248, 236, 0.94);
+  color: #1e3a4e;
+}
+
+.sat-city-label {
+  border-color: #cdbca5;
+  background: rgba(255, 250, 242, 0.96);
+  color: #22465f;
+  border-radius: 8px;
+}
+
+.sat-city-label.urdu {
+  font-family: "Noto Nastaliq Urdu", serif;
+  font-size: 0.79rem;
+}
+
+.sat-analyze-btn {
+  border: none;
+  border-radius: 12px;
+  margin-top: 0.96rem;
+  background: linear-gradient(180deg, #be6e43 0%, #9e542f 100%);
+  color: #fff6ee;
+  letter-spacing: 0.01em;
+  box-shadow: 0 14px 26px rgba(158, 84, 47, 0.33);
+}
+
+.sat-analyze-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #cc7c50 0%, #af6137 100%);
+  transform: translateY(-1px);
+}
+
+.sat-error,
+.sat-coord-warning,
+.sat-boundary-required,
+.sat-boundary-help,
+.sat-critical-alert {
+  border: 1px solid #ddbe9e;
+  border-radius: 10px;
+  background: #fff3e7;
+  color: #7b3f22;
+}
+
+.sat-results-header {
+  border: 1px solid #dfd2bf;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #fff8ee 0%, #f8efe1 55%, #eef1f3 100%);
+}
+
+.sat-results-title,
+.sat-report-label,
+.sat-weather-impact-title,
+.sat-fqv-title,
+.sat-soil-block-title,
+.sat-engine-value,
+.sat-output-value,
+.sat-soil-suite-value,
+.sat-soil-fact-value,
+.sat-weather-impact-insight-head,
+.sat-soil-impact-title,
+.sat-fqv-action-title {
+  color: #1f3a52;
+}
+
+.sat-results-meta > span {
+  border-color: #d8c7b0;
+  background: #fff6ea;
+  color: #7a4b30;
+}
+
+.sat-data-badge.real {
+  border-color: #9bc7c6;
+  background: #e6f5f4;
+  color: #0d6f6a;
+}
+
+.sat-field-report,
+.sat-farmer-quickview,
+.sat-weather-impact-panel,
+.sat-soil-suite,
+.sat-rec-group,
+.sat-rec-card,
+.sat-output-card,
+.sat-engine-strip,
+.sat-engine-card,
+.sat-soil-suite-card,
+.sat-weather-metric-card,
+.sat-weather-impact-insight-item,
+.sat-soil-fact-card,
+.sat-soil-impact-item,
+.sat-fqv-card,
+.sat-action-btn.secondary {
+  border: 1px solid #ddd1bf;
+  border-radius: 13px;
+  background: #fffdf9;
+}
+
+.sat-rec-group.immediate,
+.sat-output-card.priority {
+  border-left: 5px solid #b8653b;
+  background: linear-gradient(180deg, #fff6ef 0%, #fff1e8 100%);
+}
+
+.sat-output-card.timeline {
+  border-left: 5px solid #26435c;
+  background: linear-gradient(180deg, #f0f5f9 0%, #e8f0f6 100%);
+}
+
+.sat-output-card.focus,
+.sat-rec-group.planned,
+.sat-driver-pill,
+.sat-rec-timing-badge {
+  border-color: #c8d5de;
+  background: #edf3f8;
+  color: #21445f;
+}
+
+.sat-action-btn.secondary {
+  border: 1px solid #c9bec0;
+  background: #f4eef0;
+  color: #584e56;
+}
+
+.sat-action-btn.secondary:hover {
+  background: #ece4e7;
+  transform: translateY(-1px);
+}
+
+/* Meaningful motion and reveal hierarchy */
+.sat-welcome,
+.sat-main-card,
+.sat-results {
+  animation: satFadeLift 460ms ease both;
+}
+
+.sat-section {
+  animation: satFadeLift 420ms ease both;
+}
+
+.sat-main-card .sat-section:nth-of-type(1) { animation-delay: 40ms; }
+.sat-main-card .sat-section:nth-of-type(2) { animation-delay: 110ms; }
+.sat-main-card .sat-section:nth-of-type(3) { animation-delay: 180ms; }
+
+@keyframes satFadeLift {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sat-welcome,
+  .sat-main-card,
+  .sat-results,
+  .sat-section {
+    animation: none;
+  }
+}
+
+@media (max-width: 1100px) {
+  .sat-location-controls {
+    position: static;
+  }
+}
+
+@media (max-width: 900px) {
+  .sat-local-context-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sat-map-wrapper {
+    height: 380px;
+  }
+}
+
+.sat-results-history-only {
+  margin-top: 1rem;
+}
+
+.sat-history-selector-wrap {
+  margin-top: 0.7rem;
+  margin-bottom: 0.75rem;
+}
+
+.sat-history-note {
+  margin-top: 0.45rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid #d8e6dc;
+  border-radius: 10px;
+  background: #f4fbf6;
+  color: #24533a;
+  font-size: 0.8rem;
+}
+
+.sat-history-recs {
+  margin-top: 0.55rem;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.sat-history-recs-title {
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: #214f36;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sat-history-rec-item {
+  border: 1px solid #dce8df;
+  border-radius: 9px;
+  background: #ffffff;
+  padding: 0.48rem 0.6rem;
+  color: #365442;
+  font-size: 0.78rem;
+  line-height: 1.42;
+}
+
+.sat-page.sat-theme-dark .sat-history-note,
+.sat-page.sat-theme-dark .sat-history-rec-item,
+.sat-page.sat-theme-dark .sat-history-selector-wrap .sat-input {
+  background: #203427;
+  border-color: #4f7f60;
+  color: #cfe8d6;
+}
+
+.sat-page.sat-theme-dark .sat-history-recs-title {
+  color: #d8efde;
+}
+
+@media (max-width: 768px) {
+  .sat-nav-links {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 0.35rem;
+  }
+
+  .sat-nav-btn {
+    font-size: 0.69rem;
+    padding: 0.38rem 0.58rem;
+  }
+
+  .sat-welcome,
+  .sat-main-card,
+  .sat-results {
+    border-radius: 16px;
+    padding: 0.82rem;
+  }
+
+  .sat-map-wrapper {
+    height: 320px;
+  }
+
+  .sat-analyze-btn {
+    font-size: 0.95rem;
+    padding: 0.83rem 0.8rem;
+  }
+}
+
+/* Dark mode: slate + copper contrast */
+.sat-page.sat-theme-dark {
+  --atlas-bg: #141b22;
+  --atlas-paper: #1b2430;
+  --atlas-ink: #e7ecef;
+  --atlas-muted: #a8b4bf;
+  background:
+    radial-gradient(900px 380px at 0% 0%, rgba(184, 101, 59, 0.2), transparent 56%),
+    radial-gradient(1000px 460px at 100% 0%, rgba(38, 67, 92, 0.28), transparent 60%),
+    linear-gradient(180deg, #10161d 0%, #151f29 55%, #111920 100%);
+}
+
+.sat-page.sat-theme-dark .sat-header {
+  background: linear-gradient(92deg, rgba(15, 24, 33, 0.95), rgba(19, 30, 41, 0.95));
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.sat-page.sat-theme-dark .sat-nav-btn {
+  border-color: rgba(196, 138, 44, 0.45);
+  background: rgba(196, 138, 44, 0.12);
+  color: #f3ddba;
+}
+
+.sat-page.sat-theme-dark .sat-welcome,
+.sat-page.sat-theme-dark .sat-main-card,
+.sat-page.sat-theme-dark .sat-results,
+.sat-page.sat-theme-dark .sat-section,
+.sat-page.sat-theme-dark .sat-control-group,
+.sat-page.sat-theme-dark .sat-results-header,
+.sat-page.sat-theme-dark .sat-local-context,
+.sat-page.sat-theme-dark .sat-local-context-item,
+.sat-page.sat-theme-dark .sat-field-report,
+.sat-page.sat-theme-dark .sat-farmer-quickview,
+.sat-page.sat-theme-dark .sat-weather-impact-panel,
+.sat-page.sat-theme-dark .sat-soil-suite,
+.sat-page.sat-theme-dark .sat-rec-group,
+.sat-page.sat-theme-dark .sat-rec-card,
+.sat-page.sat-theme-dark .sat-output-card,
+.sat-page.sat-theme-dark .sat-engine-strip,
+.sat-page.sat-theme-dark .sat-engine-card,
+.sat-page.sat-theme-dark .sat-soil-suite-card,
+.sat-page.sat-theme-dark .sat-weather-metric-card,
+.sat-page.sat-theme-dark .sat-weather-impact-insight-item,
+.sat-page.sat-theme-dark .sat-soil-fact-card,
+.sat-page.sat-theme-dark .sat-soil-impact-item,
+.sat-page.sat-theme-dark .sat-fqv-card,
+.sat-page.sat-theme-dark .sat-action-btn.secondary,
+.sat-page.sat-theme-dark .sat-lang-toggle,
+.sat-page.sat-theme-dark .sat-input,
+.sat-page.sat-theme-dark .sat-select-chip,
+.sat-page.sat-theme-dark .sat-city-label,
+.sat-page.sat-theme-dark .sat-city-overlay-name,
+.sat-page.sat-theme-dark .sat-heat-legend,
+.sat-page.sat-theme-dark .sat-map-wrapper,
+.sat-page.sat-theme-dark .sat-heatmap-map-wrapper {
+  background: #1b2430;
+  border-color: #334456;
+  color: #e7ecef;
+}
+
+.sat-page.sat-theme-dark .sat-title,
+.sat-page.sat-theme-dark .sat-results-title,
+.sat-page.sat-theme-dark .sat-report-label,
+.sat-page.sat-theme-dark .sat-weather-impact-title,
+.sat-page.sat-theme-dark .sat-fqv-title,
+.sat-page.sat-theme-dark .sat-soil-block-title,
+.sat-page.sat-theme-dark .sat-engine-value,
+.sat-page.sat-theme-dark .sat-output-value,
+.sat-page.sat-theme-dark .sat-soil-suite-value,
+.sat-page.sat-theme-dark .sat-soil-fact-value,
+.sat-page.sat-theme-dark .sat-weather-impact-insight-head,
+.sat-page.sat-theme-dark .sat-soil-impact-title,
+.sat-page.sat-theme-dark .sat-fqv-action-title,
+.sat-page.sat-theme-dark .sat-local-context-value {
+  color: #f1f5f8;
+}
+
+.sat-page.sat-theme-dark .sat-subtitle,
+.sat-page.sat-theme-dark .sat-workflow-chip,
+.sat-page.sat-theme-dark .sat-local-context-kicker,
+.sat-page.sat-theme-dark .sat-chip-subtext,
+.sat-page.sat-theme-dark .sat-weather-metric-note,
+.sat-page.sat-theme-dark .sat-weather-impact-summary,
+.sat-page.sat-theme-dark .sat-soil-fact-note,
+.sat-page.sat-theme-dark .sat-fqv-note,
+.sat-page.sat-theme-dark .sat-output-sub,
+.sat-page.sat-theme-dark .sat-results-meta > span,
+.sat-page.sat-theme-dark .sat-action-btn.secondary {
+  color: #a8b4bf;
+}
+
+.sat-page.sat-theme-dark .sat-select-chip.active,
+.sat-page.sat-theme-dark .sat-workflow-chip.done,
+.sat-page.sat-theme-dark .sat-recent-chip,
+.sat-page.sat-theme-dark .sat-lang-btn.active,
+.sat-page.sat-theme-dark .sat-results-meta > span {
+  background: #2d2f38;
+  border-color: #b8653b;
+  color: #f4d7c4;
+}
+
+.sat-page.sat-theme-dark .sat-geo-btn,
+.sat-page.sat-theme-dark .sat-go-btn {
+  background: linear-gradient(180deg, #315978 0%, #254762 100%);
+  border-color: #4d7898;
+  color: #eef3f8;
+}
+
+.sat-page.sat-theme-dark .sat-analyze-btn {
+  background: linear-gradient(180deg, #ca7b4f 0%, #ab5d35 100%);
+  box-shadow: 0 14px 26px rgba(92, 49, 29, 0.4);
+}
+
+.sat-page.sat-theme-dark .sat-error,
+.sat-page.sat-theme-dark .sat-coord-warning,
+.sat-page.sat-theme-dark .sat-boundary-required,
+.sat-page.sat-theme-dark .sat-boundary-help,
+.sat-page.sat-theme-dark .sat-critical-alert {
+  background: #3a2a23;
+  border-color: #8a5b43;
+  color: #f2ccb3;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 2026 redesign v3: Premium Green surfaces (final polish)                    */
+/* -------------------------------------------------------------------------- */
+
+.sat-page {
+  --pg-bg: #eef5ef;
+  --pg-surface: #ffffff;
+  --pg-surface-soft: #f4faf4;
+  --pg-border: #d4e3d4;
+  --pg-text: #153928;
+  --pg-muted: #57715f;
+  --pg-primary: #2f7a4a;
+  --pg-primary-strong: #205a38;
+  --pg-accent: #89b998;
+  background:
+    radial-gradient(980px 420px at 0% -10%, rgba(96, 170, 116, 0.18), transparent 56%),
+    radial-gradient(1200px 520px at 100% -15%, rgba(59, 123, 76, 0.18), transparent 60%),
+    linear-gradient(180deg, #edf4ee 0%, #e8f1e8 45%, #eef6ef 100%);
+  color: var(--pg-text);
+}
+
+.sat-header {
+  background: rgba(248, 252, 248, 0.9);
+  border-bottom: 1px solid #d5e2d5;
+  box-shadow: 0 8px 22px rgba(28, 74, 42, 0.1);
+}
+
+.sat-logo-btn {
+  color: var(--pg-primary-strong);
+}
+
+.sat-nav-btn {
+  border: 1px solid #cfe0cf;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.8);
+  color: #2a4937;
+  font-weight: 700;
+  text-transform: none;
+}
+
+.sat-nav-btn:hover {
+  border-color: #95c2a4;
+  background: #ecf7ef;
+}
+
+.sat-welcome,
+.sat-main-card,
+.sat-results {
+  border: 1px solid var(--pg-border);
+  border-radius: 24px;
+  background:
+    linear-gradient(170deg, rgba(255, 255, 255, 0.95) 0%, rgba(246, 251, 246, 0.95) 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 14px 28px rgba(33, 84, 50, 0.1),
+    0 30px 48px rgba(33, 84, 50, 0.08);
+}
+
+.sat-welcome {
+  border-radius: 26px;
+}
+
+.sat-title {
+  color: #113b26;
+}
+
+.sat-subtitle {
+  color: var(--pg-muted);
+}
+
+.sat-workflow-strip {
+  border: 1px solid #d6e5d7;
+  border-radius: 14px;
+  background: #f7fcf7;
+}
+
+.sat-workflow-chip {
+  border: 1px solid #dce8dc;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #6b7f6e;
+}
+
+.sat-workflow-chip.done {
+  border-color: #9dcaab;
+  background: #e7f6ea;
+  color: #235c3a;
+}
+
+.sat-local-context {
+  border: 1px solid #d4e4d5;
+  border-radius: 14px;
+  background: #f5fbf6;
+}
+
+.sat-local-context-title {
+  color: #2c5f40;
+}
+
+.sat-local-context-item {
+  border: 1px solid #dce8dc;
+  border-radius: 11px;
+  background: #ffffff;
+}
+
+.sat-local-context-kicker {
+  color: #6b806f;
+}
+
+.sat-local-context-value {
+  color: #1d4a32;
+}
+
+.sat-main-card,
+.sat-results {
+  padding: 1.06rem;
+}
+
+.sat-section {
+  border: 1px solid #dbe8dc;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #f9fdf9 100%);
+  box-shadow: 0 6px 16px rgba(47, 122, 74, 0.06);
+}
+
+.sat-section-title {
+  color: #2f6144;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+}
+
+.sat-select-chip,
+.sat-control-group,
+.sat-field-report,
+.sat-farmer-quickview,
+.sat-weather-impact-panel,
+.sat-soil-suite,
+.sat-rec-group,
+.sat-rec-card,
+.sat-output-card,
+.sat-engine-strip,
+.sat-engine-card,
+.sat-soil-suite-card,
+.sat-weather-metric-card,
+.sat-weather-impact-insight-item,
+.sat-soil-fact-card,
+.sat-soil-impact-item,
+.sat-fqv-card,
+.sat-action-btn.secondary,
+.sat-results-header,
+.sat-input,
+.sat-history-select,
+.sat-lang-toggle,
+.sat-map-wrapper,
+.sat-heatmap-map-wrapper,
+.sat-city-overlay-name,
+.sat-heat-legend {
+  border: 1px solid #d6e4d7;
+  border-radius: 14px;
+  background: var(--pg-surface);
+  box-shadow: 0 8px 20px rgba(32, 88, 51, 0.07);
+}
+
+.sat-select-chip {
+  border-radius: 12px;
+}
+
+.sat-select-chip:hover:not(.disabled) {
+  border-color: #94c2a2;
+  background: #f2f9f3;
+}
+
+.sat-select-chip.active {
+  border-color: #5ea374;
+  background: linear-gradient(180deg, #ecf8ef 0%, #e3f3e8 100%);
+  color: #1f5938;
+  box-shadow: 0 10px 18px rgba(39, 101, 60, 0.14);
+}
+
+.sat-control-group {
+  background: linear-gradient(180deg, #ffffff 0%, #f7fcf8 100%);
+}
+
+.sat-control-group-primary {
+  border-color: #c5dec9;
+  background: linear-gradient(180deg, #f8fdf8 0%, #edf8ef 100%);
+}
+
+.sat-input,
+.sat-history-select {
+  border-radius: 11px;
+  background: #fcfffc;
+}
+
+.sat-input:focus,
+.sat-history-select:focus {
+  border-color: #6ba982;
+  box-shadow: 0 0 0 3px rgba(74, 140, 94, 0.16);
+}
+
+.sat-lang-toggle {
+  background: #f7fcf7;
+}
+
+.sat-lang-btn.active {
+  border-color: #9cc8aa;
+  background: #e9f6ec;
+  color: #2b6543;
+}
+
+.sat-geo-btn,
+.sat-go-btn {
+  border: 1px solid #7db58f;
+  border-radius: 11px;
+  background: linear-gradient(180deg, #e9f7ed 0%, #dff2e5 100%);
+  color: #205a38;
+}
+
+.sat-geo-btn:hover:not(:disabled),
+.sat-go-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #e2f3e8 0%, #d4eddc 100%);
+  box-shadow: 0 10px 18px rgba(45, 108, 64, 0.16);
+}
+
+.sat-recent-chip {
+  border: 1px solid #a8cfb3;
+  background: #ebf8ee;
+  color: #2b6342;
+}
+
+.sat-recent-chip:hover {
+  background: #e2f3e7;
+}
+
+.sat-map-wrapper,
+.sat-heatmap-map-wrapper {
+  border-width: 1px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.85) inset,
+    0 14px 24px rgba(40, 95, 57, 0.14);
+}
+
+.sat-map-wrapper {
+  height: 455px;
+}
+
+.sat-city-label {
+  border-radius: 999px;
+  border-color: #d2e2d5;
+  background: rgba(255, 255, 255, 0.95);
+  color: #27593d;
+}
+
+.sat-analyze-btn {
+  border-radius: 14px;
+  background: linear-gradient(180deg, #2f7a4a 0%, #225f39 100%);
+  box-shadow: 0 14px 24px rgba(34, 95, 58, 0.29);
+}
+
+.sat-analyze-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #3a8a57 0%, #2d6f45 100%);
+}
+
+.sat-error,
+.sat-coord-warning,
+.sat-boundary-required,
+.sat-boundary-help,
+.sat-critical-alert {
+  border: 1px solid #bdd9c5;
+  background: #eef8f1;
+  color: #25553a;
+}
+
+.sat-results-header {
+  background: linear-gradient(135deg, #f9fdf9 0%, #edf7ef 100%);
+}
+
+.sat-results-title,
+.sat-report-label,
+.sat-weather-impact-title,
+.sat-fqv-title,
+.sat-soil-block-title,
+.sat-engine-value,
+.sat-output-value,
+.sat-soil-suite-value,
+.sat-soil-fact-value,
+.sat-weather-impact-insight-head,
+.sat-soil-impact-title,
+.sat-fqv-action-title {
+  color: #18472f;
+}
+
+.sat-results-meta > span,
+.sat-output-card.focus,
+.sat-rec-group.planned,
+.sat-driver-pill,
+.sat-rec-timing-badge {
+  border: 1px solid #cbe0d0;
+  background: #edf7ef;
+  color: #2a6242;
+}
+
+.sat-data-badge.real {
+  border-color: #a9d7b7;
+  background: #e7f7ec;
+  color: #1e5b37;
+}
+
+.sat-rec-group.immediate,
+.sat-output-card.priority,
+.sat-output-card.timeline {
+  border-left: 4px solid #4f9d67;
+  background: linear-gradient(180deg, #f4fbf5 0%, #ecf7ef 100%);
+}
+
+.sat-action-btn.secondary {
+  border: 1px solid #d2dfd6;
+  background: #f5faf6;
+  color: #4d6657;
+}
+
+.sat-action-btn.secondary:hover {
+  background: #edf5ef;
+}
+
+.sat-page.sat-theme-dark {
+  background:
+    radial-gradient(900px 360px at 0% -10%, rgba(72, 156, 95, 0.22), transparent 56%),
+    radial-gradient(1100px 460px at 100% -12%, rgba(56, 118, 78, 0.22), transparent 60%),
+    linear-gradient(180deg, #101a13 0%, #132218 52%, #0f1912 100%);
+}
+
+.sat-page.sat-theme-dark .sat-header {
+  background: rgba(15, 30, 20, 0.92);
+  border-bottom-color: #2e4c37;
+}
+
+.sat-page.sat-theme-dark .sat-nav-btn {
+  border-color: #3f6a4c;
+  background: rgba(73, 133, 92, 0.16);
+  color: #d2ecd9;
+}
+
+.sat-page.sat-theme-dark .sat-welcome,
+.sat-page.sat-theme-dark .sat-main-card,
+.sat-page.sat-theme-dark .sat-results,
+.sat-page.sat-theme-dark .sat-section,
+.sat-page.sat-theme-dark .sat-control-group,
+.sat-page.sat-theme-dark .sat-results-header,
+.sat-page.sat-theme-dark .sat-local-context,
+.sat-page.sat-theme-dark .sat-local-context-item,
+.sat-page.sat-theme-dark .sat-field-report,
+.sat-page.sat-theme-dark .sat-farmer-quickview,
+.sat-page.sat-theme-dark .sat-weather-impact-panel,
+.sat-page.sat-theme-dark .sat-soil-suite,
+.sat-page.sat-theme-dark .sat-rec-group,
+.sat-page.sat-theme-dark .sat-rec-card,
+.sat-page.sat-theme-dark .sat-output-card,
+.sat-page.sat-theme-dark .sat-engine-strip,
+.sat-page.sat-theme-dark .sat-engine-card,
+.sat-page.sat-theme-dark .sat-soil-suite-card,
+.sat-page.sat-theme-dark .sat-weather-metric-card,
+.sat-page.sat-theme-dark .sat-weather-impact-insight-item,
+.sat-page.sat-theme-dark .sat-soil-fact-card,
+.sat-page.sat-theme-dark .sat-soil-impact-item,
+.sat-page.sat-theme-dark .sat-fqv-card,
+.sat-page.sat-theme-dark .sat-action-btn.secondary,
+.sat-page.sat-theme-dark .sat-lang-toggle,
+.sat-page.sat-theme-dark .sat-input,
+.sat-page.sat-theme-dark .sat-select-chip,
+.sat-page.sat-theme-dark .sat-city-label,
+.sat-page.sat-theme-dark .sat-city-overlay-name,
+.sat-page.sat-theme-dark .sat-heat-legend,
+.sat-page.sat-theme-dark .sat-map-wrapper,
+.sat-page.sat-theme-dark .sat-heatmap-map-wrapper,
+.sat-page.sat-theme-dark .sat-results-meta > span,
+.sat-page.sat-theme-dark .sat-output-card.focus,
+.sat-page.sat-theme-dark .sat-rec-group.planned {
+  background: #18291e;
+  border-color: #335440;
+  color: #e4f3e8;
+}
+
+.sat-page.sat-theme-dark .sat-title,
+.sat-page.sat-theme-dark .sat-results-title,
+.sat-page.sat-theme-dark .sat-report-label,
+.sat-page.sat-theme-dark .sat-weather-impact-title,
+.sat-page.sat-theme-dark .sat-fqv-title,
+.sat-page.sat-theme-dark .sat-soil-block-title,
+.sat-page.sat-theme-dark .sat-engine-value,
+.sat-page.sat-theme-dark .sat-output-value,
+.sat-page.sat-theme-dark .sat-soil-suite-value,
+.sat-page.sat-theme-dark .sat-soil-fact-value,
+.sat-page.sat-theme-dark .sat-weather-impact-insight-head,
+.sat-page.sat-theme-dark .sat-soil-impact-title,
+.sat-page.sat-theme-dark .sat-fqv-action-title,
+.sat-page.sat-theme-dark .sat-local-context-value {
+  color: #effaf2;
+}
+
+.sat-page.sat-theme-dark .sat-subtitle,
+.sat-page.sat-theme-dark .sat-workflow-chip,
+.sat-page.sat-theme-dark .sat-local-context-kicker,
+.sat-page.sat-theme-dark .sat-chip-subtext,
+.sat-page.sat-theme-dark .sat-weather-metric-note,
+.sat-page.sat-theme-dark .sat-weather-impact-summary,
+.sat-page.sat-theme-dark .sat-soil-fact-note,
+.sat-page.sat-theme-dark .sat-fqv-note,
+.sat-page.sat-theme-dark .sat-output-sub,
+.sat-page.sat-theme-dark .sat-action-btn.secondary {
+  color: #a8c0b1;
+}
+
+.sat-page.sat-theme-dark .sat-select-chip.active,
+.sat-page.sat-theme-dark .sat-workflow-chip.done,
+.sat-page.sat-theme-dark .sat-recent-chip,
+.sat-page.sat-theme-dark .sat-lang-btn.active,
+.sat-page.sat-theme-dark .sat-results-meta > span,
+.sat-page.sat-theme-dark .sat-output-card.focus,
+.sat-page.sat-theme-dark .sat-rec-group.planned {
+  background: #203727;
+  border-color: #4f8a64;
+  color: #d7f0de;
+}
+
+.sat-page.sat-theme-dark .sat-geo-btn,
+.sat-page.sat-theme-dark .sat-go-btn {
+  background: linear-gradient(180deg, #2f7a4a 0%, #245f3a 100%);
+  border-color: #4f9a67;
+  color: #ecf9f0;
+}
+
+.sat-page.sat-theme-dark .sat-analyze-btn {
+  background: linear-gradient(180deg, #3f9760 0%, #2e7448 100%);
+  box-shadow: 0 14px 24px rgba(28, 80, 48, 0.42);
+}
+
+.sat-page.sat-theme-dark .sat-error,
+.sat-page.sat-theme-dark .sat-coord-warning,
+.sat-page.sat-theme-dark .sat-boundary-required,
+.sat-page.sat-theme-dark .sat-boundary-help,
+.sat-page.sat-theme-dark .sat-critical-alert {
+  background: #203427;
+  border-color: #4f7f60;
+  color: #cfe8d6;
+}
+
+@media (max-width: 1100px) {
+  .sat-location-controls {
+    position: static;
+  }
+}
+
+@media (max-width: 900px) {
+  .sat-local-context-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sat-map-wrapper {
+    height: 380px;
+  }
+}
+
+@media (max-width: 768px) {
+  .sat-main-card,
+  .sat-results,
+  .sat-welcome {
+    border-radius: 18px;
+  }
+
+  .sat-map-wrapper {
+    height: 330px;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Alignment + consistency fixes                                               */
+/* -------------------------------------------------------------------------- */
+
+.sat-page {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+}
+
+.sat-welcome::after {
+  display: none;
+}
+
+.sat-container {
+  max-width: 1240px;
+}
+
+.sat-main-card,
+.sat-results,
+.sat-welcome {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.sat-main-card {
+  padding: 1rem;
+}
+
+.sat-location-layout {
+  grid-template-columns: minmax(300px, 390px) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.sat-location-controls {
+  position: static;
+  top: auto;
+}
+
+.sat-control-group,
+.sat-map-wrapper,
+.sat-section,
+.sat-results-header,
+.sat-field-report,
+.sat-farmer-quickview,
+.sat-weather-impact-panel,
+.sat-soil-suite,
+.sat-rec-group,
+.sat-rec-card,
+.sat-output-card,
+.sat-engine-strip,
+.sat-engine-card {
+  box-shadow: 0 10px 22px rgba(26, 74, 44, 0.08);
+}
+
+/* Premium map drawing controls */
+.leaflet-draw {
+  margin-top: 8px !important;
+  margin-left: 8px !important;
+}
+
+.leaflet-draw-toolbar {
+  border: 1px solid #c7dccd !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(30, 88, 50, 0.18);
+}
+
+.leaflet-draw-toolbar a {
+  width: 34px !important;
+  height: 34px !important;
+  line-height: 34px !important;
+  border-bottom-color: #d6e4d8 !important;
+  background-color: #ffffff !important;
+  color: #205f39 !important;
+  position: relative;
+}
+
+.leaflet-draw-toolbar a:hover {
+  background-color: #ecf8ef !important;
+}
+
+.leaflet-draw-toolbar .leaflet-draw-draw-rectangle {
+  background-image: none !important;
+}
+
+.leaflet-draw-toolbar .leaflet-draw-draw-rectangle::before {
+  content: "✎";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  font-weight: 700;
+  color: #1f6c40;
+}
+
+.leaflet-draw-toolbar .leaflet-draw-edit-edit {
+  display: none !important;
+}
+
+.leaflet-draw-actions {
+  border-radius: 10px !important;
+  border-color: #c7dccd !important;
+  box-shadow: 0 8px 18px rgba(30, 88, 50, 0.16);
+}
+
+.leaflet-draw-actions a {
+  color: #205f39 !important;
+  background: #ffffff !important;
+}
+
+/* Keep this page dark mode aligned with app-wide simple dark style */
+.sat-page.sat-theme-dark {
+  background: #0f172a;
+  color: #e5e7eb;
+}
+
+.sat-page.sat-theme-dark .sat-header {
+  background: rgba(17, 24, 39, 0.9);
+  border-bottom-color: #2b3445;
+  box-shadow: none;
+}
+
+.sat-page.sat-theme-dark .sat-welcome,
+.sat-page.sat-theme-dark .sat-main-card,
+.sat-page.sat-theme-dark .sat-results,
+.sat-page.sat-theme-dark .sat-section,
+.sat-page.sat-theme-dark .sat-control-group,
+.sat-page.sat-theme-dark .sat-results-header,
+.sat-page.sat-theme-dark .sat-local-context,
+.sat-page.sat-theme-dark .sat-local-context-item,
+.sat-page.sat-theme-dark .sat-field-report,
+.sat-page.sat-theme-dark .sat-farmer-quickview,
+.sat-page.sat-theme-dark .sat-weather-impact-panel,
+.sat-page.sat-theme-dark .sat-soil-suite,
+.sat-page.sat-theme-dark .sat-rec-group,
+.sat-page.sat-theme-dark .sat-rec-card,
+.sat-page.sat-theme-dark .sat-output-card,
+.sat-page.sat-theme-dark .sat-engine-strip,
+.sat-page.sat-theme-dark .sat-engine-card,
+.sat-page.sat-theme-dark .sat-soil-suite-card,
+.sat-page.sat-theme-dark .sat-weather-metric-card,
+.sat-page.sat-theme-dark .sat-weather-impact-insight-item,
+.sat-page.sat-theme-dark .sat-soil-fact-card,
+.sat-page.sat-theme-dark .sat-soil-impact-item,
+.sat-page.sat-theme-dark .sat-fqv-card,
+.sat-page.sat-theme-dark .sat-action-btn.secondary,
+.sat-page.sat-theme-dark .sat-lang-toggle,
+.sat-page.sat-theme-dark .sat-input,
+.sat-page.sat-theme-dark .sat-select-chip,
+.sat-page.sat-theme-dark .sat-city-label,
+.sat-page.sat-theme-dark .sat-city-overlay-name,
+.sat-page.sat-theme-dark .sat-heat-legend,
+.sat-page.sat-theme-dark .sat-map-wrapper,
+.sat-page.sat-theme-dark .sat-heatmap-map-wrapper,
+.sat-page.sat-theme-dark .sat-results-meta > span,
+.sat-page.sat-theme-dark .sat-output-card.focus,
+.sat-page.sat-theme-dark .sat-rec-group.planned,
+.sat-page.sat-theme-dark .sat-nav-btn {
+  background: #111827;
+  border-color: #2b3445;
+  color: #e5e7eb;
+}
+
+.sat-page.sat-theme-dark .sat-subtitle,
+.sat-page.sat-theme-dark .sat-chip-subtext,
+.sat-page.sat-theme-dark .sat-weather-metric-note,
+.sat-page.sat-theme-dark .sat-weather-impact-summary,
+.sat-page.sat-theme-dark .sat-soil-fact-note,
+.sat-page.sat-theme-dark .sat-fqv-note,
+.sat-page.sat-theme-dark .sat-output-sub,
+.sat-page.sat-theme-dark .sat-workflow-chip,
+.sat-page.sat-theme-dark .sat-local-context-kicker {
+  color: #9aa6ba;
+}
+
+.sat-page.sat-theme-dark .sat-select-chip.active,
+.sat-page.sat-theme-dark .sat-workflow-chip.done,
+.sat-page.sat-theme-dark .sat-recent-chip,
+.sat-page.sat-theme-dark .sat-lang-btn.active,
+.sat-page.sat-theme-dark .sat-geo-btn,
+.sat-page.sat-theme-dark .sat-go-btn,
+.sat-page.sat-theme-dark .sat-results-meta > span,
+.sat-page.sat-theme-dark .sat-output-card.focus,
+.sat-page.sat-theme-dark .sat-rec-group.planned {
+  background: #172b20;
+  border-color: #2f6b49;
+  color: #b6eacb;
+}
+
+.sat-page.sat-theme-dark .sat-analyze-btn {
+  background: linear-gradient(180deg, #3f9760 0%, #2e7448 100%);
+}
+
+.sat-page.sat-theme-dark .sat-error,
+.sat-page.sat-theme-dark .sat-coord-warning,
+.sat-page.sat-theme-dark .sat-boundary-required,
+.sat-page.sat-theme-dark .sat-boundary-help,
+.sat-page.sat-theme-dark .sat-critical-alert {
+  background: #122a1c;
+  border-color: #2a5438;
+  color: #a7d4b5;
+}
+
+@media (max-width: 980px) {
+  .sat-location-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Draw UX: no cancel/save menu, direct actions only */
+.leaflet-draw-actions {
+  display: none !important;
+}
+
+.sat-compact-indices-box {
+  margin-top: 0.75rem;
+  border: 1px solid #d4e3d6;
+  border-radius: 12px;
+  background: #fbfefb;
+  padding: 0.58rem 0.62rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.48rem 0.65rem;
+}
+
+.sat-compact-index-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.sat-compact-index-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+}
+
+.sat-compact-index-label {
+  font-size: 0.67rem;
+  font-weight: 800;
+  color: #4f6b58;
+  letter-spacing: 0.04em;
+}
+
+.sat-compact-index-value {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #1e4d32;
+}
+
+.sat-compact-index-track {
+  height: 7px;
+  border-radius: 999px;
+  background: #e3ece5;
+  overflow: hidden;
+}
+
+.sat-compact-index-fill {
+  height: 100%;
+  border-radius: inherit;
+  box-shadow: 0 0 0 1px rgba(17, 48, 31, 0.08);
+}
+
+.sat-page.sat-theme-dark .sat-compact-indices-box {
+  border-color: #335440;
+  background: #18291e;
+}
+
+.sat-page.sat-theme-dark .sat-compact-index-label {
+  color: #a8c0b1;
+}
+
+.sat-page.sat-theme-dark .sat-compact-index-value {
+  color: #e8f4ec;
+}
+
+.sat-page.sat-theme-dark .sat-compact-index-track {
+  background: #2a4333;
+}
+
+@media (max-width: 900px) {
+  .sat-compact-indices-box {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Restore dustbin button style on draw toolbar with immediate delete behavior */
+.leaflet-draw-toolbar .leaflet-draw-edit-remove {
+  background-image: none !important;
+}
+
+.leaflet-draw-toolbar .leaflet-draw-edit-remove::before {
+  content: "🗑";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* Field report hierarchy: breathe more, make priority content obvious */
+.sat-field-report {
+  padding: 1.05rem;
+}
+
+.sat-field-report-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.sat-report-kicker {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #5f7a67;
+  margin-bottom: 0.18rem;
+}
+
+.sat-report-summary-text {
+  margin: 0.5rem 0 0.7rem;
+  line-height: 1.5;
+  max-width: 820px;
+}
+
+.sat-report-highlights {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-top: 0.55rem;
+}
+
+.sat-report-highlight-card {
+  border: 1px solid #d7e4d8;
+  border-radius: 12px;
+  background: #f9fdf9;
+  padding: 0.62rem 0.68rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sat-report-priority-notes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-top: 0.72rem;
+}
+
+.sat-report-note-item {
+  border-left: 3px solid #68a67e;
+  background: #f4faf5;
+  border-radius: 10px;
+  padding: 0.56rem 0.65rem;
+}
+
+.sat-report-note-label {
+  display: block;
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #5b7262;
+  font-weight: 800;
+}
+
+.sat-report-note-text {
+  display: block;
+  margin-top: 0.16rem;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: #274d36;
+}
+
+.sat-page.sat-theme-dark .sat-report-kicker,
+.sat-page.sat-theme-dark .sat-report-note-label {
+  color: #9ec3ab;
+}
+
+.sat-page.sat-theme-dark .sat-report-highlight-card {
+  border-color: #335440;
+  background: #1a2d21;
+}
+
+.sat-page.sat-theme-dark .sat-report-note-item {
+  border-left-color: #4f8a64;
+  background: #1a2f22;
+}
+
+.sat-page.sat-theme-dark .sat-report-note-text {
+  color: #d4e9db;
+}
+
+@media (max-width: 920px) {
+  .sat-report-highlights,
+  .sat-report-priority-notes {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* FINAL SATELLITE CARD DENSITY FIX */
+.sat-recommendations-readable .sat-rec-group {
+  padding: 0.42rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-group-title {
+  margin: 0 0 0.26rem !important;
+  font-size: 0.7rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-card {
+  padding: 0.46rem 0.5rem !important;
+  margin-bottom: 0.24rem !important;
+  border-radius: 9px !important;
+  border-left-width: 4px !important;
+}
+
+.sat-recommendations-readable .sat-rec-header {
+  margin-bottom: 0.06rem !important;
+  gap: 0.15rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-type {
+  font-size: 0.8rem !important;
+  line-height: 1.25 !important;
+}
+
+.sat-recommendations-readable .sat-rec-badges {
+  gap: 0.12rem !important;
+}
+
+.sat-recommendations-readable .sat-priority-badge,
+.sat-recommendations-readable .sat-rec-timing-badge {
+  padding: 0.07rem 0.24rem !important;
+  font-size: 0.56rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-key-grid {
+  gap: 0.12rem !important;
+  margin-bottom: 0.06rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-key-chip {
+  padding: 0.07rem 0.24rem !important;
+  font-size: 0.58rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-action {
+  margin: 0.06rem 0 0.1rem !important;
+  font-size: 0.76rem !important;
+  line-height: 1.28 !important;
+}
+
+.sat-recommendations-readable .sat-rec-weather-note {
+  margin: 0.08rem 0 0.06rem !important;
+  padding: 0.14rem 0.24rem !important;
+  font-size: 0.64rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-brief {
+  margin-top: 0.08rem !important;
+  padding: 0.12rem 0.2rem !important;
+  gap: 0.04rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-brief-row {
+  grid-template-columns: 42px 1fr !important;
+  gap: 0.12rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-brief-label {
+  font-size: 0.52rem !important;
+  line-height: 1.1 !important;
+}
+
+.sat-recommendations-readable .sat-rec-brief-text {
+  font-size: 0.64rem !important;
+  line-height: 1.18 !important;
+  -webkit-line-clamp: 1;
+}
+
+.sat-recommendations-readable .sat-rec-brief-row-timeline .sat-rec-brief-text {
+  -webkit-line-clamp: 1;
+}
+
+.sat-recommendations-readable .sat-rec-more {
+  margin-top: 0.08rem !important;
+  padding-top: 0.08rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-more summary {
+  font-size: 0.62rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-detail {
+  margin: 0.03rem 0 !important;
+  font-size: 0.62rem !important;
+  line-height: 1.2 !important;
+}
+
+@media (max-width: 768px) {
+  .sat-recommendations-readable .sat-rec-group {
+    padding: 0.34rem !important;
+  }
+
+  .sat-recommendations-readable .sat-rec-card {
+    padding: 0.4rem 0.4rem !important;
+    margin-bottom: 0.2rem !important;
+  }
+}
+
+/* FINAL OVERRIDE: keep layout, fix recommendation readability */
+.sat-recommendations-readable .sat-rec-group {
+  padding: 0.44rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-group-title {
+  margin: 0 0 0.3rem !important;
+  font-size: 0.72rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-card {
+  padding: 0.52rem 0.56rem !important;
+  margin-bottom: 0.3rem !important;
+  border-radius: 9px !important;
+  border-left-width: 4px !important;
+  box-shadow: 0 4px 10px rgba(20, 52, 33, 0.08) !important;
+}
+
+.sat-recommendations-readable .sat-rec-header {
+  margin-bottom: 0.08rem !important;
+  gap: 0.18rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-type {
+  font-size: 0.84rem !important;
+  line-height: 1.28 !important;
+}
+
+.sat-recommendations-readable .sat-rec-badges {
+  gap: 0.14rem !important;
+}
+
+.sat-recommendations-readable .sat-priority-badge,
+.sat-recommendations-readable .sat-rec-timing-badge {
+  padding: 0.08rem 0.3rem !important;
+  font-size: 0.58rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-key-grid {
+  gap: 0.14rem !important;
+  margin-bottom: 0.08rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-key-chip {
+  padding: 0.08rem 0.3rem !important;
+  font-size: 0.6rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-action {
+  margin: 0.08rem 0 0.14rem !important;
+  font-size: 0.8rem !important;
+  line-height: 1.32 !important;
+}
+
+.sat-recommendations-readable .sat-rec-weather-note {
+  margin: 0.1rem 0 0.08rem !important;
+  padding: 0.18rem 0.3rem !important;
+  font-size: 0.68rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-brief {
+  margin-top: 0.1rem !important;
+  padding: 0.16rem 0.28rem !important;
+  gap: 0.06rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-brief-row {
+  grid-template-columns: 46px 1fr !important;
+  gap: 0.16rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-brief-label {
+  font-size: 0.55rem !important;
+  line-height: 1.15 !important;
+}
+
+.sat-recommendations-readable .sat-rec-brief-text {
+  font-size: 0.67rem !important;
+  line-height: 1.22 !important;
+  -webkit-line-clamp: 1;
+}
+
+.sat-recommendations-readable .sat-rec-more {
+  margin-top: 0.12rem !important;
+  padding-top: 0.12rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-more summary {
+  font-size: 0.66rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-detail {
+  margin: 0.04rem 0 !important;
+  font-size: 0.67rem !important;
+  line-height: 1.25 !important;
+}
+
+@media (max-width: 768px) {
+  .sat-recommendations-readable .sat-rec-group {
+    padding: 0.38rem !important;
+  }
+
+  .sat-recommendations-readable .sat-rec-card {
+    padding: 0.46rem 0.46rem !important;
+    margin-bottom: 0.24rem !important;
+  }
+}
+
+/* Final compact spacing override for recommendation cards */
+.sat-recommendations .sat-rec-group {
+  padding: 0.5rem !important;
+}
+
+.sat-recommendations .sat-rec-group-title {
+  margin: 0 0 0.34rem !important;
+}
+
+.sat-recommendations .sat-rec-card {
+  padding: 0.58rem 0.64rem !important;
+  margin-bottom: 0.34rem !important;
+  border-radius: 10px !important;
+}
+
+.sat-recommendations .sat-rec-header {
+  margin-bottom: 0.12rem !important;
+  gap: 0.24rem !important;
+}
+
+.sat-recommendations .sat-rec-badges {
+  gap: 0.18rem !important;
+}
+
+.sat-recommendations .sat-priority-badge,
+.sat-recommendations .sat-rec-timing-badge {
+  padding: 0.1rem 0.34rem !important;
+  font-size: 0.6rem !important;
+}
+
+.sat-recommendations .sat-rec-key-grid {
+  gap: 0.18rem !important;
+  margin-bottom: 0.1rem !important;
+}
+
+.sat-recommendations .sat-rec-key-chip {
+  padding: 0.1rem 0.36rem !important;
+  font-size: 0.62rem !important;
+}
+
+.sat-recommendations .sat-rec-action {
+  margin: 0.1rem 0 0.16rem !important;
+  font-size: 0.82rem !important;
+  line-height: 1.36 !important;
+}
+
+.sat-recommendations .sat-rec-weather-note {
+  margin: 0.12rem 0 0.1rem !important;
+  padding: 0.2rem 0.34rem !important;
+  font-size: 0.7rem !important;
+}
+
+.sat-recommendations .sat-rec-brief {
+  margin-top: 0.14rem !important;
+  padding: 0.2rem 0.34rem !important;
+  gap: 0.08rem !important;
+}
+
+.sat-recommendations .sat-rec-brief-row {
+  grid-template-columns: 50px 1fr !important;
+  gap: 0.22rem !important;
+  min-height: 0 !important;
+}
+
+.sat-recommendations .sat-rec-brief-label {
+  font-size: 0.58rem !important;
+  line-height: 1.2 !important;
+}
+
+.sat-recommendations .sat-rec-brief-text {
+  font-size: 0.7rem !important;
+  line-height: 1.26 !important;
+  -webkit-line-clamp: 1;
+}
+
+.sat-recommendations .sat-rec-more {
+  margin-top: 0.16rem !important;
+  padding-top: 0.16rem !important;
+}
+
+.sat-recommendations .sat-rec-more summary {
+  font-size: 0.7rem !important;
+}
+
+.sat-recommendations .sat-rec-detail {
+  margin: 0.05rem 0 !important;
+  font-size: 0.7rem !important;
+  line-height: 1.3 !important;
+}
+
+@media (max-width: 768px) {
+  .sat-recommendations .sat-rec-group {
+    padding: 0.44rem !important;
+  }
+
+  .sat-recommendations .sat-rec-card {
+    padding: 0.52rem 0.52rem !important;
+    margin-bottom: 0.3rem !important;
+  }
+}
+
+/* Final compact pass: tighten recommendation card spacing for readability */
+.sat-recommendations .sat-rec-group {
+  padding: 0.56rem;
+}
+
+.sat-recommendations .sat-rec-group-title {
+  margin: 0 0 0.4rem;
+}
+
+.sat-recommendations .sat-rec-card {
+  padding: 0.64rem 0.7rem;
+  margin-bottom: 0.4rem;
+  border-radius: 11px;
+}
+
+.sat-recommendations .sat-rec-header {
+  margin-bottom: 0.18rem;
+  gap: 0.3rem;
+}
+
+.sat-recommendations .sat-rec-type {
+  font-size: 0.88rem;
+  line-height: 1.3;
+}
+
+.sat-recommendations .sat-rec-badges {
+  gap: 0.22rem;
+}
+
+.sat-recommendations .sat-priority-badge,
+.sat-recommendations .sat-rec-timing-badge {
+  padding: 0.12rem 0.38rem;
+  font-size: 0.61rem;
+}
+
+.sat-recommendations .sat-rec-key-grid {
+  gap: 0.24rem;
+  margin-bottom: 0.14rem;
+}
+
+.sat-recommendations .sat-rec-key-chip {
+  padding: 0.12rem 0.42rem;
+  font-size: 0.64rem;
+}
+
+.sat-recommendations .sat-rec-action {
+  margin: 0.14rem 0 0.22rem;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.sat-recommendations .sat-rec-weather-note {
+  margin: 0.16rem 0 0.14rem;
+  padding: 0.24rem 0.42rem;
+  font-size: 0.72rem;
+}
+
+.sat-recommendations .sat-rec-brief {
+  margin-top: 0.22rem;
+  padding: 0.24rem 0.42rem;
+  gap: 0.12rem;
+}
+
+.sat-recommendations .sat-rec-brief-row {
+  grid-template-columns: 56px 1fr;
+  gap: 0.28rem;
+  min-height: 0;
+}
+
+.sat-recommendations .sat-rec-brief-label {
+  font-size: 0.62rem;
+  line-height: 1.24;
+}
+
+.sat-recommendations .sat-rec-brief-text {
+  font-size: 0.73rem;
+  line-height: 1.3;
+  -webkit-line-clamp: 1;
+}
+
+.sat-recommendations .sat-rec-more {
+  margin-top: 0.24rem;
+  padding-top: 0.24rem;
+}
+
+.sat-recommendations .sat-rec-more summary {
+  font-size: 0.72rem;
+}
+
+.sat-recommendations .sat-rec-detail {
+  margin: 0.08rem 0;
+  font-size: 0.73rem;
+  line-height: 1.34;
+}
+
+.sat-page.sat-theme-dark .sat-recommendations .sat-rec-card,
+.sat-page.sat-theme-dark .sat-recommendations .sat-rec-brief {
+  border-color: #355341;
+}
+
+@media (max-width: 768px) {
+  .sat-recommendations .sat-rec-group {
+    padding: 0.48rem;
+  }
+
+  .sat-recommendations .sat-rec-card {
+    padding: 0.58rem 0.58rem;
+    margin-bottom: 0.36rem;
+  }
+
+  .sat-recommendations .sat-rec-brief-row {
+    grid-template-columns: 52px 1fr;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Recommendation card refresh (layout preserved, card-only redesign)         */
+/* -------------------------------------------------------------------------- */
+
+.sat-recommendations .sat-rec-card {
+  position: relative;
+  border: 1px solid #cfe0d4;
+  border-left-width: 6px;
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #fbfefc 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.85) inset,
+    0 10px 20px rgba(23, 70, 43, 0.08);
+  padding: 0.9rem 0.95rem 0.86rem;
+  margin-bottom: 0.6rem;
+  transition: transform 160ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.sat-recommendations .sat-rec-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 16px 28px rgba(23, 70, 43, 0.12);
+  border-color: #b9d4c1;
+}
+
+.sat-recommendations .sat-rec-card.priority-critical,
+.sat-recommendations .sat-rec-card.priority-high {
+  border-left-color: #277949;
+}
+
+.sat-recommendations .sat-rec-card.priority-medium {
+  border-left-color: #4b9f6f;
+}
+
+.sat-recommendations .sat-rec-card.priority-low {
+  border-left-color: #84b89a;
+}
+
+.sat-recommendations .sat-rec-header {
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin-bottom: 0.42rem;
+}
+
+.sat-recommendations .sat-rec-type {
+  font-size: 0.95rem;
+  line-height: 1.3;
+  color: #143927;
+  font-weight: 800;
+}
+
+.sat-recommendations .sat-priority-badge {
+  border-radius: 999px;
+  padding: 0.2rem 0.54rem;
+  font-size: 0.64rem;
+  letter-spacing: 0.05em;
+  font-weight: 800;
+}
+
+.sat-recommendations .sat-priority-badge.priority-critical,
+.sat-recommendations .sat-priority-badge.priority-high {
+  background: #e8f6ee;
+  border-color: #9ecfb1;
+  color: #1b5b39;
+}
+
+.sat-recommendations .sat-priority-badge.priority-medium {
+  background: #eff8f2;
+  border-color: #b8d9c3;
+  color: #2d6e4b;
+}
+
+.sat-recommendations .sat-priority-badge.priority-low {
+  background: #f4faf6;
+  border-color: #cde3d4;
+  color: #3a7a56;
+}
+
+.sat-recommendations .sat-rec-key-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.34rem;
+  margin-bottom: 0.28rem;
+}
+
+.sat-recommendations .sat-rec-key-chip {
+  border: 1px solid #d9e7de;
+  border-radius: 999px;
+  background: #f7fbf9;
+  color: #4e6e5b;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.16rem 0.52rem;
+}
+
+.sat-recommendations .sat-rec-key-chip.urgency {
+  border-color: #b5d5c1;
+  background: #edf8f1;
+  color: #215a3a;
+}
+
+.sat-recommendations .sat-rec-key-chip.cost {
+  border-color: #c9ded1;
+  background: #f4faf6;
+  color: #3d664f;
+}
+
+.sat-recommendations .sat-rec-action {
+  margin: 0.25rem 0 0.4rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #1f4631;
+  font-weight: 650;
+}
+
+.sat-recommendations .sat-rec-weather-note {
+  margin: 0.34rem 0 0.2rem;
+  border: 1px solid #c5dcef;
+  border-left: 4px solid #4f93c7;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #f4f9fe 0%, #edf5fc 100%);
+  color: #2a5a7f;
+  padding: 0.38rem 0.55rem;
+  font-size: 0.76rem;
+}
+
+.sat-recommendations .sat-rec-brief {
+  margin-top: 0.44rem;
+  border: 1px solid #dde9e1;
+  border-radius: 10px;
+  background: #f9fcfa;
+  padding: 0.42rem 0.56rem;
+  gap: 0.24rem;
+}
+
+.sat-recommendations .sat-rec-brief-row {
+  grid-template-columns: 74px 1fr;
+  gap: 0.42rem;
+}
+
+.sat-recommendations .sat-rec-brief-label {
+  color: #4d6a5a;
+  font-size: 0.67rem;
+}
+
+.sat-recommendations .sat-rec-brief-text {
+  color: #274736;
+  font-size: 0.78rem;
+  line-height: 1.42;
+}
+
+.sat-recommendations .sat-rec-more {
+  margin-top: 0.45rem;
+  border-top: 1px dashed #d4e3d9;
+  padding-top: 0.38rem;
+}
+
+.sat-recommendations .sat-rec-more summary {
+  color: #2a6b48;
+  font-size: 0.77rem;
+  font-weight: 800;
+}
+
+.sat-recommendations .sat-rec-detail {
+  color: #4e6a5a;
+  font-size: 0.78rem;
+  line-height: 1.46;
+}
+
+.sat-page.sat-theme-dark .sat-recommendations .sat-rec-card {
+  border-color: #345240;
+  background: linear-gradient(180deg, #17281f 0%, #15251d 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.03) inset,
+    0 12px 22px rgba(0, 0, 0, 0.24);
+}
+
+.sat-page.sat-theme-dark .sat-recommendations .sat-rec-card:hover {
+  border-color: #3f664e;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 18px 30px rgba(0, 0, 0, 0.3);
+}
+
+.sat-page.sat-theme-dark .sat-recommendations .sat-rec-type {
+  color: #e0ede5;
+}
+
+.sat-page.sat-theme-dark .sat-recommendations .sat-rec-action,
+.sat-page.sat-theme-dark .sat-recommendations .sat-rec-brief-text {
+  color: #cbe0d4;
+}
+
+.sat-page.sat-theme-dark .sat-recommendations .sat-rec-key-chip,
+.sat-page.sat-theme-dark .sat-recommendations .sat-rec-brief {
+  border-color: #355341;
+  background: #1b2d23;
+  color: #9fb9aa;
+}
+
+.sat-page.sat-theme-dark .sat-recommendations .sat-rec-weather-note {
+  border-color: #2f4f66;
+  border-left-color: #568fba;
+  background: #1b2a34;
+  color: #b9d4e8;
+}
+
+.sat-page.sat-theme-dark .sat-recommendations .sat-rec-brief-label,
+.sat-page.sat-theme-dark .sat-recommendations .sat-rec-detail,
+.sat-page.sat-theme-dark .sat-recommendations .sat-rec-more summary {
+  color: #a5c0b2;
+}
+
+@media (max-width: 768px) {
+  .sat-recommendations .sat-rec-card {
+    padding: 0.78rem 0.78rem 0.74rem;
+  }
+
+  .sat-recommendations .sat-rec-brief-row {
+    grid-template-columns: 68px 1fr;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Pro Product Card System                                                     */
+/* -------------------------------------------------------------------------- */
+
+.sat-page {
+  font-family: "Manrope", "Segoe UI", Helvetica, Arial, sans-serif;
+  background: #f3f5f7 !important;
+  color: #0f1720;
+}
+
+.sat-main-card,
+.sat-results {
+  border: 1px solid #d8dee6;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(16, 24, 40, 0.08);
+}
+
+.sat-results-header {
+  border: 1px solid #e5e9ef;
+  border-radius: 14px;
+  background: #f9fbfd;
+}
+
+.sat-results-title {
+  font-size: 1.32rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #0f1720;
+}
+
+.sat-section-title {
+  color: #0f1720;
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.sat-field-report,
+.sat-farmer-quickview,
+.sat-recommendations .sat-rec-group,
+.sat-weather-impact-panel,
+.sat-soil-suite {
+  border: 1px solid #dde3ea;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 6px 16px rgba(15, 23, 32, 0.05);
+}
+
+.sat-report-kicker,
+.sat-output-kicker,
+.sat-fqv-kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.64rem;
+  font-weight: 800;
+  color: #64748b;
+}
+
+.sat-report-label,
+.sat-fqv-title,
+.sat-output-value,
+.sat-yield-val {
+  color: #0f1720;
+}
+
+.sat-report-summary-text,
+.sat-output-sub,
+.sat-fqv-note,
+.sat-soil-suite-subtitle,
+.sat-soil-suite-meta {
+  color: #526074;
+}
+
+.sat-report-highlights {
+  gap: 0.55rem;
+}
+
+.sat-report-highlight-card {
+  border: 1px solid #e6ebf1;
+  border-radius: 10px;
+  background: #fbfcfe;
+  padding: 0.56rem 0.62rem;
+}
+
+.sat-yield-lbl {
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  color: #7b8798;
+}
+
+.sat-report-note-item {
+  border-left: 3px solid #1f8a5a;
+  border-radius: 10px;
+  background: #f4fbf7;
+}
+
+/* Recommendation container */
+.sat-recommendations .sat-rec-group {
+  padding: 0.8rem;
+}
+
+.sat-rec-group-title {
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #5d6b7c;
+  margin-bottom: 0.55rem;
+}
+
+.sat-rec-card {
+  border: 1px solid #e3e8ee;
+  border-left-width: 4px;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 0.7rem 0.8rem;
+  margin-bottom: 0.48rem;
+}
+
+.sat-rec-card.priority-critical,
+.sat-rec-card.priority-high {
+  border-left-color: #0f7a4c;
+}
+
+.sat-rec-card.priority-medium {
+  border-left-color: #2d9a63;
+}
+
+.sat-rec-card.priority-low {
+  border-left-color: #76b895;
+}
+
+.sat-rec-header {
+  margin-bottom: 0.22rem;
+}
+
+.sat-rec-type {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #0f1720;
+}
+
+.sat-priority-badge {
+  border-radius: 999px;
+  font-size: 0.64rem;
+  padding: 0.14rem 0.44rem;
+}
+
+.sat-rec-key-grid {
+  margin: 0.15rem 0 0.32rem;
+  gap: 0.3rem;
+}
+
+.sat-rec-key-chip {
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 0.18rem 0.5rem;
+}
+
+.sat-rec-action {
+  margin: 0.18rem 0 0.3rem;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: #223143;
+  font-weight: 600;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.sat-rec-weather-note {
+  margin-top: 0.35rem;
+  padding: 0.36rem 0.5rem;
+  border-radius: 8px;
+  border-left: 3px solid #2f80ed;
+  background: #f3f8ff;
+  color: #1f4c84;
+  font-size: 0.74rem;
+}
+
+.sat-rec-brief {
+  margin-top: 0.32rem;
+  border: 1px solid #e8edf2;
+  border-radius: 8px;
+  background: #fafbfd;
+  padding: 0.32rem 0.44rem;
+  display: grid;
+  grid-template-rows: repeat(3, minmax(42px, auto));
+  gap: 0.16rem;
+}
+
+.sat-rec-brief-row {
+  display: grid;
+  grid-template-columns: 62px 1fr;
+  align-items: start;
+  gap: 0.3rem;
+}
+
+.sat-rec-brief-label {
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6b7788;
+}
+
+.sat-rec-brief-text {
+  font-size: 0.74rem;
+  line-height: 1.34;
+  color: #334155;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.sat-rec-more {
+  margin-top: 0.28rem;
+  border-top: 1px dashed #e1e7ee;
+  padding-top: 0.28rem;
+}
+
+.sat-rec-more summary {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #246a45;
+}
+
+.sat-rec-detail {
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: #4a5a6d;
+  margin: 0.16rem 0;
+}
+
+/* Equal rhythm in recommendation list */
+.sat-recommendations .sat-rec-group {
+  display: grid;
+  gap: 0.48rem;
+}
+
+/* Mobile */
+@media (max-width: 920px) {
+  .sat-rec-card {
+    padding: 0.66rem 0.72rem;
+  }
+
+  .sat-rec-action {
+    -webkit-line-clamp: 3;
+  }
+
+  .sat-rec-brief-row {
+    grid-template-columns: 58px 1fr;
+  }
+}
+
+/* Dark mode parity */
+.sat-page.sat-theme-dark {
+  background: #0f1419 !important;
+}
+
+.sat-page.sat-theme-dark .sat-main-card,
+.sat-page.sat-theme-dark .sat-results,
+.sat-page.sat-theme-dark .sat-results-header,
+.sat-page.sat-theme-dark .sat-field-report,
+.sat-page.sat-theme-dark .sat-farmer-quickview,
+.sat-page.sat-theme-dark .sat-recommendations .sat-rec-group,
+.sat-page.sat-theme-dark .sat-weather-impact-panel,
+.sat-page.sat-theme-dark .sat-soil-suite,
+.sat-page.sat-theme-dark .sat-rec-card,
+.sat-page.sat-theme-dark .sat-rec-brief {
+  background: #171d24;
+  border-color: #2a3440;
+  color: #e5edf7;
+}
+
+.sat-page.sat-theme-dark .sat-results-title,
+.sat-page.sat-theme-dark .sat-report-label,
+.sat-page.sat-theme-dark .sat-rec-type,
+.sat-page.sat-theme-dark .sat-output-value,
+.sat-page.sat-theme-dark .sat-yield-val {
+  color: #edf3fa;
+}
+
+.sat-page.sat-theme-dark .sat-subtitle,
+.sat-page.sat-theme-dark .sat-report-summary-text,
+.sat-page.sat-theme-dark .sat-output-sub,
+.sat-page.sat-theme-dark .sat-rec-action,
+.sat-page.sat-theme-dark .sat-rec-detail,
+.sat-page.sat-theme-dark .sat-rec-brief-text {
+  color: #a7b5c7;
+}
+
+.sat-page.sat-theme-dark .sat-rec-brief-label,
+.sat-page.sat-theme-dark .sat-yield-lbl,
+.sat-page.sat-theme-dark .sat-report-kicker,
+.sat-page.sat-theme-dark .sat-output-kicker {
+  color: #8b9ab0;
+}
+
+/* Outcome tracking loop */
+.sat-outcome-loop {
+  margin-top: 0.75rem;
+  border: 1px solid #dde4eb;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 0.75rem;
+}
+
+.sat-outcome-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.sat-outcome-copy {
+  margin: 0.35rem 0 0.6rem;
+  color: #516074;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.sat-outcome-trend-pill {
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 800;
+  padding: 0.2rem 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sat-outcome-trend-pill.improving {
+  background: #e9f9ef;
+  color: #157347;
+}
+
+.sat-outcome-trend-pill.worsening {
+  background: #fdeeee;
+  color: #b42318;
+}
+
+.sat-outcome-trend-pill.mixed {
+  background: #fff6e6;
+  color: #9a6700;
+}
+
+.sat-outcome-action-box {
+  border: 1px solid #e5ebf1;
+  border-radius: 10px;
+  background: #fafbfd;
+  padding: 0.55rem;
+  margin-bottom: 0.6rem;
+}
+
+.sat-outcome-action-title {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #1d2939;
+}
+
+.sat-outcome-action-meta {
+  font-size: 0.72rem;
+  color: #667085;
+  margin: 0.12rem 0 0.34rem;
+}
+
+.sat-outcome-note {
+  width: 100%;
+  border: 1px solid #d9e1ea;
+  border-radius: 8px;
+  padding: 0.42rem 0.5rem;
+  font-family: inherit;
+  font-size: 0.76rem;
+  resize: vertical;
+  margin-bottom: 0.42rem;
+}
+
+.sat-outcome-note:focus {
+  outline: none;
+  border-color: #5b8def;
+  box-shadow: 0 0 0 3px rgba(91, 141, 239, 0.16);
+}
+
+.sat-outcome-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.44rem;
+}
+
+.sat-outcome-metric-card {
+  border: 1px solid #e6ecf2;
+  border-radius: 10px;
+  background: #fbfcfe;
+  padding: 0.52rem;
+}
+
+@media (max-width: 920px) {
+  .sat-outcome-metrics {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sat-page.sat-theme-dark .sat-outcome-loop,
+.sat-page.sat-theme-dark .sat-outcome-action-box,
+.sat-page.sat-theme-dark .sat-outcome-metric-card {
+  background: #171d24;
+  border-color: #2b3540;
+}
+
+.sat-page.sat-theme-dark .sat-outcome-copy,
+.sat-page.sat-theme-dark .sat-outcome-action-meta {
+  color: #9fb0c3;
+}
+
+.sat-page.sat-theme-dark .sat-outcome-action-title {
+  color: #e6eef8;
+}
+
+.sat-page.sat-theme-dark .sat-outcome-note {
+  background: #11171e;
+  border-color: #334152;
+  color: #dbe7f4;
+}
+
+/* Sidebar layout and tabbed results */
+.sat-shell {
+  --sat-sidebar-width: 200px;
+  display: block;
+  min-height: 100vh;
+  min-height: 100dvh;
+  position: relative;
+  overflow-x: hidden;
+  overflow-y: visible;
+  transition: none;
+}
+
+.sat-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--sat-sidebar-width);
+  height: auto;
+  max-height: none;
+  border-right: 1px solid #d7dee7;
+  background: #ffffff;
+  padding: 0.95rem 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 120;
+  transition: padding 0.14s ease, border-color 0.14s ease;
+}
+
+.sat-sidebar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.sat-sidebar-logo {
+  justify-content: flex-start;
+  margin-bottom: 0.1rem;
+}
+
+.sat-sidebar-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 0.35rem;
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.14s ease, transform 0.14s ease;
+}
+
+.sat-sidebar-btn {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 10px;
+  padding: 0.62rem 0.72rem;
+  text-align: left;
+  justify-content: flex-start;
+}
+
+.sat-sidebar-collapse-btn {
+  border: 1px solid #cfd8e3;
+  background: #f8fbff;
+  color: #223142;
+  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.sat-sidebar-collapse-btn:hover {
+  background: #eef4fb;
+}
+
+.sat-shell.sidebar-collapsed {
+  --sat-sidebar-width: 64px;
+}
+
+.sat-sidebar.collapsed {
+  padding-left: 0.35rem;
+  padding-right: 0.35rem;
+}
+
+.sat-sidebar.collapsed .sat-sidebar-top {
+  justify-content: center;
+}
+
+.sat-sidebar.collapsed .sat-sidebar-logo {
+  width: 0;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+  margin: 0;
+}
+
+.sat-sidebar.collapsed .sat-sidebar-links {
+  opacity: 0;
+  transform: translateX(-4px);
+  pointer-events: none;
+}
+
+.sat-sidebar.collapsed .sat-sidebar-collapse-btn {
+  width: 34px;
+  height: 34px;
+}
+
+.sat-main {
+  margin-left: var(--sat-sidebar-width);
+  width: calc(100% - var(--sat-sidebar-width));
+  min-width: 0;
+  padding: 1.2rem 0.9rem 2.4rem;
+  box-sizing: border-box;
+}
+
+.sat-shell.no-sidebar {
+  --sat-sidebar-width: 0px;
+}
+
+.sat-shell.no-sidebar .sat-main {
+  margin-left: 0;
+  width: 100%;
+}
+
+.sat-history-back-row {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 8px 12px 6px;
+  margin: 0;
+}
+
+.sat-history-back-btn {
+  margin: 0;
+  display: inline-flex;
+  justify-content: flex-start;
+}
+
+.sat-results-tabs {
+  margin-top: 0.6rem;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/* Irrigation Schedule Panel */
+/* ─────────────────────────────────────────────────────────────────────────── */
+
+.sat-irrigation-schedule-panel {
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid #e0e7f1;
+  padding: 1.4rem 1.5rem;
+  margin: 1.8rem 0;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+
+.sat-irr-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.4rem;
+  gap: 1rem;
+}
+
+.sat-irr-subtitle {
+  font-size: 0.85rem;
+  color: #5f6b7a;
+  margin-top: 0.25rem;
+}
+
+.sat-irr-meta {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1b4332;
+  background: #f0faf3;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.sat-irr-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.8rem;
+}
+
+.sat-irr-card {
+  border: 1px solid #dce3ed;
+  border-radius: 10px;
+  padding: 0.9rem;
+  background: #fafbfc;
+  border-left: 4px solid #8fa2bd;
+}
+
+.sat-irr-card.critical {
+  border-left-color: #dc2626;
+  background: #fef2f2;
+  border-color: #fee2e2;
+}
+
+.sat-irr-day {
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: #5f6b7a;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.3rem;
+}
+
+.sat-irr-action {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.4rem;
+}
+
+.sat-irr-amount {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1b4332;
+  margin-bottom: 0.2rem;
+}
+
+.sat-irr-rain {
+  font-size: 0.8rem;
+  color: #0ea5e9;
+  margin-bottom: 0.4rem;
+}
+
+.sat-irr-note {
+  font-size: 0.75rem;
+  color: #5f6b7a;
+  line-height: 1.35;
+}
+
+.sat-irr-full-schedule {
+  margin-top: 1.6rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.sat-irr-full-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sat-irr-timeline {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.sat-irr-timeline-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+}
+
+.sat-irr-timeline-day {
+  font-weight: 600;
+  color: #5f6b7a;
+}
+
+.sat-irr-timeline-action {
+  background: #f0faf3;
+  color: #1b4332;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 0.7rem;
+}
+
+.sat-irr-timeline-item:not(:last-child)::after {
+  content: '→';
+  color: #cbd5e1;
+  margin: 0 0.2rem;
+}
+
+.sat-irr-tips {
+  margin-top: 1.4rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.sat-irr-tip-item {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #3f5563;
+  padding-left: 0.8rem;
+}
+
+.sat-irr-tip-item strong {
+  display: inline-block;
+  margin-right: 0.4rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.sat-field-note-strong {
+  font-weight: 700;
+}
+
+/* Dark theme for irrigation schedule */
+.sat-page.sat-theme-dark .sat-irrigation-schedule-panel {
+  background: #0f1a2e;
+  border-color: #2f3f59;
+  color: #e5e7eb;
+}
+
+.sat-page.sat-theme-dark .sat-irr-subtitle {
+  color: #a0aec0;
+}
+
+.sat-page.sat-theme-dark .sat-irr-meta {
+  background: #1a3a2a;
+  color: #7ec983;
+}
+
+.sat-page.sat-theme-dark .sat-irr-card {
+  background: #132533;
+  border-color: #2f3f59;
+}
+
+.sat-page.sat-theme-dark .sat-irr-card.critical {
+  background: #3a1414;
+  border-color: #7f1d1d;
+}
+
+.sat-page.sat-theme-dark .sat-irr-action {
+  color: #e5e7eb;
+}
+
+.sat-page.sat-theme-dark .sat-irr-note {
+  color: #9ca3af;
+}
+
+.sat-page.sat-theme-dark .sat-irr-timeline-action {
+  background: #1a3a2a;
+  color: #7ec983;
+}
+
+.sat-page.sat-theme-dark .sat-irr-tip-item {
+  color: #cbd5e1;
+}
+
+.sat-page.sat-theme-dark .sat-irr-tip-item strong {
+  color: #e5e7eb;
+}
+
+.sat-fert-panel .sat-irr-card {
+  border-left-color: #2d6a4f;
+}
+
+.sat-fert-panel .sat-irr-rain {
+  color: #166534;
+  font-weight: 700;
+}
+
+.sat-fert-panel {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.sat-fert-compact-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.55rem;
+  margin-bottom: 0.9rem;
+}
+
+.sat-fert-row {
+  display: grid;
+  grid-template-columns: minmax(160px, 1.4fr) minmax(120px, 1fr) minmax(100px, 0.8fr);
+  align-items: center;
+  gap: 0.7rem;
+  border: 1px solid #dce3ed;
+  border-radius: 8px;
+  background: #f9fbfd;
+  padding: 0.38rem 0.5rem;
+}
+
+.sat-fert-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #526074;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sat-fert-product {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.sat-fert-dose {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1b4332;
+}
+
+.sat-fert-cost {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #166534;
+  text-align: right;
+}
+
+@media (max-width: 840px) {
+  .sat-fert-row {
+    grid-template-columns: 1fr;
+    gap: 0.28rem;
+  }
+
+  .sat-fert-cost {
+    text-align: left;
+  }
+}
+
+.sat-page.sat-theme-dark .sat-fert-panel .sat-irr-rain {
+  color: #86efac;
+}
+
+.sat-page.sat-theme-dark .sat-fert-row {
+  background: #132533;
+  border-color: #2f3f59;
+}
+
+.sat-page.sat-theme-dark .sat-fert-label {
+  color: #9ca3af;
+}
+
+.sat-page.sat-theme-dark .sat-fert-product {
+  color: #e5e7eb;
+}
+
+.sat-page.sat-theme-dark .sat-fert-dose,
+.sat-page.sat-theme-dark .sat-fert-cost {
+  color: #86efac;
+}
+
+.sat-rec-compact-row {
+  border-left-width: 4px;
+}
+
+.sat-rec-compact-row.level-critical,
+.sat-rec-compact-row.level-high {
+  border-left-color: #dc2626;
+}
+
+.sat-rec-compact-row.level-medium {
+  border-left-color: #f59e0b;
+}
+
+.sat-rec-compact-row.level-low {
+  border-left-color: #16a34a;
+}
+
+.sat-rec-compact-row .sat-fert-dose {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.sat-rec-compact-row .sat-fert-cost {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sat-page.sat-theme-dark .sat-rec-compact-row .sat-fert-dose {
+  color: #cbd5e1;
+}
+
+.sat-page.sat-theme-dark .sat-rec-compact-row .sat-fert-cost {
+  color: #fcd34d;
+}
+
+.sat-rec-plan-grid {
+  margin-top: 0.5rem;
+  margin-bottom: 0.35rem;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+.sat-rec-plan-card {
+  padding: 0.9rem 1rem;
+  min-height: 128px;
+  border-left-color: #cbd5e1;
+  background: #ffffff;
+}
+
+.sat-rec-plan-card.critical {
+  border-left-color: #cbd5e1;
+  background: #ffffff;
+}
+
+.sat-rec-plan-card.medium {
+  border-left-color: #cbd5e1;
+  background: #ffffff;
+}
+
+.sat-rec-plan-card.low {
+  border-left-color: #cbd5e1;
+  background: #ffffff;
+}
+
+.sat-rec-plan-card .sat-irr-day {
+  margin-bottom: 0.2rem;
+}
+
+.sat-rec-plan-card .sat-irr-action {
+  font-size: 0.92rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+  white-space: normal;
+  word-break: break-word;
+  text-align: left;
+}
+
+.sat-rec-action-list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.sat-rec-action-point {
+  width: 100%;
+  text-align: left;
+}
+
+.sat-rec-plan-card .sat-irr-note {
+  font-size: 0.76rem;
+  margin-bottom: 0.45rem;
+  line-height: 1.35;
+  white-space: normal;
+  word-break: break-word;
+  text-align: left;
+}
+
+.sat-rec-plan-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.sat-rec-plan-urgency {
+  font-size: 0.78rem;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.sat-rec-plan-priority {
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  background: #ffffff;
+}
+
+.sat-rec-plan-priority.level-critical,
+.sat-rec-plan-priority.level-high {
+  color: #991b1b;
+  border-color: #fecaca;
+  background: #fee2e2;
+}
+
+.sat-rec-plan-priority.level-medium {
+  color: #92400e;
+  border-color: #fde68a;
+  background: #fef3c7;
+}
+
+.sat-rec-plan-priority.level-low {
+  color: #166534;
+  border-color: #bbf7d0;
+  background: #dcfce7;
+}
+
+.sat-page.sat-theme-dark .sat-rec-plan-card {
+  background: #ffffff;
+  border-color: #2f3f59;
+}
+
+.sat-page.sat-theme-dark .sat-rec-plan-card.critical {
+  background: #ffffff;
+}
+
+.sat-page.sat-theme-dark .sat-rec-plan-card.medium {
+  background: #ffffff;
+}
+
+.sat-page.sat-theme-dark .sat-rec-plan-card.low {
+  background: #ffffff;
+}
+
+.sat-page.sat-theme-dark .sat-rec-plan-urgency {
+  color: #0f172a;
+}
+
+.sat-results-tab {
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #526074;
+  cursor: pointer;
+}
+
+.sat-results-tab.active {
+  background: #ffffff;
+  border-color: #c7d2de;
+  color: #0f1720;
+  box-shadow: 0 4px 10px rgba(15, 23, 32, 0.08);
+}
+
+@media (max-width: 900px) {
+  .sat-shell {
+    --sat-sidebar-width: 0px;
+  }
+
+  .sat-sidebar {
+    position: static;
+    width: 100%;
+    inset: auto;
+    height: auto;
+    max-height: none;
+    border-right: none;
+    border-bottom: 1px solid #d7dee7;
+  }
+
+  .sat-main {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .sat-sidebar-links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .sat-sidebar-links {
+    grid-template-columns: 1fr;
+  }
+
+  .sat-results-tabs {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.sat-page.sat-theme-dark .sat-sidebar {
+  background: #171d24;
+  border-color: #2a3440;
+}
+
+.sat-page.sat-theme-dark .sat-sidebar-collapse-btn,
+.sat-page.sat-theme-dark .sat-sidebar.collapsed .sat-sidebar-collapse-btn {
+  background: #1f2731;
+  border-color: #364352;
+  color: #d9e4f1;
+}
+
+.sat-page.sat-theme-dark .sat-results-tabs {
+  background: #131a22;
+  border-color: #2f3a47;
+}
+
+.sat-page.sat-theme-dark .sat-results-tab {
+  color: #a2b3c8;
+}
+
+.sat-page.sat-theme-dark .sat-results-tab.active {
+  background: #1e2731;
+  border-color: #3a495d;
+  color: #edf3fa;
+}
+
+.sat-history-list-wrap {
+  margin-top: 0.7rem;
+}
+
+.sat-history-list-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #1c2a3c;
+  margin-bottom: 0.45rem;
+}
+
+.sat-history-list {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.sat-history-item {
+  border: 1px solid #dde5ee;
+  border-radius: 10px;
+  background: #fbfdff;
+  padding: 0.56rem;
+}
+
+.sat-history-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.3rem;
+}
+
+.sat-history-item-date {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #17212f;
+}
+
+.sat-history-item-status {
+  font-size: 0.67rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #4e5f72;
+  border: 1px solid #d4dde8;
+  border-radius: 999px;
+  padding: 0.14rem 0.44rem;
+}
+
+.sat-history-item-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.8rem;
+  font-size: 0.74rem;
+  color: #4a5a6d;
+  margin-bottom: 0.35rem;
+}
+
+.sat-history-heatmap-wrap {
+  border: 1px solid #dbe4ee;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.sat-history-heatmap-map {
+  width: 100%;
+  height: 210px;
+}
+
+@media (max-width: 820px) {
+  .sat-history-heatmap-map {
+    height: 180px;
+  }
+}
+
+.sat-page.sat-theme-dark .sat-history-item {
+  background: #171d24;
+  border-color: #2a3440;
+}
+
+.sat-page.sat-theme-dark .sat-history-item-date {
+  color: #e9f0fa;
+}
+
+.sat-page.sat-theme-dark .sat-history-item-status {
+  color: #afbdd0;
+  border-color: #3a4658;
+}
+
+.sat-page.sat-theme-dark .sat-history-item-metrics,
+.sat-page.sat-theme-dark .sat-history-list-title {
+  color: #a6b4c6;
+}
+
+.sat-page.sat-theme-dark .sat-history-heatmap-wrap {
+  border-color: #334152;
+}
+
+/* Final visual overrides requested by user */
+.sat-page {
+  background: #ffffff !important;
+}
+
+.sat-rec-key-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.34rem;
+  margin: 0.18rem 0 0.38rem;
+}
+
+.sat-rec-key-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  padding: 0.26rem 0.68rem;
+}
+
+.sat-rec-key-chip.urgency {
+  background: #fff4e5;
+  border-color: #f6cd9a;
+  color: #9a3412;
+}
+
+.sat-rec-key-chip.cost {
+  background: #eef5ff;
+  border-color: #bfd4f8;
+  color: #1d4e89;
+}
+
+.sat-rec-key-chip.benefit {
+  background: #eaf9ef;
+  border-color: #bde8c8;
+  color: #166534;
+}
+
+.sat-page.sat-theme-dark .sat-rec-key-chip.urgency {
+  background: #3d2a1d;
+  border-color: #7c4a23;
+  color: #f6d3a6;
+}
+
+.sat-page.sat-theme-dark .sat-rec-key-chip.cost {
+  background: #1d2d45;
+  border-color: #34517d;
+  color: #c8dbff;
+}
+
+.sat-page.sat-theme-dark .sat-rec-key-chip.benefit {
+  background: #193224;
+  border-color: #2f6b49;
+  color: #bdeacb;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Design Refresh Override                                                     */
+/* -------------------------------------------------------------------------- */
+
+.sat-page {
+  --ui-bg: #f4f7f5;
+  --ui-surface: #ffffff;
+  --ui-border: #d9e3dc;
+  --ui-text: #10261a;
+  --ui-muted: #5f7266;
+  --ui-primary: #226a44;
+  --ui-primary-soft: #e9f4ee;
+  --ui-shadow: 0 8px 26px rgba(20, 52, 33, 0.08);
+  background:
+    radial-gradient(900px 380px at 0% -10%, rgba(108, 165, 123, 0.15), transparent 60%),
+    radial-gradient(1100px 420px at 100% -15%, rgba(65, 120, 84, 0.11), transparent 62%),
+    var(--ui-bg) !important;
+  color: var(--ui-text);
+}
+
+.sat-container {
+  max-width: 1220px;
+}
+
+.sat-header {
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom: 1px solid var(--ui-border);
+  box-shadow: 0 6px 20px rgba(17, 43, 28, 0.08);
+}
+
+.sat-nav-btn {
+  border-radius: 999px;
+  border: 1px solid #cfd9d2;
+  background: #ffffff;
+  color: #284937;
+}
+
+.sat-nav-btn:hover {
+  border-color: #99b8a5;
+  background: #f1f7f3;
+}
+
+.sat-welcome,
+.sat-main-card,
+.sat-results {
+  border: 1px solid var(--ui-border);
+  background: var(--ui-surface);
+  box-shadow: var(--ui-shadow);
+}
+
+.sat-main-card,
+.sat-results {
+  border-radius: 20px;
+}
+
+.sat-section {
+  border: 1px solid #dde6df;
+  border-radius: 14px;
+  background: #fcfefd;
+}
+
+.sat-title {
+  color: #103021;
+  letter-spacing: -0.02em;
+}
+
+.sat-subtitle {
+  color: var(--ui-muted);
+}
+
+.sat-workflow-strip {
+  border-radius: 12px;
+  border: 1px solid #dbe5de;
+  background: #f7fbf8;
+}
+
+.sat-workflow-chip {
+  border-radius: 999px;
+  border: 1px solid #dde7e0;
+  background: #ffffff;
+  color: #6a7c70;
+}
+
+.sat-workflow-chip.done {
+  border-color: #a6cab4;
+  background: #eaf5ee;
+  color: #2e6645;
+}
+
+.sat-map-wrapper,
+.sat-heatmap-map-wrapper {
+  border: 1px solid #cfdcd3;
+  border-radius: 16px;
+  box-shadow: 0 10px 24px rgba(21, 52, 34, 0.12);
+}
+
+.sat-analyze-btn {
+  border-radius: 12px;
+  background: linear-gradient(180deg, #2d7a50, #215f3d);
+  box-shadow: 0 12px 24px rgba(34, 95, 61, 0.26);
+}
+
+.sat-analyze-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #388a5b, #2b6f47);
+}
+
+.sat-results-header {
+  border: 1px solid #dbe5de;
+  background: linear-gradient(130deg, #f8fcf9, #eff7f1);
+  border-radius: 14px;
+}
+
+.sat-results-title,
+.sat-report-label,
+.sat-fqv-title,
+.sat-output-value,
+.sat-rec-type,
+.sat-soil-suite-value,
+.sat-soil-block-title {
+  color: #153624;
+}
+
+.sat-results-meta > span {
+  border-radius: 999px;
+  border: 1px solid #cfe0d6;
+  background: #f2f9f4;
+  color: #2f5f46;
+}
+
+.sat-field-report,
+.sat-farmer-quickview,
+.sat-recommendations .sat-rec-group,
+.sat-weather-impact-panel,
+.sat-soil-suite,
+.sat-output-card,
+.sat-engine-strip {
+  border: 1px solid #d8e2db;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 8px 18px rgba(20, 52, 33, 0.07);
+}
+
+.sat-report-highlight-card {
+  border: 1px solid #dce7df;
+  background: #fbfefc;
+}
+
+.sat-report-note-item {
+  border-left: 3px solid #4c9270;
+  background: #f2f9f4;
+}
+
+.sat-rec-card {
+  border: 1px solid #dbe5de;
+  border-left-width: 4px;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 0.82rem 0.88rem;
+  margin-bottom: 0.52rem;
+}
+
+.sat-rec-card.priority-critical,
+.sat-rec-card.priority-high {
+  border-left-color: #2e7a50;
+}
+
+.sat-rec-card.priority-medium {
+  border-left-color: #5f9b7a;
+}
+
+.sat-rec-card.priority-low {
+  border-left-color: #8eb79e;
+}
+
+.sat-rec-action {
+  margin: 0.24rem 0 0.3rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #1f3f2f;
+}
+
+.sat-rec-key-chip {
+  border-radius: 999px;
+  font-size: 0.74rem;
+  padding: 0.2rem 0.58rem;
+}
+
+.sat-rec-brief {
+  border: 1px solid #e2e9e4;
+  background: #f8fbf9;
+  border-radius: 10px;
+  padding: 0.35rem 0.52rem;
+}
+
+.sat-rec-brief-row {
+  grid-template-columns: 68px 1fr;
+}
+
+.sat-rec-brief-label {
+  color: #587063;
+}
+
+.sat-rec-brief-text {
+  color: #2f4a3c;
+}
+
+.sat-rec-more {
+  margin-top: 0.36rem;
+  border-top: 1px dashed #d8e2db;
+  padding-top: 0.34rem;
+}
+
+.sat-rec-more summary {
+  color: #2f6e4c;
+  font-size: 0.78rem;
+}
+
+.sat-rec-weather-note {
+  border-left-color: #4a90c7;
+  background: #f2f8fd;
+  color: #275981;
+}
+
+.sat-error,
+.sat-coord-warning,
+.sat-boundary-required,
+.sat-boundary-help,
+.sat-critical-alert,
+.sat-simulated-notice {
+  border: 1px solid #cde0d3;
+  background: #eef7f1;
+  color: #29513c;
+}
+
+.sat-page.sat-theme-dark {
+  background: #101a14 !important;
+  color: #e3eee7;
+}
+
+.sat-page.sat-theme-dark .sat-header,
+.sat-page.sat-theme-dark .sat-welcome,
+.sat-page.sat-theme-dark .sat-main-card,
+.sat-page.sat-theme-dark .sat-results,
+.sat-page.sat-theme-dark .sat-section,
+.sat-page.sat-theme-dark .sat-field-report,
+.sat-page.sat-theme-dark .sat-farmer-quickview,
+.sat-page.sat-theme-dark .sat-recommendations .sat-rec-group,
+.sat-page.sat-theme-dark .sat-weather-impact-panel,
+.sat-page.sat-theme-dark .sat-soil-suite,
+.sat-page.sat-theme-dark .sat-output-card,
+.sat-page.sat-theme-dark .sat-engine-strip,
+.sat-page.sat-theme-dark .sat-rec-card,
+.sat-page.sat-theme-dark .sat-rec-brief,
+.sat-page.sat-theme-dark .sat-results-header,
+.sat-page.sat-theme-dark .sat-map-wrapper,
+.sat-page.sat-theme-dark .sat-heatmap-map-wrapper,
+.sat-page.sat-theme-dark .sat-nav-btn {
+  background: #16241c;
+  border-color: #32473a;
+  color: #e3eee7;
+}
+
+.sat-page.sat-theme-dark .sat-subtitle,
+.sat-page.sat-theme-dark .sat-chip-subtext,
+.sat-page.sat-theme-dark .sat-rec-brief-label,
+.sat-page.sat-theme-dark .sat-rec-detail,
+.sat-page.sat-theme-dark .sat-output-sub {
+  color: #a7bcb0;
+}
+
+.sat-page.sat-theme-dark .sat-analyze-btn {
+  background: linear-gradient(180deg, #3f9564, #2d714b);
+}
+
+@media (max-width: 980px) {
+  .sat-location-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sat-main-card,
+  .sat-results {
+    border-radius: 16px;
+  }
+
+  .sat-report-highlights,
+  .sat-report-priority-notes {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* FINAL SATELLITE READABILITY FIX (no font-size changes) */
+.sat-recommendations-readable .sat-rec-group {
+  padding: 0.68rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-group-title {
+  margin: 0 0 0.5rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-card {
+  padding: 0.72rem 0.78rem !important;
+  margin-bottom: 0.52rem !important;
+  border-radius: 12px !important;
+  border-left-width: 4px !important;
+  box-shadow: 0 8px 16px rgba(20, 52, 33, 0.08) !important;
+}
+
+.sat-recommendations-readable .sat-rec-header {
+  margin-bottom: 0.24rem !important;
+  gap: 0.32rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-badges {
+  gap: 0.28rem !important;
+}
+
+.sat-recommendations-readable .sat-priority-badge,
+.sat-recommendations-readable .sat-rec-timing-badge {
+  padding: 0.16rem 0.46rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-key-grid {
+  gap: 0.34rem !important;
+  margin-bottom: 0.24rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-key-chip {
+  padding: 0.18rem 0.5rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-action {
+  margin: 0.2rem 0 0.3rem !important;
+  line-height: 1.5 !important;
+}
+
+.sat-recommendations-readable .sat-rec-weather-note {
+  margin: 0.2rem 0 0.14rem !important;
+  padding: 0.3rem 0.48rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-brief {
+  margin-top: 0.24rem !important;
+  padding: 0.26rem 0.44rem !important;
+  gap: 0.14rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-brief-row {
+  grid-template-columns: 68px 1fr !important;
+  gap: 0.34rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-brief-text {
+  -webkit-line-clamp: 2;
+}
+
+.sat-recommendations-readable .sat-rec-brief-row-timeline .sat-rec-brief-text {
+  -webkit-line-clamp: 1;
+}
+
+.sat-recommendations-readable .sat-rec-more {
+  margin-top: 0.26rem !important;
+  padding-top: 0.24rem !important;
+}
+
+.sat-recommendations-readable .sat-rec-detail {
+  margin: 0.12rem 0 !important;
+  line-height: 1.42 !important;
+}
+
+@media (max-width: 768px) {
+  .sat-recommendations-readable .sat-rec-group {
+    padding: 0.56rem !important;
+  }
+
+  .sat-recommendations-readable .sat-rec-card {
+    padding: 0.62rem 0.62rem !important;
+    margin-bottom: 0.42rem !important;
+  }
+
+  .sat-recommendations-readable .sat-rec-brief-row {
+    grid-template-columns: 62px 1fr !important;
+  }
+}
+
+/* Premium Irrigation Advisory card */
+.sat-recommendations-readable .sat-rec-card.sat-rec-card-irrigation {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02)),
+    linear-gradient(180deg, #0b1d12 0%, #0a1a0f 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-left: 4px solid #4ade80 !important;
+  border-radius: 16px !important;
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.34),
+    0 2px 8px rgba(74, 222, 128, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+}
+
+.sat-recommendations-readable .sat-rec-card.sat-rec-card-irrigation::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #4ade80;
+  box-shadow: 0 0 12px rgba(74, 222, 128, 0.7);
+  animation: satLimePulse 1.8s ease-in-out infinite;
+}
+
+.sat-recommendations-readable .sat-rec-card.sat-rec-card-irrigation::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  background:
+    linear-gradient(110deg, rgba(74, 222, 128, 0) 0%, rgba(74, 222, 128, 0.3) 12%, rgba(74, 222, 128, 0) 24%) top / 260% 1px no-repeat,
+    radial-gradient(circle at 12% 20%, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 100%),
+    radial-gradient(circle at 78% 66%, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 100%);
+  opacity: 0.03;
+  pointer-events: none;
+  animation: satTopShimmer 6.2s linear infinite;
+}
+
+.sat-recommendations-readable .sat-rec-card.sat-rec-card-irrigation .sat-rec-header,
+.sat-recommendations-readable .sat-rec-card.sat-rec-card-irrigation .sat-rec-key-grid,
+.sat-recommendations-readable .sat-rec-card.sat-rec-card-irrigation .sat-rec-action,
+.sat-recommendations-readable .sat-rec-card.sat-rec-card-irrigation .sat-irrigation-insight-grid,
+.sat-recommendations-readable .sat-rec-card.sat-rec-card-irrigation .sat-rec-more {
+  position: relative;
+  z-index: 1;
+}
+
+.sat-recommendations-readable .sat-rec-card.sat-rec-card-irrigation .sat-irrigation-title {
+  font-family: "DM Serif Display", Georgia, serif;
+  font-size: 22px;
+  letter-spacing: 0.01em;
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(74, 222, 128, 0.24);
+}
+
+.sat-recommendations-readable .sat-rec-card.sat-rec-card-irrigation .sat-irrigation-critical-badge {
+  background: linear-gradient(135deg, #ff4444 0%, #ff8800 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.26) !important;
+  color: #fffefc !important;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 800;
+  box-shadow: 0 0 0 rgba(255, 119, 80, 0.45);
+  animation: satCriticalPulse 1.7s ease-in-out infinite;
+}
+
+.sat-recommendations-readable .sat-rec-card.sat-rec-card-irrigation .sat-irrigation-chip {
+  border: 1px solid rgba(74, 222, 128, 0.35) !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  color: #d4fbe2 !important;
+  border-radius: 8px;
+  backdrop-filter: blur(8px);
+}
+
+.sat-recommendations-readable .sat-rec-card.sat-rec-card-irrigation .sat-irrigation-callout {
+  border-left: 3px solid #4ade80;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
+  padding: 0.52rem 0.64rem;
+  color: #f7fff9;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.52;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.sat-recommendations-readable .sat-rec-card.sat-rec-card-irrigation .sat-rec-weather-note {
+  border-left-color: #4ade80;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(74, 222, 128, 0.2);
+  color: #d7fae4;
+}
+
+.sat-irrigation-insight-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin-top: 0.46rem;
+}
+
+.sat-irrigation-insight-tile {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.46rem 0.52rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+  transition: transform 160ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.sat-irrigation-insight-tile:hover {
+  transform: translateY(-2px);
+  border-color: rgba(74, 222, 128, 0.34);
+  box-shadow: 0 8px 16px rgba(10, 20, 14, 0.38);
+}
+
+.sat-irrigation-insight-icon {
+  color: #4ade80;
+  filter: drop-shadow(0 0 4px rgba(74, 222, 128, 0.4));
+}
+
+.sat-irrigation-insight-label {
+  color: #f3fff6;
+  font-weight: 700;
+}
+
+.sat-irrigation-insight-text {
+  color: #b8cbbf;
+  line-height: 1.42;
+}
+
+.sat-irrigation-accordion {
+  border-top-color: rgba(255, 255, 255, 0.16);
+}
+
+.sat-irrigation-accordion > summary {
+  color: #ddfbe8;
+}
+
+.sat-irrigation-accordion-body {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 320ms ease, opacity 240ms ease;
+}
+
+.sat-irrigation-accordion[open] .sat-irrigation-accordion-body {
+  max-height: 220px;
+  opacity: 1;
+  margin-top: 0.5rem;
+}
+
+.sat-irrigation-detail-pills {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.sat-irrigation-detail-pill {
+  margin: 0;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  padding: 0.44rem 0.52rem;
+  backdrop-filter: blur(8px);
+}
+
+.sat-irrigation-detail-pill.warning {
+  border-color: rgba(251, 191, 36, 0.38);
+  background: rgba(251, 191, 36, 0.1);
+  color: #fde68a;
+}
+
+.sat-irrigation-detail-pill.info {
+  border-color: rgba(45, 212, 191, 0.36);
+  background: rgba(45, 212, 191, 0.1);
+  color: #99f6e4;
+}
+
+@keyframes satLimePulse {
+  0%,
+  100% { opacity: 0.72; box-shadow: 0 0 10px rgba(74, 222, 128, 0.52); }
+  50% { opacity: 1; box-shadow: 0 0 18px rgba(74, 222, 128, 0.95); }
+}
+
+@keyframes satCriticalPulse {
+  0%,
+  100% { box-shadow: 0 0 0 rgba(255, 119, 80, 0.45); }
+  50% { box-shadow: 0 0 14px rgba(255, 119, 80, 0.7); }
+}
+
+@keyframes satTopShimmer {
+  from { background-position: 130% 0, 0 0, 0 0; }
+  to { background-position: -140% 0, 0 0, 0 0; }
+}
+
+@media (max-width: 920px) {
+  .sat-irrigation-insight-grid,
+  .sat-irrigation-detail-pills {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Irrigation card refinement: keep shape, restore previous color system, no emoji visuals */
+.sat-recommendations-readable .sat-rec-card.sat-rec-card-irrigation {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fcf9 100%) !important;
+  border: 1px solid #dbe8df !important;
+  border-left: 4px solid #4ade80 !important;
+  box-shadow:
+    0 8px 18px rgba(20, 52, 33, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+}
+
+.sat-recommendations-readable .sat-rec-card.sat-rec-card-irrigation::before {
+  background: #4ade80;
+  box-shadow: 0 0 10px rgba(74, 222, 128, 0.35);
+}
+
+.sat-recommendations-readable .sat-rec-card.sat-rec-card-irrigation::after {
+  opacity: 0.02;
+}
+
+.sat-recommendations-readable .sat-rec-card.sat-rec-card-irrigation .sat-irrigation-title {
+  color: #153624;
+  text-shadow: none;
+}
+
+.sat-recommendations-readable .sat-rec-card.sat-rec-card-irrigation .sat-irrigation-critical-badge {
+  background: #e8f6ee !important;
+  border: 1px solid #9ecfb1 !important;
+  color: #1b5b39 !important;
+  box-shadow: none;
+  animation: none;
+}
+
+.sat-recommendations-readable .sat-rec-card.sat-rec-card-irrigation .sat-irrigation-chip {
+  border: 1px solid #b7d9c3 !important;
+  background: #f2faf5 !important;
+  color: #2b5f43 !important;
+  border-radius: 8px;
+  backdrop-filter: none;
+}
+
+.sat-recommendations-readable .sat-rec-card.sat-rec-card-irrigation .sat-irrigation-callout-wrap {
+  margin-top: 0.2rem;
+}
+
+.sat-recommendations-readable .sat-rec-card.sat-rec-card-irrigation .sat-irrigation-callout-label {
+  font-weight: 800;
+  color: #24583b;
+  margin-bottom: 0.24rem;
+}
+
+.sat-recommendations-readable .sat-rec-card.sat-rec-card-irrigation .sat-irrigation-callout {
+  border-left: 4px solid #4ade80;
+  background: #eef9f2;
+  border-radius: 10px;
+  color: #143525;
+  box-shadow: 0 3px 8px rgba(37, 96, 61, 0.12);
+}
+
+.sat-recommendations-readable .sat-rec-card.sat-rec-card-irrigation .sat-rec-weather-note {
+  border-left-color: #4ade80;
+  background: #f4faf6;
+  border: 1px solid #cfe6d6;
+  color: #2b5f43;
+}
+
+.sat-irrigation-insight-tile {
+  border: 1px solid #dbe8df;
+  background: #fbfefc;
+}
+
+.sat-irrigation-insight-tile:hover {
+  border-color: #b8d8c3;
+  box-shadow: 0 8px 16px rgba(20, 52, 33, 0.1);
+}
+
+.sat-irrigation-insight-icon {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #4ade80;
+  display: inline-block;
+  filter: none;
+}
+
+.sat-irrigation-insight-label {
+  color: #153624;
+}
+
+.sat-irrigation-insight-text {
+  color: #526074;
+}
+
+.sat-irrigation-expanded-details {
+  margin-top: 0.5rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.sat-irrigation-detail-pills {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.sat-irrigation-detail-pill {
+  margin: 0;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  padding: 0.44rem 0.52rem;
+}
+
+.sat-irrigation-detail-pill.warning {
+  border-color: #f6d9a3;
+  background: #fff7e8;
+  color: #7a4a00;
+}
+
+.sat-irrigation-detail-pill.info {
+  border-color: #bce3dd;
+  background: #eff9f7;
+  color: #1f5d56;
+}
+
+@media (max-width: 920px) {
+  .sat-irrigation-detail-pills {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Recommendation card spacing refinement */
+.sat-recommendations-readable .sat-rec-group.immediate {
+  display: grid !important;
+  gap: 14px !important;
+}
+
+.sat-recommendations-readable .sat-rec-card {
+  margin: 0 !important;
+}
+
+/* Left-align recommendation content for easier farmer reading */
+.sat-recommendations-readable .sat-rec-group,
+.sat-recommendations-readable .sat-rec-group-title,
+.sat-recommendations-readable .sat-rec-card,
+.sat-recommendations-readable .sat-rec-header,
+.sat-recommendations-readable .sat-rec-type-row,
+.sat-recommendations-readable .sat-rec-action,
+.sat-recommendations-readable .sat-rec-weather-note,
+.sat-recommendations-readable .sat-rec-brief,
+.sat-recommendations-readable .sat-rec-brief-row,
+.sat-recommendations-readable .sat-rec-brief-label,
+.sat-recommendations-readable .sat-rec-brief-text,
+.sat-recommendations-readable .sat-rec-impact,
+.sat-recommendations-readable .sat-rec-evidence,
+.sat-recommendations-readable .sat-evidence-item {
+  text-align: left !important;
+}
+
+.sat-recommendations-readable .sat-rec-header {
+  align-items: flex-start;
+}
+/* ─── New Micronutrient Panel ───────────────────────────────────────────────────── */
+.sat-fert-panel {
+  margin-top: 1.5rem;
+  border-top: 2px solid #d8dee6;
+}
+
+/* ─── ROI Panel ───────────────────────────────────────────────────────────────────── */
+.sat-roi-panel .sat-irr-card {
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.sat-roi-panel .sat-irr-card.critical {
+  background: #fff5f5;
+  border-left-color: #dc2626;
+}
+
+.sat-roi-panel .sat-irr-card.positive {
+  background: #f0fdf4;
+  border-left-color: #16a34a;
+}
+
+.sat-roi-panel .sat-irr-card.neutral {
+  background: #f3f4f6;
+  border-left-color: #6b7280;
+}
+
+.sat-roi-panel .sat-irr-card.caution {
+  background: #fffbeb;
+  border-left-color: #f59e0b;
+}
+
+/* ─── Cost Tracker ──────────────────────────────────────────────────────────────── */
+.sat-cost-tracker-panel {
+  background: var(--sat-surface);
+  padding: 1.5rem;
+  border-radius: var(--sat-radius-md);
+  margin-top: 1.5rem;
+  border: 1px solid var(--sat-border);
+}
+
+.sat-tracker-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.sat-tracker-card {
+  padding: 0.75rem;
+  background: var(--sat-surface-soft);
+  border-radius: 8px;
+  border: 1px solid var(--sat-border);
+  text-align: center;
+}
+
+.sat-tracker-label {
+  font-size: 0.8rem;
+  color: var(--sat-text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.sat-tracker-value {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--sat-text-strong);
+}
+
+/* Visual Budget Tracker */
+.sat-budget-visual {
+  margin: 1.5rem 0;
+}
+
+.sat-budget-comparison {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.sat-budget-box {
+  padding: 1.2rem;
+  border-radius: var(--sat-radius-sm);
+  border: 2px solid var(--sat-border);
+  text-align: center;
+  background: var(--sat-surface-soft);
+}
+
+.sat-budget-expected {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+}
+
+.sat-budget-circle {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.sat-budget-amount {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--sat-text-strong);
+  margin: 0.5rem 0;
+}
+
+.sat-budget-label {
+  font-size: 0.85rem;
+  color: var(--sat-text-muted);
+  font-weight: 600;
+}
+
+/* Budget Status Banner */
+.sat-budget-status {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: var(--sat-radius-sm);
+  font-weight: 600;
+}
+
+.sat-budget-status.under-budget {
+  background: #f0fdf4;
+  border: 2px solid #10b981;
+  color: #15803d;
+}
+
+.sat-budget-status.over-budget {
+  background: #fef2f2;
+  border: 2px solid #dc2626;
+  color: #991b1b;
+}
+
+.sat-budget-status-circle {
+  font-size: 1.8rem;
+}
+
+.sat-budget-status-text {
+  font-size: 1rem;
+}
+
+/* Quick-Add Presets */
+.sat-cost-presets-section {
+  margin: 1.5rem 0;
+}
+
+.sat-preset-toggle {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--sat-surface-soft);
+  border: 1px solid var(--sat-border);
+  border-radius: var(--sat-radius-sm);
+  font-weight: 600;
+  color: var(--sat-text-strong);
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+.sat-preset-toggle:hover {
+  background: #e8eef5;
+}
+
+.sat-preset-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.sat-preset-btn {
+  padding: 1rem 0.5rem;
+  background: #fafbfc;
+  border: 2px solid var(--sat-border);
+  border-radius: var(--sat-radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--sat-text-strong);
+}
+
+.sat-preset-btn:hover {
+  border-color: var(--sat-primary);
+  background: #e8f3ff;
+  transform: translateY(-2px);
+}
+
+.sat-preset-icon {
+  font-size: 2rem;
+}
+
+.sat-preset-name {
+  font-size: 0.8rem;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Manual Entry Form */
+.sat-cost-input-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+}
+
+.sat-cost-input-form .sat-input {
+  padding: 0.75rem;
+  border: 1px solid var(--sat-border);
+  border-radius: var(--sat-radius-sm);
+  font-size: 0.95rem;
+}
+
+.sat-cost-input-form .sat-action-btn {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.sat-cost-notes-input {
+  grid-column: 1 / -1;
+  min-height: 96px;
+  resize: vertical;
+}
+
+/* Cost List */
+.sat-cost-list {
+  margin-top: 1.5rem;
+}
+
+.sat-cost-list-header {
+  font-weight: 700;
+  color: var(--sat-text-strong);
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.sat-cost-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem;
+  border-bottom: 1px solid var(--sat-border);
+  background: var(--sat-surface-soft);
+  margin-bottom: 0.5rem;
+  border-radius: 6px;
+}
+
+.sat-cost-details {
+  flex: 1;
+}
+
+.sat-cost-name {
+  font-weight: 600;
+  color: var(--sat-text-strong);
+}
+
+.sat-cost-date {
+  font-size: 0.8rem;
+  color: var(--sat-text-muted);
+  margin-top: 0.2rem;
+}
+
+.sat-cost-amount {
+  font-weight: 700;
+  color: var(--sat-primary);
+  min-width: 120px;
+  text-align: right;
+}
+
+.sat-cost-remove {
+  background: none;
+  border: none;
+  color: #dc2626;
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  margin-left: 0.5rem;
+}
+
+.sat-cost-remove:hover {
+  color: #991b1b;
+}
+
+/* ─── Stage Checklist Panel (Interactive Timeline) ───────────────────────────── */
+.sat-stage-checklist-panel {
+  background: var(--sat-surface);
+  padding: 1.5rem;
+  border-radius: var(--sat-radius-md);
+  margin-top: 1.5rem;
+  border: 1px solid var(--sat-border);
+}
+
+.sat-stage-timeline {
+  margin: 1.5rem 0;
+  overflow-x: auto;
+}
+
+.sat-stage-track {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 1rem 0;
+  min-width: 100%;
+}
+
+.sat-stage-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  padding: 1rem;
+  border-radius: var(--sat-radius-sm);
+  background: var(--sat-surface-soft);
+  border: 2px solid var(--sat-border);
+  transition: all 0.2s;
+  cursor: default;
+}
+
+.sat-stage-node.current {
+  background: #fffbeb;
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+}
+
+.sat-stage-node.past {
+  background: #f0fdf4;
+  border-color: #10b981;
+}
+
+.sat-stage-node-icon {
+  font-size: 2rem;
+}
+
+.sat-stage-node-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--sat-text-strong);
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Task List */
+.sat-task-list {
+  margin-top: 1.5rem;
+}
+
+.sat-task-list-header {
+  font-weight: 700;
+  color: var(--sat-text-strong);
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+.sat-task-item {
+  margin-bottom: 0.75rem;
+  border-radius: var(--sat-radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--sat-border);
+}
+
+.sat-task-header {
+  padding: 1rem;
+  background: var(--sat-surface-soft);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: background 0.2s;
+}
+
+.sat-task-header:hover {
+  background: #e8eef5;
+}
+
+.sat-task-header-static {
+  cursor: default;
+}
+
+.sat-task-header-static:hover {
+  background: var(--sat-surface-soft);
+}
+
+.sat-task-timing {
+  font-weight: 700;
+  color: var(--sat-text-strong);
+  min-width: 110px;
+  font-size: 0.85rem;
+}
+
+.sat-task-title {
+  flex: 1;
+  color: var(--sat-text);
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.sat-task-expand-icon {
+  color: var(--sat-text-muted);
+  font-weight: 600;
+}
+
+/* ─── Pest Disease Panel (Visual Risk Grid) ──────────────────────────────────── */
+.sat-pest-disease-panel {
+  background: var(--sat-surface);
+  padding: 1.5rem;
+  border-radius: var(--sat-radius-md);
+  margin-top: 1.5rem;
+  border: 1px solid var(--sat-border);
+}
+
+.sat-pest-risk-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.sat-pest-risk-grid-dual {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+}
+
+.sat-pest-risk-column {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.sat-pest-col-title {
+  font-size: 0.84rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-radius: 999px;
+  padding: 0.45rem 0.8rem;
+  width: fit-content;
+}
+
+.sat-pest-col-title.high {
+  color: #991b1b;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+}
+
+.sat-pest-col-title.low {
+  color: #166534;
+  background: #dcfce7;
+  border: 1px solid #bbf7d0;
+}
+
+.sat-pest-empty-note {
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  padding: 0.75rem;
+  font-size: 0.84rem;
+  color: #475569;
+  background: #f8fafc;
+}
+
+.sat-pest-card {
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid var(--sat-border);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+  background: #ffffff;
+  overflow: hidden;
+  min-height: 120px;
+}
+
+.sat-pest-card.risk-high {
+  background: #FEF2F2;
+  border-color: #FECACA;
+}
+
+.sat-pest-card.risk-low {
+  background: #F0FDF4;
+  border-color: #BBF7D0;
+}
+
+.sat-pest-card:hover {
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.11);
+}
+
+.sat-pest-card-header {
+  padding: 0.85rem 0.9rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 1rem;
+  align-items: center;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.sat-pest-card-header.risk-high {
+  background: #FEF2F2;
+}
+
+.sat-pest-card-header.risk-low {
+  background: #F0FDF4;
+}
+
+.sat-pest-name {
+  font-family: "DM Sans", "Segoe UI", Roboto, Arial, sans-serif;
+  font-weight: 700;
+  color: #0f172a;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.sat-pest-risk-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: white;
+  padding: 0.35rem 0.62rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.sat-pest-chevron {
+  color: #334155;
+  font-size: 0.9rem;
+  line-height: 1;
+  transition: transform 220ms ease;
+  transform: rotate(-90deg);
+}
+
+.sat-pest-card-body {
+  overflow: hidden;
+  transition: max-height 260ms ease, opacity 260ms ease, padding 260ms ease;
+  max-height: 0;
+  opacity: 0;
+  padding: 0 0.9rem;
+}
+
+.sat-pest-card-body.expanded {
+  max-height: 420px;
+  opacity: 1;
+  padding: 0.8rem 0.9rem 0.9rem;
+}
+
+.sat-pest-chevron.expanded {
+  transform: rotate(0deg);
+}
+
+.sat-pest-section {
+  display: block;
+}
+
+.sat-pest-section-label {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 0.3rem;
+}
+
+.sat-pest-section-text {
+  font-size: 0.85rem;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.sat-pest-divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 0.65rem 0;
+}
+
+.sat-pest-inline-wrap {
+  margin: 0.9rem 0 0.2rem;
+}
+
+.sat-pest-inline-label {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.45rem;
+}
+
+.sat-pest-inline-row {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 0.2rem;
+}
+
+.sat-pest-inline-item {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.34rem 0.65rem;
+  white-space: nowrap;
+}
+
+.sat-pest-inline-item.risk-high {
+  border-color: #fecaca;
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.sat-pest-inline-item.risk-low {
+  border-color: #bbf7d0;
+  background: #dcfce7;
+  color: #166534;
+}
+
+.sat-pest-inline-empty {
+  font-size: 0.82rem;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.sat-pest-detail-list {
+  margin-top: 0.8rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.8rem;
+}
+
+/* ─── Responsive Adjustments ─────────────────────────────────────────────────── */
+@media (max-width: 720px) {
+  .sat-budget-comparison {
+    grid-template-columns: 1fr;
+  }
+
+  .sat-preset-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .sat-cost-input-form {
+    grid-template-columns: 1fr;
+  }
+
+  .sat-stage-track {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+
+  .sat-stage-node-label {
+    font-size: 0.65rem;
+  }
+
+  .sat-pest-risk-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .sat-pest-risk-grid-dual {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sat-pest-risk-group {
+  padding: 0.75rem;
+}
+
+.sat-pest-risk-item {
+  margin-bottom: 0.75rem;
+  padding: 0.6rem;
+  background: #f9fafb;
+  border-left: 3px solid #2d6a4f;
+  border-radius: 4px;
+}
+
+.sat-pest-risk-title {
+  font-weight: 600;
+  color: var(--sat-text-strong);
+  margin-bottom: 0.25rem;
+}
+
+.sat-pest-risk-condition {
+  font-size: 0.85rem;
+  color: var(--sat-text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.sat-pest-risk-action {
+  font-size: 0.85rem;
+  color: #16a34a;
+  font-weight: 500;
+}
+
+/* ─── Weather Risk 14-Day ───────────────────────────────────────────────────── */
+.sat-weather-risk-panel {
+  background: var(--sat-surface);
+  padding: 1.5rem;
+  border-radius: var(--sat-radius-md);
+  margin-top: 1.5rem;
+  border: 1px solid var(--sat-border);
+}
+
+.sat-weather-risk-list {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.sat-weather-risk-card {
+  padding: 0.85rem;
+  border-left: 4px solid #6b7280;
+  background: #f9fafb;
+  border-radius: 6px;
+}
+
+.sat-weather-risk-card.severity-critical {
+  border-left-color: #dc2626;
+  background: #fff5f5;
+}
+
+.sat-weather-risk-card.severity-moderate {
+  border-left-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.sat-weather-risk-card.severity-low {
+  border-left-color: #16a34a;
+  background: #f0fdf4;
+}
+
+.sat-weather-risk-type {
+  font-weight: 600;
+  color: var(--sat-text-strong);
+  margin-bottom: 0.25rem;
+}
+
+.sat-weather-risk-day {
+  display: inline-block;
+  font-size: 0.75rem;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  margin-bottom: 0.5rem;
+}
+
+.sat-weather-risk-detail {
+  font-size: 0.85rem;
+  color: var(--sat-text);
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.sat-weather-risk-action {
+  font-size: 0.85rem;
+  color: #1e40af;
+  font-weight: 500;
+}
+
+/* ─── District Benchmark ────────────────────────────────────────────────────── */
+.sat-benchmark-panel {
+  background: var(--sat-surface);
+  padding: 1.5rem;
+  border-radius: var(--sat-radius-md);
+  margin-top: 1.5rem;
+  border: 1px solid var(--sat-border);
+}
+
+.sat-benchmark-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.sat-benchmark-card {
+  padding: 0.85rem;
+  background: var(--sat-surface-soft);
+  border-radius: 8px;
+  border: 1px solid var(--sat-border);
+}
+
+.sat-benchmark-card.emphasis {
+  background: #f0fdf4;
+  border-color: #16a34a;
+}
+
+.sat-benchmark-label {
+  font-size: 0.8rem;
+  color: var(--sat-text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.sat-benchmark-value {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--sat-text-strong);
+}
+
+.sat-benchmark-detail {
+  font-size: 0.8rem;
+  color: var(--sat-text-muted);
+  margin-top: 0.25rem;
+}
+
+.sat-benchmark-gap-list {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.sat-benchmark-gap-item {
+  padding: 0.85rem;
+  border: 1px solid var(--sat-border);
+  border-radius: 8px;
+  background: #f9fafb;
+}
+
+.sat-benchmark-gap-title {
+  font-weight: 600;
+  color: var(--sat-text-strong);
+  margin-bottom: 0.2rem;
+}
+
+.sat-benchmark-gap-amount {
+  font-size: 0.9rem;
+  color: #2d6a4f;
+  font-weight: 500;
+  margin-bottom: 0.4rem;
+}
+
+.sat-benchmark-gap-reason {
+  font-size: 0.85rem;
+  color: var(--sat-text);
+  margin-bottom: 0.3rem;
+  line-height: 1.3;
+}
+
+.sat-benchmark-gap-action {
+  font-size: 0.85rem;
+  color: #1e40af;
+  font-weight: 500;
+}
+
+/* ─── Crop Variety Matcher ──────────────────────────────────────────────────── */
+.sat-variety-panel {
+  background: var(--sat-surface);
+  padding: 1.5rem;
+  border-radius: var(--sat-radius-md);
+  margin-top: 1.5rem;
+  border: 1px solid var(--sat-border);
+}
+
+.sat-variety-soil-profile {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.sat-variety-badge {
+  display: inline-block;
+  background: var(--sat-surface-soft);
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: var(--sat-text-strong);
+  border: 1px solid var(--sat-border);
+}
+
+.sat-variety-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.85rem;
+  margin: 1rem 0;
+}
+
+.sat-variety-card {
+  padding: 0.85rem;
+  border: 1px solid var(--sat-border);
+  border-radius: 8px;
+  background: var(--sat-surface-soft);
+}
+
+.sat-variety-name {
+  font-weight: 600;
+  color: var(--sat-text-strong);
+  margin-bottom: 0.2rem;
+  font-size: 0.95rem;
+}
+
+.sat-variety-suitability {
+  display: inline-block;
+  font-size: 0.75rem;
+  background: #e8f3ff;
+  color: #1e40af;
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+  margin-bottom: 0.5rem;
+}
+
+.sat-variety-reason {
+  font-size: 0.8rem;
+  color: var(--sat-text);
+  margin-bottom: 0.5rem;
+  line-height: 1.35;
+}
+
+.sat-variety-details {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  color: var(--sat-text-muted);
+}
+
+.sat-variety-detail-item {
+  display: block;
+}
+
+/* ─── Responsive tweaks ─────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .sat-tracker-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .sat-benchmark-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .sat-variety-list {
+    grid-template-columns: 1fr;
+  }
+
+  .sat-cost-input-form {
+    flex-direction: column;
+  }
+
+  .sat-cost-input-form .sat-input,
+  .sat-cost-input-form .sat-action-btn {
+    width: 100%;
+  }
+}
+
+/* Dark theme adjustments */
+.sat-page.sat-theme-dark .sat-cost-tracker-panel,
+.sat-page.sat-theme-dark .sat-pest-disease-panel,
+.sat-page.sat-theme-dark .sat-weather-risk-panel,
+.sat-page.sat-theme-dark .sat-benchmark-panel,
+.sat-page.sat-theme-dark .sat-variety-panel {
+  background: var(--sat-surface);
+  border-color: var(--sat-border);
+}
+
+.sat-page.sat-theme-dark .sat-pest-week-head,
+.sat-page.sat-theme-dark .sat-tracker-card,
+.sat-page.sat-theme-dark .sat-benchmark-card,
+.sat-page.sat-theme-dark .sat-variety-badge {
+  background: var(--sat-surface-soft);
+}
+
+/* Compact overview + reduced tab spacing */
+.sat-results-tabs {
+  margin-top: 0.45rem;
+  gap: 0.35rem;
+}
+
+.sat-results-tab {
+  padding: 0.36rem 0.64rem;
+}
+
+.sat-overview-panel {
+  border: 1px solid #dce3ed;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 0.85rem;
+  margin-top: 0.7rem;
+}
+
+.sat-overview-head .sat-section-title {
+  margin-bottom: 0.2rem;
+}
+
+.sat-overview-snapshot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.48rem;
+  margin: 0.55rem 0 0.75rem;
+}
+
+.sat-overview-snapshot-card {
+  border: 1px solid #dce3ed;
+  border-radius: 9px;
+  background: #f8fafc;
+  padding: 0.5rem 0.6rem;
+}
+
+.sat-overview-snapshot-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #526074;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sat-overview-snapshot-value {
+  margin-top: 0.16rem;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #0f1720;
+}
+
+.sat-overview-note {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #5f6b7a;
+}
+
+.sat-overview-attention-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.55rem;
+  margin-top: 0.65rem;
+}
+
+.sat-overview-attention-card {
+  border: 1px solid #dce3ed;
+  border-left-width: 4px;
+  border-radius: 10px;
+  background: #f9fbfd;
+  padding: 0.62rem 0.68rem;
+  display: grid;
+  gap: 0.28rem;
+}
+
+.sat-overview-attention-card.critical,
+.sat-overview-attention-card.high {
+  border-left-color: #dc2626;
+}
+
+.sat-overview-attention-card.medium {
+  border-left-color: #f59e0b;
+}
+
+.sat-overview-attention-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1.3;
+}
+
+.sat-overview-attention-detail {
+  font-size: 0.76rem;
+  color: #4b5563;
+  line-height: 1.4;
+}
+
+.sat-overview-open-link {
+  justify-self: start;
+  border: none;
+  border-radius: 8px;
+  background: #e8eef6;
+  color: #0f1720;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 0.28rem 0.52rem;
+  cursor: pointer;
+}
+
+.sat-overview-open-link:hover {
+  background: #d8e3f0;
+}
+
+.sat-overview-clear-card {
+  margin-top: 0.6rem;
+  border-radius: 9px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  font-size: 0.78rem;
+  padding: 0.6rem 0.68rem;
+}
+
+.sat-overview-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.32rem;
+  margin-top: 0.62rem;
+}
+
+.sat-overview-shortcuts .sat-results-tab {
+  font-size: 0.72rem;
+}
+
+.sat-planning-recommendations {
+  margin-top: 0.72rem;
+  margin-bottom: 0.8rem;
+}
+
+.sat-planning-recommendations .sat-rec-group-title {
+  margin-bottom: 0.35rem;
+}
+
+.sat-results .sat-irrigation-schedule-panel,
+.sat-results .sat-pest-disease-panel,
+.sat-results .sat-weather-risk-panel,
+.sat-results .sat-cost-tracker-panel,
+.sat-results .sat-benchmark-panel,
+.sat-results .sat-variety-panel {
+  margin-top: 0.8rem;
+  margin-bottom: 0.8rem;
+}
+
+.sat-page.sat-theme-dark .sat-overview-panel {
+  background: #0f1a2e;
+  border-color: #2f3f59;
+}
+
+.sat-page.sat-theme-dark .sat-overview-note {
+  color: #a0aec0;
+}
+
+.sat-page.sat-theme-dark .sat-overview-snapshot-card {
+  background: #132533;
+  border-color: #2f3f59;
+}
+
+.sat-page.sat-theme-dark .sat-overview-snapshot-label {
+  color: #9fb0c4;
+}
+
+.sat-page.sat-theme-dark .sat-overview-snapshot-value {
+  color: #e5e7eb;
+}
+
+.sat-page.sat-theme-dark .sat-overview-attention-card {
+  background: #132533;
+  border-color: #2f3f59;
+}
+
+.sat-page.sat-theme-dark .sat-overview-attention-title {
+  color: #e5e7eb;
+}
+
+.sat-page.sat-theme-dark .sat-overview-attention-detail {
+  color: #cbd5e1;
+}
+
+.sat-page.sat-theme-dark .sat-overview-open-link {
+  background: #213042;
+  color: #e5e7eb;
+}
+
+.sat-page.sat-theme-dark .sat-overview-open-link:hover {
+  background: #2b3c50;
+}
+
+.sat-page.sat-theme-dark .sat-overview-clear-card {
+  background: #153221;
+  border-color: #2f855a;
+  color: #9ae6b4;
+}
+
+/* ── Farm Location Management ────────────────────────────────────────── */
+
+.sat-locations-section {
+  border: 2px solid var(--sat-primary);
+  background: linear-gradient(135deg, var(--sat-surface-soft) 0%, var(--sat-surface) 100%);
+}
+
+.sat-locations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.sat-empty-locations-message {
+  padding: 24px;
+  text-align: center;
+  color: var(--sat-text-muted);
+  font-size: 13px;
+  line-height: 1.6;
+  background: rgba(45, 106, 79, 0.05);
+  border-radius: var(--sat-radius-md);
+  margin: 16px 0;
+}
+
+.sat-location-card {
+  position: relative;
+  border: 1px solid var(--sat-border);
+  border-radius: var(--sat-radius-md);
+  background: var(--sat-surface);
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+.sat-location-card.active {
+  border-color: var(--sat-primary);
+  background: rgba(45, 106, 79, 0.05);
+  box-shadow: 0 0 0 2px rgba(45, 106, 79, 0.1);
+}
+
+.sat-location-select-btn {
+  width: 100%;
+  padding: 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.2s ease;
+}
+
+.sat-location-card:hover .sat-location-select-btn {
+  background: rgba(45, 106, 79, 0.05);
+}
+
+.sat-location-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--sat-text-strong);
+  word-break: break-word;
+}
+
+.sat-location-meta {
+  font-size: 11px;
+  color: var(--sat-text-muted);
+  margin-top: 4px;
+}
+
+.sat-location-crop {
+  font-size: 10px;
+  color: var(--sat-primary);
+  background: rgba(45, 106, 79, 0.1);
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-top: 6px;
+  display: inline-block;
+}
+
+.sat-location-delete-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  background: rgba(255, 0, 0, 0.1);
+  border: none;
+  border-radius: 4px;
+  color: #dc2626;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sat-location-delete-btn:hover {
+  background: rgba(255, 0, 0, 0.2);
+}
+
+.sat-locations-collapse-btn-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.sat-add-location-btn {
+  display: none;
+}
+
+.sat-add-location-btn:hover {
+  display: none;
+}
+
+.sat-collapse-locations-btn,
+.sat-expand-locations-btn {
+  padding: 6px 12px;
+  background: var(--sat-surface-soft);
+  color: var(--sat-text);
+  border: 1px solid var(--sat-border);
+  border-radius: var(--sat-radius-sm);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sat-collapse-locations-btn:hover,
+.sat-expand-locations-btn:hover {
+  background: var(--sat-border);
+}
+
+.sat-expand-locations-btn {
+  display: block;
+  width: 100%;
+  margin-bottom: 16px;
+  padding: 10px;
+  font-weight: 600;
+}
+
+/* Modal styles */
+.sat-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.sat-modal-card {
+  background: var(--sat-surface);
+  border-radius: var(--sat-radius-lg);
+  box-shadow: var(--sat-shadow-2);
+  max-width: 400px;
+  width: 90%;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sat-modal-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--sat-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sat-modal-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--sat-text-strong);
+  margin: 0;
+}
+
+.sat-modal-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  color: var(--sat-text-muted);
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.sat-modal-close-btn:hover {
+  color: var(--sat-text);
+}
+
+.sat-modal-body {
+  padding: 20px;
+}
+
+.sat-modal-text {
+  font-size: 13px;
+  color: var(--sat-text-muted);
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+.sat-location-name-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--sat-border);
+  border-radius: var(--sat-radius-sm);
+  font-size: 13px;
+  color: var(--sat-text);
+  transition: border-color 0.2s ease;
+}
+
+.sat-location-name-input:focus {
+  outline: none;
+  border-color: var(--sat-primary);
+  box-shadow: 0 0 0 2px rgba(45, 106, 79, 0.1);
+}
+
+.sat-modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--sat-border);
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.sat-btn-cancel,
+.sat-btn-save {
+  padding: 10px 20px;
+  border-radius: var(--sat-radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.sat-btn-cancel {
+  background: var(--sat-surface-soft);
+  color: var(--sat-text);
+  border: 1px solid var(--sat-border);
+}
+
+.sat-btn-cancel:hover {
+  background: var(--sat-border);
+}
+
+.sat-btn-save {
+  background: var(--sat-primary);
+  color: white;
+}
+
+.sat-btn-save:hover:not(:disabled) {
+  background: var(--sat-primary-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--sat-shadow-1);
+}
+
+.sat-btn-save:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sat-btn-delete {
+  background: #dc2626;
+  color: white;
+  padding: 10px 20px;
+  border-radius: var(--sat-radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.sat-btn-delete:hover {
+  background: #b91c1c;
+  transform: translateY(-1px);
+  box-shadow: var(--sat-shadow-1);
+}
+
+.sat-delete-confirm-modal {
+  border-left: 4px solid #dc2626;
+}
+
+.sat-text-muted {
+  opacity: 0.7 !important;
+  font-size: 12px !important;
+}
+
+/* Dark theme for modal */
+.sat-page.sat-theme-dark .sat-modal-overlay {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.sat-page.sat-theme-dark .sat-modal-card {
+  background: #1e293b;
+}
+
+.sat-page.sat-theme-dark .sat-modal-header,
+.sat-page.sat-theme-dark .sat-modal-footer {
+  border-color: #334155;
+}
+
+.sat-page.sat-theme-dark .sat-modal-title {
+  color: #f1f5f9;
+}
+
+.sat-page.sat-theme-dark .sat-location-name-input {
+  background: #0f172a;
+  color: #f1f5f9;
+  border-color: #334155;
+}
+
+.sat-page.sat-theme-dark .sat-location-name-input:focus {
+  border-color: var(--sat-primary);
+}
+
+.sat-page.sat-theme-dark .sat-btn-cancel {
+  background: #334155;
+  color: #f1f5f9;
+  border-color: #475569;
+}
+
+.sat-page.sat-theme-dark .sat-btn-cancel:hover {
+  background: #475569;
+}
+
+.sat-page.sat-theme-dark .sat-btn-delete {
+  background: #dc2626;
+  color: white;
+}
+
+.sat-page.sat-theme-dark .sat-btn-delete:hover {
+  background: #b91c1c;
+}
+
+.sat-inline-toast {
+  margin: 0 auto 12px;
+  width: min(520px, 100%);
+  border: 1px solid #9ad5b0;
+  background: #ecfbf1;
+  color: #1a5a36;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.sat-report-toolbar {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.sat-report-new-analysis-btn {
+  min-height: 34px;
+}
+
+.sat-report-close-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid #cad9cc;
+  background: #f7fbf8;
+  color: #1f4e35;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.sat-report-close-btn:hover {
+  background: #eaf5ed;
+}
+
+.sat-page.sat-theme-dark .sat-inline-toast {
+  background: rgba(12, 35, 25, 0.94);
+  border-color: rgba(52, 211, 153, 0.55);
+  color: #b8f7cf;
+}
+
+.sat-page.sat-theme-dark .sat-report-close-btn {
+  background: rgba(19, 33, 28, 0.9);
+  border-color: rgba(148, 163, 184, 0.35);
+  color: #dcfce7;
+}
+
+.sat-page.sat-theme-dark .sat-report-close-btn:hover {
+  background: rgba(22, 45, 35, 0.95);
+}
+
+/* Satellite page revamp: lock to readable light theme */
+.sat-page.sat-theme-revamp {
+  --sat-bg: #f3f8f6;
+  --sat-surface: #ffffff;
+  --sat-surface-soft: #f2f6f9;
+  --sat-border: #d5dde5;
+  --sat-text: #1f2937;
+  --sat-text-strong: #0f172a;
+  --sat-text-muted: #475569;
+  --sat-primary: #2f6f55;
+  --sat-primary-strong: #1f513c;
+  --sat-success: #0f766e;
+  --sat-warning: #b45309;
+  --sat-danger: #b91c1c;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(47, 111, 85, 0.1), transparent 38%),
+    radial-gradient(circle at 100% 0%, rgba(14, 116, 144, 0.08), transparent 34%),
+    linear-gradient(180deg, #f7fbfa 0%, #f1f6f4 100%);
+}
+
+.sat-page.sat-theme-revamp .sat-main {
+  padding: 1.2rem 1rem 2.5rem;
+}
+
+.sat-page.sat-theme-revamp .sat-sidebar {
+  background: linear-gradient(180deg, #ffffff 0%, #f4faf7 100%);
+  border: 1px solid #d8e5dd;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+.sat-page.sat-theme-revamp .sat-sidebar-mode-badge {
+  border: 1px solid #b7d8c7;
+  background: #eaf7f0;
+  color: #1f513c;
+  border-radius: 10px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-align: center;
+  padding: 0.56rem 0.72rem;
+  letter-spacing: 0.01em;
+}
+
+.sat-page.sat-theme-revamp .sat-main-card,
+.sat-page.sat-theme-revamp .sat-results,
+.sat-page.sat-theme-revamp .sat-field-report,
+.sat-page.sat-theme-revamp .sat-section,
+.sat-page.sat-theme-revamp .sat-control-group,
+.sat-page.sat-theme-revamp .sat-output-card,
+.sat-page.sat-theme-revamp .sat-result-card,
+.sat-page.sat-theme-revamp .sat-diagnosis-block,
+.sat-page.sat-theme-revamp .sat-technical-section,
+.sat-page.sat-theme-revamp .sat-soil-panel,
+.sat-page.sat-theme-revamp .sat-rec-card,
+.sat-page.sat-theme-revamp .sat-quick-action,
+.sat-page.sat-theme-revamp .sat-rec-group,
+.sat-page.sat-theme-revamp .sat-weather-impact-row,
+.sat-page.sat-theme-revamp .sat-soil-score-row,
+.sat-page.sat-theme-revamp .sat-soil-trend-row,
+.sat-page.sat-theme-revamp .sat-soil-rec-item,
+.sat-page.sat-theme-revamp .sat-engine-card,
+.sat-page.sat-theme-revamp .sat-history-item,
+.sat-page.sat-theme-revamp .sat-outcome-action-box,
+.sat-page.sat-theme-revamp .sat-history-list-wrap {
+  background: #ffffff;
+  border-color: #d5dde5;
+  color: #1f2937;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+}
+
+.sat-page.sat-theme-revamp .sat-results-header,
+.sat-page.sat-theme-revamp .sat-growth-near-heatmap,
+.sat-page.sat-theme-revamp .sat-heatmap-panel,
+.sat-page.sat-theme-revamp .sat-weather-impact-panel,
+.sat-page.sat-theme-revamp .sat-output-card.priority,
+.sat-page.sat-theme-revamp .sat-output-card.focus,
+.sat-page.sat-theme-revamp .sat-output-card.timeline {
+  background: linear-gradient(180deg, #f9fcfb 0%, #f2f8f5 100%);
+  border-color: #cfe0d6;
+}
+
+.sat-page.sat-theme-revamp .sat-title,
+.sat-page.sat-theme-revamp .sat-results-title,
+.sat-page.sat-theme-revamp .sat-report-label,
+.sat-page.sat-theme-revamp .sat-section-title,
+.sat-page.sat-theme-revamp .sat-rec-type,
+.sat-page.sat-theme-revamp .sat-soil-block-title,
+.sat-page.sat-theme-revamp .sat-soil-rec-type,
+.sat-page.sat-theme-revamp .sat-soil-impact-title,
+.sat-page.sat-theme-revamp .sat-yield-val,
+.sat-page.sat-theme-revamp .sat-tracker-value,
+.sat-page.sat-theme-revamp .sat-tech-meta-value,
+.sat-page.sat-theme-revamp .sat-health-score {
+  color: #0f172a;
+}
+
+.sat-page.sat-theme-revamp .sat-subtitle,
+.sat-page.sat-theme-revamp .sat-output-sub,
+.sat-page.sat-theme-revamp .sat-report-summary-text,
+.sat-page.sat-theme-revamp .sat-rec-detail,
+.sat-page.sat-theme-revamp .sat-rec-reason,
+.sat-page.sat-theme-revamp .sat-qa-action,
+.sat-page.sat-theme-revamp .sat-soil-rec-action,
+.sat-page.sat-theme-revamp .sat-soil-rec-reason,
+.sat-page.sat-theme-revamp .sat-soil-impact-text,
+.sat-page.sat-theme-revamp .sat-weather-impact-summary,
+.sat-page.sat-theme-revamp .sat-weather-impact-insight-reason,
+.sat-page.sat-theme-revamp .sat-weather-impact-insight-action,
+.sat-page.sat-theme-revamp .sat-capture-meta-inline,
+.sat-page.sat-theme-revamp .sat-bench-desc,
+.sat-page.sat-theme-revamp .sat-index-hint,
+.sat-page.sat-theme-revamp .sat-soil-note,
+.sat-page.sat-theme-revamp .sat-chip-subtext,
+.sat-page.sat-theme-revamp .sat-yield-lbl,
+.sat-page.sat-theme-revamp .sat-tech-meta-label {
+  color: #475569;
+}
+
+.sat-page.sat-theme-revamp .sat-nav-btn,
+.sat-page.sat-theme-revamp .sat-sidebar-btn,
+.sat-page.sat-theme-revamp .sat-lang-toggle,
+.sat-page.sat-theme-revamp .sat-select-chip,
+.sat-page.sat-theme-revamp .sat-input,
+.sat-page.sat-theme-revamp .sat-history-select,
+.sat-page.sat-theme-revamp .sat-boundary-status,
+.sat-page.sat-theme-revamp .sat-rec-empty,
+.sat-page.sat-theme-revamp .sat-recent-chip,
+.sat-page.sat-theme-revamp .sat-city-label,
+.sat-page.sat-theme-revamp .sat-city-overlay-name,
+.sat-page.sat-theme-revamp .sat-heat-legend,
+.sat-page.sat-theme-revamp .sat-modal-card {
+  background: #ffffff;
+  border-color: #d0dae3;
+  color: #1f2937;
+}
+
+.sat-page.sat-theme-revamp .sat-nav-btn:hover,
+.sat-page.sat-theme-revamp .sat-sidebar-btn:hover,
+.sat-page.sat-theme-revamp .sat-select-chip:hover:not(.disabled),
+.sat-page.sat-theme-revamp .sat-recent-chip:hover,
+.sat-page.sat-theme-revamp .sat-action-btn.secondary:hover {
+  background: #eef6f2;
+  border-color: #bdd6c8;
+}
+
+.sat-page.sat-theme-revamp .sat-select-chip.active,
+.sat-page.sat-theme-revamp .sat-lang-btn.active,
+.sat-page.sat-theme-revamp .sat-results-meta > span,
+.sat-page.sat-theme-revamp .sat-rec-timing-badge,
+.sat-page.sat-theme-revamp .sat-driver-pill {
+  background: #e9f6ef;
+  border-color: #b6d8c6;
+  color: #1f513c;
+}
+
+.sat-page.sat-theme-revamp .sat-analyze-btn {
+  background: linear-gradient(180deg, #2f6f55, #245844);
+  box-shadow: 0 12px 26px rgba(47, 111, 85, 0.25);
+}
+
+.sat-page.sat-theme-revamp .sat-analyze-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #397d61, #2f6f55);
+}
+
+.sat-page.sat-theme-revamp .sat-geo-btn,
+.sat-page.sat-theme-revamp .sat-go-btn,
+.sat-page.sat-theme-revamp .sat-action-btn {
+  background: #e9f6ef;
+  border-color: #b6d8c6;
+  color: #1f513c;
+}
+
+.sat-page.sat-theme-revamp .sat-error {
+  background: #fff4f4;
+  border-color: #f3c7c7;
+  color: #8f1d1d;
+}
+
+.sat-page.sat-theme-revamp .sat-coord-warning,
+.sat-page.sat-theme-revamp .sat-boundary-required,
+.sat-page.sat-theme-revamp .sat-boundary-help {
+  background: #f3fbf7;
+  border-color: #c6e2d3;
+  color: #245844;
+}
+
+@media (max-width: 768px) {
+  .sat-page.sat-theme-revamp .sat-main {
+    padding: 0.9rem 0.65rem 2rem;
+  }
+
+  .sat-page.sat-theme-revamp .sat-sidebar-mode-badge {
+    font-size: 0.72rem;
+    padding: 0.48rem 0.6rem;
+  }
+}

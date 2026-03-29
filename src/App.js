@@ -14,14 +14,18 @@ import CropComparisonMatrix from './CropComparisonMatrix';
 import ReportGenerator from './ReportGenerator';
 import SoilAnalysis from './soilAnalysis';
 import SoilTrends from './components/SoilTrends';
+import SatelliteAnalysis from './SatelliteAnalysis';
+import FarmerHistoryPage from './FarmerHistoryPage';
 
 import './global.css';
 
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import './App.css';
 import AdminDashboard from './AdminDashboard';
+import { useLanguage } from './context/LanguageContext';
 
 function App() {
+  const { t } = useLanguage();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -91,7 +95,7 @@ function App() {
         fontSize: '1.2rem',
         color: '#10b981'
       }}>
-        Loading...
+        {t('loading', 'Loading...')}
       </div>
     );
   }
@@ -142,6 +146,12 @@ function App() {
         {/* Add the SoilTrends route */}
         <Route path="/soil-trends" element={
           isAuthenticated ? <SoilTrends user={user} onLogout={handleLogout} /> : <Navigate to="/login" replace />
+        } />
+        <Route path="/satellite-analysis" element={
+          isAuthenticated ? <SatelliteAnalysis user={user} onLogout={handleLogout} /> : <Navigate to="/login" replace />
+        } />
+        <Route path="/satellite-history" element={
+          isAuthenticated ? <FarmerHistoryPage /> : <Navigate to="/login" replace />
         } />
         <Route path="/prediction-results" element={
           isAuthenticated ? <PredictionResults /> : <Navigate to="/login" replace />

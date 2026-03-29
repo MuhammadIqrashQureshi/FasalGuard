@@ -20,6 +20,28 @@ class MLPredictionController {
     }
   }
 
+  // Single-crop fallback wrapper — used when ML service is unavailable
+  async fallbackPrediction(crop, weatherData) {
+    try {
+      // Use the existing rule-based generator for a single crop
+      const result = this.generateRuleBasedPrediction(crop, weatherData);
+      return result;
+    } catch (error) {
+      console.error('Fallback prediction error:', error);
+      // As a last resort, return a minimal fallback shape
+      return {
+        success: true,
+        prediction: {
+          predicted_yield: 3.5,
+          confidence: 0.5,
+          model_type: 'fallback',
+          note: 'Minimal fallback due to internal error'
+        },
+        source: 'fallback'
+      };
+    }
+  }
+
  async predictWithML(crop, weatherData, modelType = 'gru') {
   if (!this.isServiceAvailable) {
     console.log(`🔄 ML service unavailable, using fallback for ${crop}`);

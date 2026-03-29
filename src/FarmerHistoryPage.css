@@ -1,0 +1,408 @@
+.farmer-history-page {
+  min-height: 100vh;
+  background: #ffffff;
+  padding: 20px;
+  color: #1e2b23;
+}
+
+.farmer-history-header {
+  display: grid;
+  grid-template-columns: 42px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.farmer-history-header h1 {
+  margin: 0;
+  text-align: center;
+  font-size: 1.7rem;
+  color: #1f4f35;
+}
+
+.farmer-history-lang-toggle {
+  margin-top: 6px;
+  display: inline-flex;
+  border: 1px solid #cfe2d4;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #f6fbf7;
+}
+
+.farmer-history-lang-btn {
+  border: none;
+  background: transparent;
+  color: #265f3f;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.farmer-history-lang-btn.active {
+  background: #2f8f57;
+  color: #ffffff;
+}
+
+.farmer-history-arrow-btn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #cfe2d4;
+  background: #f8fdf9;
+  color: #265f3f;
+  border-radius: 999px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.farmer-history-arrow-btn:hover {
+  background: #ecf8f0;
+}
+
+.farmer-history-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 16px;
+}
+
+.farmer-history-fields-panel,
+.farmer-history-details-panel {
+  background: #ffffff;
+  border: 1px solid #dbe8de;
+  border-radius: 14px;
+  box-shadow: 0 8px 20px rgba(20, 60, 38, 0.08);
+  padding: 14px;
+}
+
+.farmer-history-details-panel {
+  max-height: 78vh;
+  overflow: auto;
+}
+
+.farmer-history-panel-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #1d5a3b;
+  margin-bottom: 6px;
+}
+
+.farmer-history-panel-subtitle {
+  font-size: 0.86rem;
+  color: #577362;
+  margin-bottom: 12px;
+}
+
+.farmer-history-field-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 70vh;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.farmer-history-field-tab {
+  text-align: left;
+  border: 1px solid #d9e8dc;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #1a3f2e;
+  padding: 10px;
+  cursor: pointer;
+  transition: border-color 0.14s ease, box-shadow 0.14s ease;
+}
+
+.farmer-history-field-tab:hover {
+  border-color: #8dc39f;
+  box-shadow: 0 5px 14px rgba(16, 60, 40, 0.1);
+}
+
+.farmer-history-field-tab.active {
+  border-color: #3d9961;
+  box-shadow: 0 8px 16px rgba(24, 87, 57, 0.14);
+  background: #f5fff8;
+}
+
+.farmer-history-field-line {
+  font-size: 0.84rem;
+  line-height: 1.35;
+  margin-bottom: 2px;
+}
+
+.farmer-history-selected-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.farmer-history-selected-meta span {
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #f1fbf4;
+  border: 1px solid #cde5d4;
+  color: #225e3f;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.farmer-history-trend-box {
+  text-align: left;
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #d6e9dc;
+  background: #f9fdfa;
+  color: #285942;
+}
+
+.farmer-history-trend-title {
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.farmer-history-entry-list {
+  display: grid;
+  gap: 12px;
+}
+
+.farmer-history-entry {
+  text-align: left;
+  border: 1px solid #d8e8dc;
+  border-radius: 12px;
+  padding: 12px;
+  background: #fcfffc;
+}
+
+.farmer-history-entry-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.farmer-history-entry-date {
+  font-weight: 800;
+  color: #215338;
+}
+
+.farmer-history-entry-location {
+  font-size: 0.82rem;
+  color: #5b7567;
+  margin-top: 3px;
+}
+
+.farmer-history-entry-status {
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 5px 10px;
+  border: 1px solid transparent;
+}
+
+.farmer-history-entry-status.done {
+  color: #0f5f33;
+  background: #e7faee;
+  border-color: #9fd8b6;
+}
+
+.farmer-history-entry-status.pending {
+  color: #6a4f06;
+  background: #fff8df;
+  border-color: #eed48a;
+}
+
+.farmer-history-entry-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.farmer-history-entry-overview {
+  margin: 8px 0 10px;
+  border: 1px solid #d6e8dc;
+  border-radius: 8px;
+  background: #f8fdf9;
+  padding: 10px;
+  font-size: 0.9rem;
+  color: #234633;
+  line-height: 1.45;
+}
+
+.farmer-history-overview-title {
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: #1f5a3b;
+  margin-bottom: 4px;
+}
+
+.farmer-history-overview-action {
+  margin-top: 8px;
+  font-size: 0.84rem;
+  color: #2c5b44;
+  font-weight: 700;
+}
+
+.farmer-history-entry-metrics span {
+  border-radius: 8px;
+  padding: 5px 8px;
+  background: #f3faf5;
+  border: 1px solid #d6e8dc;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.farmer-history-entry-note {
+  margin: 6px 0;
+  border-left: 3px solid #77b08c;
+  background: #f2fbf5;
+  border-radius: 8px;
+  padding: 7px 9px;
+  font-size: 0.86rem;
+  color: #285642;
+}
+
+.farmer-history-entry-actions {
+  margin: 8px 0 10px;
+}
+
+.farmer-history-full-report {
+  margin: 8px 0 10px;
+  border: 1px solid #d0e4d7;
+  border-radius: 10px;
+  background: #f9fdfa;
+  padding: 10px;
+  max-height: 360px;
+  overflow: auto;
+}
+
+.farmer-history-full-report pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.78rem;
+  color: #1f4332;
+}
+
+.farmer-history-note-input {
+  width: 100%;
+  border: 1px solid #c9dfd0;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #1f3c2d;
+  padding: 8px;
+  margin-top: 6px;
+  margin-bottom: 8px;
+  font-size: 0.84rem;
+  resize: vertical;
+  min-height: 56px;
+}
+
+.farmer-history-note-save {
+  border: 1px solid #6aa885;
+  background: #e9f8ef;
+  color: #215138;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.farmer-history-note-save:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.farmer-history-entry-recs {
+  text-align: left;
+  margin-top: 8px;
+  display: grid;
+  gap: 8px;
+}
+
+.farmer-history-entry-recs-title {
+  text-align: left;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #1f5a3b;
+}
+
+.farmer-history-entry-rec-item {
+  text-align: left;
+  border-radius: 8px;
+  border: 1px solid #d6e8dc;
+  background: #ffffff;
+  padding: 8px 10px;
+}
+
+.farmer-history-entry-rec-action {
+  text-align: left;
+  font-size: 0.84rem;
+  color: #234633;
+  line-height: 1.45;
+}
+
+.farmer-history-heatmap-wrap {
+  margin-top: 10px;
+  border-radius: 8px;
+}
+
+.farmer-history-heatmap-toggle {
+  border: 1px solid #c9dfd0;
+  background: #f7fcf8;
+  color: #24573c;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.farmer-history-heatmap-toggle:hover {
+  background: #ecf7ef;
+}
+
+.farmer-history-heatmap-map {
+  margin-top: 8px;
+  height: 220px;
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #cfe3d4;
+}
+
+.farmer-history-muted {
+  color: #587263;
+  font-size: 0.86rem;
+  text-align: left;
+}
+
+.farmer-history-error {
+  margin-top: 12px;
+  color: #6b1818;
+  background: #ffefef;
+  border: 1px solid #e9b8b8;
+  border-radius: 10px;
+  padding: 10px;
+  text-align: left;
+}
+
+@media (max-width: 960px) {
+  .farmer-history-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .farmer-history-field-list {
+    max-height: none;
+  }
+
+  .farmer-history-header {
+    grid-template-columns: 40px 1fr 40px;
+  }
+}

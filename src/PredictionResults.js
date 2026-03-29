@@ -14,37 +14,39 @@ import WeatherVisualizationsDark from './WeatherVisualizations';
 import IrrigationCalculatorDark from './IrrigationCalculator';
 import CropComparisonMatrixDark from './CropComparisonMatrix';
 import ReportGeneratorDark from './ReportGenerator';
+import { useLanguage } from './context/LanguageContext';
 
 // Sidebar Component
 const Sidebar = ({ isOpen, setIsOpen, activePage, setActivePage, navigate }) => {
+  const { t } = useLanguage();
   const menuItems = [
     {
       id: 'dashboard',
-      label: 'Prediction Dashboard',
+      label: t('predictionDashboard', 'Prediction Dashboard'),
       icon: <Home size={20} />,
       path: '/prediction-results'
     },
     {
       id: 'weather',
-      label: 'Weather Visualizations',
+      label: t('weatherVisualizations', 'Weather Visualizations'),
       icon: <Cloud size={20} />,
       path: '/prediction-results/weather'
     },
     {
       id: 'irrigation',
-      label: 'Smart Irrigation',
+      label: t('smartIrrigation', 'Smart Irrigation'),
       icon: <DropletsIcon size={20} />,
       path: '/prediction-results/irrigation'
     },
     {
       id: 'matrix',
-      label: 'Crop Matrix',
+      label: t('cropMatrix', 'Crop Matrix'),
       icon: <Grid3x3 size={20} />,
       path: '/prediction-results/matrix'
     },
     {
       id: 'report',
-      label: 'Generate Report',
+      label: t('generateReport', 'Generate Report'),
       icon: <FileText size={20} />,
       path: '/prediction-results/report'
     }
@@ -250,7 +252,7 @@ const Sidebar = ({ isOpen, setIsOpen, activePage, setActivePage, navigate }) => 
                 color: '#22c55e', 
                 fontWeight: '600' 
               }}>
-                AI Active
+                {t('aiActive', 'AI Active')}
               </span>
             </div>
             <div style={{ 
@@ -258,7 +260,7 @@ const Sidebar = ({ isOpen, setIsOpen, activePage, setActivePage, navigate }) => 
               color: '#94a3b8',
               lineHeight: '1.4'
             }}>
-              Real-time analysis powered by ML
+              {t('realTimeAnalysis', 'Real-time analysis powered by ML')}
             </div>
           </div>
         )}
@@ -302,6 +304,7 @@ const Sidebar = ({ isOpen, setIsOpen, activePage, setActivePage, navigate }) => 
 };
 
 export default function PredictionResults() {
+  const { t } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
   const { predictionData, inputData } = location.state || {};
@@ -349,9 +352,9 @@ export default function PredictionResults() {
         justifyContent: 'center',
         alignItems: 'center'
       }}>
-        <h2 style={{ color: '#ef4444', marginBottom: '1rem' }}>No prediction data found</h2>
+        <h2 style={{ color: '#ef4444', marginBottom: '1rem' }}>{t('noPredictionData', 'No prediction data found')}</h2>
         <p style={{ color: '#94a3b8', marginBottom: '2rem' }}>
-          Please go back and try again with valid location data.
+          {t('noPredictionHint', 'Please go back and try again with valid location data.')}
         </p>
         <button 
           onClick={() => navigate('/')}
@@ -376,7 +379,7 @@ export default function PredictionResults() {
             e.target.style.boxShadow = '0 4px 14px rgba(34, 197, 94, 0.4)';
           }}
         >
-          Go Back to Home
+          {t('goBackHome', 'Go Back to Home')}
         </button>
       </div>
     );
@@ -456,6 +459,30 @@ export default function PredictionResults() {
     return crop.metrics?.ml_confidence || 0.7;
   };
 
+  const formatPkr = (value) => {
+    if (value === null || value === undefined || Number.isNaN(Number(value))) return 'N/A';
+    const numericValue = Number(value);
+    const sign = numericValue > 0 ? '+' : '';
+    return `${sign}PKR ${Math.round(numericValue).toLocaleString('en-PK')}`;
+  };
+
+  const getEconomicImpact = (crop) => {
+    const fromRecommendation = crop.economicImpact;
+    if (fromRecommendation) return fromRecommendation;
+
+    const metrics = crop.metrics || {};
+    if (metrics.impact_pkr_per_acre !== undefined) {
+      return {
+        expectedNetImpactPkrPerAcre: metrics.impact_pkr_per_acre,
+        expectedRangePkrPerAcre: metrics.impact_range_pkr_per_acre,
+        upsidePkrPerAcre: metrics.upside_pkr_per_acre,
+        downsidePkrPerAcre: metrics.downside_pkr_per_acre
+      };
+    }
+
+    return null;
+  };
+
   // Get weather summary from ML
   const getMlWeatherSummary = (cropKey) => {
     const mlPrediction = getMlPredictionForCrop(cropKey);
@@ -469,10 +496,10 @@ export default function PredictionResults() {
   };
 
   const getSuitabilityText = (score) => {
-    if (score >= 80) return 'Excellent';
-    if (score >= 60) return 'Good';
-    if (score >= 40) return 'Moderate';
-    return 'Poor';
+    if (score >= 80) return t('excellent', 'Excellent');
+    if (score >= 60) return t('good', 'Good');
+    if (score >= 40) return t('moderate', 'Moderate');
+    return t('poor', 'Poor');
   };
 
   const getWeatherIcon = (day) => {
@@ -993,6 +1020,7 @@ export default function PredictionResults() {
               const yieldData = getCorrectYield(crop);
               const confidence = getCorrectConfidence(crop);
               const recommendations = getCorrectRecommendation(crop, crop.recommendation);
+              const economicImpact = getEconomicImpact(crop);
               
               return (
                 <div key={crop.cropKey || index} style={{
@@ -1211,6 +1239,24 @@ export default function PredictionResults() {
                               color: '#e2e8f0'
                             }}>
                               {mlWeatherSummary.days_analyzed} days
+                            </div>
+                          </div>
+                        )}
+
+                        {economicImpact && (
+                          <div>
+                            <div style={{ fontSize: '0.9rem', color: '#94a3b8', marginBottom: '0.25rem' }}>
+                              Expected Impact (PKR/acre)
+                            </div>
+                            <div style={{ 
+                              fontSize: '1.2rem', 
+                              fontWeight: 'bold',
+                              color: (economicImpact.expectedNetImpactPkrPerAcre || 0) >= 0 ? '#10b981' : '#ef4444'
+                            }}>
+                              {formatPkr(economicImpact.expectedNetImpactPkrPerAcre)}
+                            </div>
+                            <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.25rem' }}>
+                              Range: {formatPkr(economicImpact.expectedRangePkrPerAcre?.lower)} to {formatPkr(economicImpact.expectedRangePkrPerAcre?.upper)}
                             </div>
                           </div>
                         )}
@@ -1550,6 +1596,37 @@ export default function PredictionResults() {
                         {waterRequirements[crop.cropKey] || crop.waterRequirements || 'Moderate'}
                       </div>
                     </div>
+
+                    {economicImpact && (
+                      <div style={{
+                        textAlign: 'center',
+                        padding: '1.5rem',
+                        background: 'rgba(34, 197, 94, 0.1)',
+                        borderRadius: '12px',
+                        border: '1px solid rgba(34, 197, 94, 0.3)',
+                        backdropFilter: 'blur(10px)',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.transform = 'translateY(-5px)';
+                        e.target.style.boxShadow = '0 8px 25px rgba(34, 197, 94, 0.3)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.transform = 'translateY(0)';
+                        e.target.style.boxShadow = 'none';
+                      }}
+                      >
+                        <div style={{ fontSize: '0.9rem', color: '#94a3b8', marginBottom: '0.75rem', fontWeight: '600' }}>
+                          Upside / Downside
+                        </div>
+                        <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#10b981' }}>
+                          Upside: {formatPkr(economicImpact.upsidePkrPerAcre)}
+                        </div>
+                        <div style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#ef4444', marginTop: '0.5rem' }}>
+                          Downside: PKR {Math.round(economicImpact.downsidePkrPerAcre || 0).toLocaleString('en-PK')}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               );

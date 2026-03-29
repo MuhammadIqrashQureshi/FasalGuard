@@ -31,6 +31,9 @@ const adminRoutes = require('./routes/adminRoutes');
 const analysisRoutes = require('./routes/analysisRoutes'); // Added this line
 const WeatherController = require('./controllers/weatherController');
 const soilAnalysisRoutes = require('./routes/soilAnalysisRoutes');
+const satelliteRoutes = require('./routes/satelliteRoutes');
+const soilAnalysisService = require('./services/soilAnalysisService');
+const { buildDistrictSoilTrendSummary } = require('./utils/soilTrendHelper');
 
 
 const app = express();
@@ -72,6 +75,8 @@ app.locals.getWaterRequirements = cropHelpers.getWaterRequirements;
 app.locals.generateRealisticWeather = weatherHelpers.generateRealisticWeather;
 app.locals.getWeatherDescription = weatherHelpers.getWeatherDescription;
 app.locals.weatherController = new WeatherController();
+app.locals.soilAnalysisService = soilAnalysisService;
+app.locals.buildDistrictSoilTrendSummary = buildDistrictSoilTrendSummary;
 
 // Routes - UPDATED ORDER
 app.use('/api/auth', authRoutes);
@@ -81,6 +86,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/analysis', analysisRoutes); // Added this line
 app.use('/api/soil', soilAnalysisRoutes);
+app.use('/api/satellite', satelliteRoutes);
 
 
 // Weather API endpoint
