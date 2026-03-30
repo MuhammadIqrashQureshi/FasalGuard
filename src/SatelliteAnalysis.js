@@ -357,6 +357,7 @@ const SatelliteAnalysis = () => {
   const loadingSavedLocationRef = useRef(false);
   const originalLoadedLocationRef = useRef(null);
   const drawAttentionTimerRef = useRef(null);
+  const analysisInFlightRef = useRef(false);
   const [outcomeSessionId] = useState(() => ensureOutcomeSessionId());
   const [outcomeHistory, setOutcomeHistory] = useState([]);
   const [outcomeTrend, setOutcomeTrend] = useState(null);
@@ -1249,7 +1250,6 @@ const SatelliteAnalysis = () => {
         setMapMode('imagery');
         clearDrawnBoundary();
         const matchedCity = syncSelectedCityWithCoords(lat, lon);
-        addToHistory(lat, lon, matchedCity ? matchedCity[0] : '');
         if (!isInAnyCityBounds(lat, lon, activeCityNames)) {
           setCoordWarning(outOfBoundsWarning);
         } else {
@@ -1310,7 +1310,6 @@ const SatelliteAnalysis = () => {
     if (!matched && !inSupportedBounds) {
       setCoordWarning(outOfBoundsWarning);
     }
-    addToHistory(lat, lon, matched ? matched[0] : '');
   };
 
   const handleRecentCoordinatePick = (value) => {
@@ -1323,8 +1322,7 @@ const SatelliteAnalysis = () => {
     setMapZoom(17);
     setMapMode('imagery');
     checkCityBounds(lat, lon);
-    const matched = syncSelectedCityWithCoords(lat, lon);
-    addToHistory(lat, lon, matched ? matched[0] : '');
+    syncSelectedCityWithCoords(lat, lon);
   };
 
   // ── map click ──────────────────────────────────────────────────────────────
@@ -1334,8 +1332,7 @@ const SatelliteAnalysis = () => {
     setMapCenter([lat, lon]);
     setMapMode('imagery');
     checkCityBounds(lat, lon);
-    const matched = syncSelectedCityWithCoords(lat, lon);
-    addToHistory(lat, lon, matched ? matched[0] : '');
+    syncSelectedCityWithCoords(lat, lon);
   };
 
   // ── analysis request ───────────────────────────────────────────────────────
@@ -1766,6 +1763,10 @@ const SatelliteAnalysis = () => {
   }, [actionNoteDraft, currentFieldSignature, loadFarmerHistory, loadOutcomeHistory, selectedHistoryLocationId, selectedLocationId]);
 
   const handleAnalyze = async (skipUpdatePrompt = false) => {
+    if (analysisInFlightRef.current) return;
+    analysisInFlightRef.current = true;
+
+    try {
     setHistoryReportMode(false);
     setHistoryOverviewOnly(false);
     try {
@@ -1903,6 +1904,11 @@ const SatelliteAnalysis = () => {
           ...cleanResult,
           stage_checklist: checklistPayload,
         };
+        addToHistory(
+          parsedLat,
+          parsedLon,
+          selectedCity || enrichedResult?.field?.city || ''
+        );
         setResult(enrichedResult);
         // Avoid immediate duplicate auto-persist with unchanged cost tracker.
         lastCostPersistSignatureRef.current = JSON.stringify(inputCosts || []);
@@ -1942,6 +1948,9 @@ const SatelliteAnalysis = () => {
       setError(buildFriendlyAnalysisError(msg, tr));
     } finally {
       setLoading(false);
+    }
+    } finally {
+      analysisInFlightRef.current = false;
     }
   };
 

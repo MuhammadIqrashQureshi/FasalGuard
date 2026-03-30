@@ -2765,6 +2765,82 @@ class SatellitePredictor:
             latitude, longitude, field_polygon
         )
 
+        # Fast non-field gate (high-confidence built-up only):
+        # Run Dynamic World first with a narrow window and short-circuit only
+        # when confidence is strong enough to avoid accuracy regression.
+        dw_fast_start = (analysis_anchor - timedelta(days=35)).isoformat()
+        dw_fast_end_exclusive = (analysis_anchor + timedelta(days=1)).isoformat()
+        dw_fast = self.get_dynamic_world_label(
+            latitude,
+            longitude,
+            dw_fast_start,
+            dw_fast_end_exclusive,
+            analysis_geometry,
+        )
+        dw_fast_confident_built = (
+            growth_stage_code != 6 and
+            dw_fast.get('dw_available') and
+            dw_fast.get('dw_label') == 6 and
+            dw_fast.get('dw_built_prob', 0.0) > dw_fast.get('dw_crop_prob', 0.0)
+        )
+
+        if dw_fast_confident_built:
+            _debug_log(f'fast_non_field_dw={dw_fast}')
+
+            field_info_fast = {
+                'latitude': round(float(latitude), 4),
+                'longitude': round(float(longitude), 4),
+                'city': city,
+                'crop': crop_normalised,
+                'geometry_type': 'polygon' if normalized_polygon else 'point_buffer',
+                'analysis_date': analysis_anchor.isoformat(),
+                'latest_image_date': None,
+                'sentinel_date_range': None,
+                'images_used': 0,
+                'imagery_simulated': False,
+                'imagery_window_days': None,
+                'cloud_threshold_used': None,
+            }
+
+            return {
+                'success': True,
+                'status': 'non_field',
+                'is_field': False,
+                'land_classification': {
+                    'is_field': False,
+                    'land_type': 'Settlement / Built-Up Area',
+                    'confidence': 'HIGH',
+                    'reason': (
+                        'Dynamic World built-up detection triggered fast path '
+                        f"(built_prob={dw_fast['dw_built_prob']:.3f}, crop_prob={dw_fast['dw_crop_prob']:.3f})."
+                    ),
+                },
+                'field': field_info_fast,
+                'field_polygon': normalized_polygon,
+                'indices': {
+                    'ndvi': 0.0,
+                    'ndwi': 0.0,
+                    'evi': 0.0,
+                    'gndvi': 0.0,
+                    'ndre': 0.0,
+                    'savi': 0.0,
+                    'ndbi': 0.0,
+                },
+                'heatmap': {
+                    'fetched': False,
+                    'type': 'raster',
+                    'error': 'Heatmap disabled: selected point is not an agricultural field.',
+                },
+                'data_source': 'dynamic_world_fast_path',
+                'dynamic_world': dw_fast,
+                'timestamp': datetime.utcnow().isoformat(),
+                'location': {
+                    'lat': round(float(latitude), 4),
+                    'lon': round(float(longitude), 4),
+                },
+                'crop': crop_normalised,
+            }
+
         today_utc = datetime.utcnow().date()
         is_current_date_request = (analysis_date is None) or (analysis_anchor == today_utc)
 
@@ -2860,8 +2936,6 @@ class SatellitePredictor:
                 indices['gndvi'], indices['ndre'], indices['ndbi'], month,
             )
 
-        heatmap = self.build_heatmap(latitude, longitude, index_image, analysis_geometry)
-
         _debug_log(f'analyze land_class={land_class}')
 
         # ── Shared field-info block ───────────────────────────────────────────
@@ -2899,6 +2973,7 @@ class SatellitePredictor:
         # Return this status before non-field checks so farmers always see the
         # correct seasonal message instead of an unrelated land-type response.
         if is_supported_satellite_crop and growth_stage_code == 6:
+            heatmap = self.build_heatmap(latitude, longitude, index_image, analysis_geometry)
             if crop_normalised == 'wheat':
                 month_names = {5:'May', 6:'June', 7:'July', 8:'August', 9:'September', 10:'October'}
                 month_label = month_names.get(month, f'Month {month}')
@@ -2984,6 +3059,8 @@ class SatellitePredictor:
                 'location': location_out,
                 'crop': crop_normalised,
             }
+
+        heatmap = self.build_heatmap(latitude, longitude, index_image, analysis_geometry)
 
         # ── Agricultural field confirmed — but crop not configured for ML ─────
         # The location is a real field; we just cannot run our configured

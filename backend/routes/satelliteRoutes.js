@@ -382,7 +382,7 @@ router.post('/analyze', async (req, res) => {
       result.soil_trends = req.app.locals.buildDistrictSoilTrendSummary(districtName);
     }
 
-    if (districtName && req.app?.locals?.soilAnalysisService) {
+    if (districtName && req.app?.locals?.soilAnalysisService && result?.is_field === true) {
       try {
         const soilAnalysis = await req.app.locals.soilAnalysisService.analyzeDistrict(districtName, cropLabel);
         if (soilAnalysis?.success) {
