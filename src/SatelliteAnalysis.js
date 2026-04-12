@@ -159,6 +159,31 @@ const buildFriendlyAnalysisError = (rawMessage, tr) => {
   );
 };
 
+const normalizeRiskLevel = (value) => {
+  const key = String(value || '').toLowerCase();
+  if (key.includes('high') || key.includes('critical')) return 'High';
+  if (key.includes('moderate') || key.includes('medium')) return 'Moderate';
+  if (key.includes('low')) return 'Low';
+  return 'Low';
+};
+
+const extractTopTasks = (result) => {
+  const recs = Array.isArray(result?.recommendations) ? result.recommendations : [];
+  const tasks = recs
+    .map((rec) => rec?.action || rec?.recommendation || rec?.type || '')
+    .map((text) => String(text || '').trim())
+    .filter(Boolean);
+
+  if (tasks.length >= 3) return tasks.slice(0, 3);
+
+  const fallback = [
+    'Irrigate by tomorrow morning if soil is dry.',
+    'Avoid heavy fertilizer before rain windows.',
+    'Inspect weak patches and treat only hotspots.',
+  ];
+  return [...tasks, ...fallback].slice(0, 3);
+};
+
 const toDateInputValue = (date) => {
   const y = date.getFullYear();
   const m = `${date.getMonth() + 1}`.padStart(2, '0');
@@ -371,11 +396,20 @@ const SatelliteAnalysis = () => {
   const [farmerHistoryError, setFarmerHistoryError] = useState('');
   const [markingOutcomeId, setMarkingOutcomeId] = useState('');
   const [actionNoteDraft, setActionNoteDraft] = useState('');
+  const [showOutcomeDetails, setShowOutcomeDetails] = useState(false);
   const [activeResultTab, setActiveResultTab] = useState('overview');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showManualCoordinates, setShowManualCoordinates] = useState(false);
+  const showOutcomeHistoryActionPanel = false;
   // New state for economic.tracking
   const [inputCosts, setInputCosts] = useState([]);
+  const [miniWeather, setMiniWeather] = useState({ forecast: [], city: '', source: '' });
+  const [miniWeatherLoading, setMiniWeatherLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
+  const lastMiniWeatherKeyRef = useRef('');
+  const lastMiniWeatherAtRef = useRef(0);
+  const miniWeatherInFlightRef = useRef(false);
+  const lastAlertKeyRef = useRef('');
 
   // Farm location management states
   const [savedLocations, setSavedLocations] = useState([]);
@@ -399,6 +433,11 @@ const SatelliteAnalysis = () => {
       // ignore storage errors
     }
   }, [selectedLocationId]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setPageLoading(false), 3200);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const today = toDateInputValue(new Date());
@@ -447,6 +486,103 @@ const SatelliteAnalysis = () => {
     const selectedCropKey = String(selectedCrop || '').toLowerCase();
     return (savedLocations || []).filter((loc) => String(loc?.crop || '').toLowerCase() === selectedCropKey);
   }, [savedLocations, selectedCrop]);
+
+  const heatmapAlertLevel = normalizeRiskLevel(result?.field_report?.risk_level || result?.risk_level);
+  const showHeatmapAlert = ['High', 'Moderate'].includes(heatmapAlertLevel);
+  const heatmapAlertText = heatmapAlertLevel === 'High'
+    ? tr('High Alert', 'شدید الرٹ')
+    : tr('Moderate Alert', 'درمیانی الرٹ');
+
+  const resolvedCoords = useMemo(() => {
+    if (Array.isArray(markerPos) && markerPos.length === 2) {
+      return { lat: markerPos[0], lon: markerPos[1] };
+    }
+
+    if (Array.isArray(fieldPolygon) && fieldPolygon.length >= 3) {
+      const centroid = getPolygonCentroid(fieldPolygon);
+      if (centroid) return { lat: centroid[0], lon: centroid[1] };
+    }
+
+    const parsed = parseCoordinatePair(coordInput);
+    if (parsed) return { lat: parsed.lat, lon: parsed.lon };
+
+    return null;
+  }, [markerPos, fieldPolygon, coordInput]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const fetchMiniWeather = async () => {
+      if (!selectedCity && !resolvedCoords) return;
+      const keyBase = selectedCity
+        ? `city:${selectedCity}`
+        : (resolvedCoords ? `coords:${resolvedCoords.lat.toFixed(4)},${resolvedCoords.lon.toFixed(4)}` : '');
+      const now = Date.now();
+      if (keyBase && keyBase === lastMiniWeatherKeyRef.current && (now - lastMiniWeatherAtRef.current) < 60000) {
+        return;
+      }
+      if (miniWeatherInFlightRef.current) return;
+      miniWeatherInFlightRef.current = true;
+
+      setMiniWeatherLoading(true);
+
+      try {
+        let response = null;
+
+        if (selectedCity) {
+          response = await axios.get(`${API_BASE}/api/weather`, {
+            params: { city: selectedCity, days: 1 },
+          });
+        }
+
+        if (!response && resolvedCoords) {
+          response = await axios.get(`${API_BASE}/api/weather`, {
+            params: { lat: resolvedCoords.lat, lon: resolvedCoords.lon, days: 1 },
+          });
+        }
+
+        if (!response?.data?.forecast) {
+          throw new Error('Weather data unavailable');
+        }
+
+        if (!isActive) return;
+        setMiniWeather({
+          forecast: Array.isArray(response.data.forecast) ? response.data.forecast : [],
+          city: response.data.city || selectedCity || '',
+          source: 'backend',
+        });
+        lastMiniWeatherKeyRef.current = keyBase;
+        lastMiniWeatherAtRef.current = Date.now();
+      } catch (err) {
+        try {
+          if (!selectedCity) throw err;
+          const fallback = await axios.get('http://localhost:5001/api/weather', {
+            params: { city: selectedCity, days: 1 },
+          });
+
+          if (!isActive) return;
+          setMiniWeather({
+            forecast: Array.isArray(fallback.data?.forecast) ? fallback.data.forecast : [],
+            city: fallback.data?.city || selectedCity || '',
+            source: 'ml-service',
+          });
+          lastMiniWeatherKeyRef.current = keyBase;
+          lastMiniWeatherAtRef.current = Date.now();
+        } catch (fallbackErr) {
+          if (!isActive) return;
+          setMiniWeather({ forecast: [], city: selectedCity || '', source: '' });
+        }
+      } finally {
+        miniWeatherInFlightRef.current = false;
+        if (isActive) setMiniWeatherLoading(false);
+      }
+    };
+
+    fetchMiniWeather();
+    return () => {
+      isActive = false;
+    };
+  }, [selectedCity, resolvedCoords?.lat, resolvedCoords?.lon, tr]);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search || '');
@@ -1342,6 +1478,51 @@ const SatelliteAnalysis = () => {
     return { Authorization: `Bearer ${token}` };
   }, []);
 
+  const sendSatelliteAlert = useCallback(async ({ analysisResult, coords }) => {
+    const riskLevel = normalizeRiskLevel(analysisResult?.field_report?.risk_level || analysisResult?.risk_level);
+    if (!['High', 'Moderate'].includes(riskLevel)) return;
+
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    const city = analysisResult?.city || analysisResult?.location?.city || selectedCity || '';
+    const sessionId = analysisResult?.session_id || analysisResult?.sessionId || '';
+    const fieldSignature = analysisResult?.field_signature || analysisResult?.fieldSignature || '';
+    const alertKey = `${riskLevel}:${sessionId}:${fieldSignature}:${analysisResult?.analysis_date || analysisResult?.timestamp || ''}:${city}`;
+    if (lastAlertKeyRef.current === alertKey) return;
+
+    const historyKey = 'satellite_alert_history';
+    const stored = localStorage.getItem(historyKey);
+    const parsed = stored ? JSON.parse(stored) : [];
+    if (Array.isArray(parsed) && parsed.includes(alertKey)) {
+      lastAlertKeyRef.current = alertKey;
+      return;
+    }
+    const nextHistory = Array.isArray(parsed) ? [alertKey, ...parsed] : [alertKey];
+    localStorage.setItem(historyKey, JSON.stringify(nextHistory.slice(0, 50)));
+    lastAlertKeyRef.current = alertKey;
+
+    const baseUrl = process.env.REACT_APP_FRONTEND_URL || 'http://localhost:3000';
+    const dashboardUrl = `${baseUrl}/dashboard`;
+    const reportUrl = `${baseUrl}/satellite?history_report=1`;
+
+    const payload = buildAlertPayloadFromResult({
+      result: analysisResult,
+      city,
+      coords,
+      dashboardUrl,
+      reportUrl,
+    });
+
+    try {
+      await axios.post(`${API_BASE}/api/satellite/alerts/email`, { payload }, {
+        headers: getAuthHeaders(),
+      });
+    } catch (alertErr) {
+      console.warn('Alert email failed:', alertErr?.response?.data?.error || alertErr.message);
+    }
+  }, [getAuthHeaders, selectedCity]);
+
   const resolveActiveSavedLocationId = useCallback(({ latitude, longitude, activePolygon, crop, city }) => {
     if (selectedLocationId) return String(selectedLocationId);
     if (!Array.isArray(savedLocations) || savedLocations.length === 0) return '';
@@ -1918,6 +2099,11 @@ const SatelliteAnalysis = () => {
           latitude: parsedLat,
           longitude: parsedLon,
           activePolygon,
+        });
+
+        await sendSatelliteAlert({
+          analysisResult: enrichedResult,
+          coords: { lat: parsedLat, lon: parsedLon },
         });
         
         // Check if this location is already saved
@@ -4158,6 +4344,74 @@ const SatelliteAnalysis = () => {
     );
   };
 
+  const buildAlertPayloadFromResult = ({ result, city, coords, dashboardUrl, reportUrl }) => {
+    const riskLevel = normalizeRiskLevel(result?.field_report?.risk_level || result?.risk_level);
+    const summary = result?.diagnosis?.urgency || result?.field_report?.status_summary || 'Field condition alert detected.';
+    const weatherSummary = result?.weather_context?.summary || {};
+    const irrigation = result?.farmer_summary?.irrigation || {};
+    const bestCrop = result?.soil_analysis?.analysis?.best_crop || result?.crop || 'N/A';
+    const confidence = result?.soil_analysis?.analysis?.confidence || result?.prediction?.confidence || 'N/A';
+    const yieldImpact = result?.field_report?.estimated_yield?.potential_loss_maunds
+      ? `${result.field_report.estimated_yield.potential_loss_maunds} maunds risk`
+      : 'N/A';
+    const lossRange = result?.field_report?.economic_impact?.expected_savings_range_pkr_per_acre;
+
+    const pestCalendar = buildPestDiseaseCalendar(result);
+    const pestWatch = [];
+    const seenPests = new Set();
+    if (pestCalendar?.calendar?.length) {
+      pestCalendar.calendar.forEach((week) => {
+        (week.risks || []).forEach((risk) => {
+          if (String(risk?.riskLevel || '').toLowerCase() !== 'high') return;
+          if (seenPests.has(risk.pest)) return;
+          seenPests.add(risk.pest);
+          pestWatch.push(`${risk.pest}: ${shortenText(risk.action, 96)}`);
+        });
+      });
+    }
+
+    return {
+      severity: riskLevel,
+      city: city || 'Unknown City',
+      analysisDate: result?.field?.analysis_date || result?.analysis_date || result?.timestamp,
+      summary,
+      tasks: extractTopTasks(result),
+      pestWatch: pestWatch.slice(0, 4),
+      weatherMetrics: {
+        maxTemp: weatherSummary?.max_temperature ?? weatherSummary?.temp_max ?? 'N/A',
+        expectedRain: weatherSummary?.total_rainfall ?? weatherSummary?.rain_next_48h ?? 'N/A',
+        dryDays: weatherSummary?.dry_days ?? 'N/A',
+        window: 'Next 48h',
+      },
+      cropDelta: {
+        bestCrop,
+        confidence,
+        yieldImpact,
+        reason: result?.soil_context?.key_limitation || 'Based on current field signals',
+      },
+      irrigation: {
+        nextDate: irrigation?.timing_window || 'Next 24-48 hours',
+        depth: irrigation?.mm_low && irrigation?.mm_high
+          ? `${irrigation.mm_low}-${irrigation.mm_high} mm`
+          : 'N/A',
+        window: irrigation?.timing_window || 'Next 48 hours',
+        note: irrigation?.irrigate_now ? 'Immediate irrigation recommended.' : 'Monitor soil moisture.',
+      },
+      economic: {
+        range: lossRange ? `PKR ${lossRange.lower} to ${lossRange.upper}` : 'N/A',
+        lossRisk: result?.field_report?.economic_impact?.expected_loss_pkr_per_acre
+          ? `PKR ${result.field_report.economic_impact.expected_loss_pkr_per_acre}`
+          : 'N/A',
+      },
+      ctas: {
+        dashboardUrl,
+        reportUrl,
+      },
+      location: coords ? `${coords.lat.toFixed(4)}, ${coords.lon.toFixed(4)}` : undefined,
+      unsubscribeText: 'You are receiving this alert because you ran a satellite analysis.',
+    };
+  };
+
   const getRiskLevel = (riskItems) => {
     const hasHigh = Array.isArray(riskItems) && riskItems.some((r) => String(r?.riskLevel || '').toLowerCase() === 'high');
     if (hasHigh) {
@@ -4644,6 +4898,154 @@ const SatelliteAnalysis = () => {
     );
   };
 
+  const HighAlertPanel = ({ analysisResult }) => {
+    if (!analysisResult) return null;
+    const riskLevel = normalizeRiskLevel(analysisResult?.field_report?.risk_level || analysisResult?.risk_level);
+    const showPanel = ['High', 'Moderate'].includes(riskLevel);
+    if (!showPanel) return null;
+
+    const summary = simplifyFarmerText(
+      analysisResult?.diagnosis?.urgency
+      || analysisResult?.field_report?.status_summary
+      || tr('High-risk field signals detected. Act within the next 48 hours.', 'اہم خطرے کے اشارے ملے ہیں۔ اگلے 48 گھنٹوں میں عمل کریں۔')
+    );
+
+    const lossRisk = Number(analysisResult?.field_report?.economic_impact?.expected_loss_pkr_per_acre);
+    const lossText = Number.isFinite(lossRisk)
+      ? `PKR ${Math.round(lossRisk).toLocaleString('en-PK')}/acre`
+      : tr('Not available', 'دستیاب نہیں');
+    const daysToCritical = Number(analysisResult?.diagnosis?.days_to_critical);
+    const daysText = Number.isFinite(daysToCritical)
+      ? `${daysToCritical} ${tr('days', 'دن')}`
+      : tr('Stable', 'مستحکم');
+    const yieldLoss = Number(analysisResult?.field_report?.estimated_yield?.potential_loss_maunds);
+    const yieldText = Number.isFinite(yieldLoss)
+      ? `${yieldLoss.toFixed(1)} ${tr('maunds risk', 'من خطرہ')}`
+      : tr('Not available', 'دستیاب نہیں');
+
+    const topActions = extractTopTasks(analysisResult).slice(0, 3);
+    const shortActions = topActions.map((item) => shortenText(item, 70));
+    const indices = analysisResult?.indices || {};
+    const weather = analysisResult?.weather_context || {};
+    const weatherSummary = weather?.summary || {};
+    const rain48h = Number(weather?.rain_next_48h ?? weatherSummary?.rain_next_48h ?? 0);
+    const tempMax = Number(weather?.temp_max ?? weatherSummary?.max_temperature ?? 0);
+    const ndwi = Number(indices?.ndwi);
+    const evi = Number(indices?.evi);
+
+    const riskReasons = [];
+    if (Number.isFinite(daysToCritical) && daysToCritical <= 2) {
+      riskReasons.push(tr(
+        `Critical window in ${daysToCritical} day(s)`,
+        `اہم ونڈو ${daysToCritical} دن میں`
+      ));
+    }
+    if (Number.isFinite(ndwi) && ndwi < -0.1) {
+      riskReasons.push(tr(
+        `NDWI ${ndwi.toFixed(3)} indicates water stress`,
+        `این ڈی ڈبلیو آئی ${ndwi.toFixed(3)} پانی کے دباؤ کی نشاندہی کرتا ہے`
+      ));
+    }
+    if (Number.isFinite(evi) && evi < 0.25) {
+      riskReasons.push(tr(
+        `EVI ${evi.toFixed(3)} shows low canopy vigor`,
+        `ای وی آئی ${evi.toFixed(3)} فصل کی کمزور نشوونما دکھاتا ہے`
+      ));
+    }
+    if (Number.isFinite(rain48h) && rain48h < 4) {
+      riskReasons.push(tr(
+        `Low rain in 48h (${rain48h.toFixed(1)} mm)`,
+        `اگلے 48 گھنٹوں میں کم بارش (${rain48h.toFixed(1)} ملی میٹر)`
+      ));
+    }
+    if (Number.isFinite(tempMax) && tempMax >= 34) {
+      riskReasons.push(tr(
+        `High temperature window (${tempMax.toFixed(1)} C)`,
+        `زیادہ درجہ حرارت کی ونڈو (${tempMax.toFixed(1)} سینٹی گریڈ)`
+      ));
+    }
+
+    const headerText = riskLevel === 'High'
+      ? tr('High Alert', 'شدید الرٹ')
+      : tr('Moderate Alert', 'درمیانی الرٹ');
+
+    const fallbackRisk = tr(
+      `Monitoring ${analysisResult?.city || selectedCity || 'selected field'}: no extreme trigger, follow routine checks`,
+      `${analysisResult?.city || selectedCity || 'منتخب فیلڈ'} کی نگرانی جاری رکھیں: کوئی انتہائی ٹرگر نہیں، معمول کے چیک جاری رکھیں`
+    );
+    const riskTickerItems = riskReasons.length ? riskReasons : [fallbackRisk];
+    const riskTickerText = `${tr('High risk now:', 'فی الحال زیادہ خطرہ:')} ${riskTickerItems.join(' • ')}`;
+
+    return (
+      <>
+        <div className="sat-high-alert-headline">
+          {tr('Immediate Field Attention Needed', 'فوری فیلڈ توجہ درکار ہے')}
+        </div>
+        <div className="sat-high-alert-subheadline">
+          <span>{riskTickerText}</span>
+        </div>
+        <section className={`sat-high-alert-panel ${riskLevel.toLowerCase()}`}>
+        <div className="sat-high-alert-header">
+          <div>
+            <div className="sat-high-alert-title-row">
+              <span className="sat-high-alert-radar" aria-hidden="true">
+                <span className="sat-high-alert-radar-ring" />
+                <span className="sat-high-alert-radar-sweep" />
+                <span className="sat-high-alert-radar-dot" />
+              </span>
+              <div className="sat-high-alert-kicker">{headerText}</div>
+            </div>
+            <div className="sat-high-alert-title">
+              {tr('Immediate field attention needed', 'فوری توجہ درکار ہے')}
+            </div>
+          </div>
+          <div className="sat-high-alert-badges">
+            <span className="sat-high-alert-badge urgent">{tr('Urgent', 'فوری')}</span>
+          </div>
+        </div>
+
+        <div className="sat-high-alert-summary">{summary}</div>
+
+        <div className="sat-high-alert-grid">
+          <div className="sat-high-alert-card">
+            <div className="sat-high-alert-label">{tr('Expected Loss', 'متوقع نقصان')}</div>
+            <div className="sat-high-alert-value">{lossText}</div>
+          </div>
+          <div className="sat-high-alert-card">
+            <div className="sat-high-alert-label">{tr('Critical Window', 'اہم ونڈو')}</div>
+            <div className="sat-high-alert-value">{daysText}</div>
+          </div>
+          <div className="sat-high-alert-card">
+            <div className="sat-high-alert-label">{tr('Yield Risk', 'پیداوار خطرہ')}</div>
+            <div className="sat-high-alert-value">{yieldText}</div>
+          </div>
+        </div>
+
+        <div className="sat-high-alert-list">
+          <div className="sat-high-alert-list-title">{tr('Top Actions (Next 48h)', 'اہم اقدامات (اگلے 48 گھنٹے)')}</div>
+          <ul>
+            {shortActions.map((item, idx) => (
+              <li key={`alert-action-${idx}`}>{item}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="sat-high-alert-pop">
+          {tr('Act within 24-48 hours and recheck weak patches.', '24-48 گھنٹوں میں عمل کریں اور کمزور حصے دوبارہ چیک کریں۔')}
+        </div>
+
+        <button
+          type="button"
+          className="sat-high-alert-cta"
+          onClick={() => setActiveResultTab('planning')}
+        >
+          {tr('Open Planning →', 'منصوبہ بندی کھولیں →')}
+        </button>
+        </section>
+      </>
+    );
+  };
+
   const FarmerQuickView = ({ analysisResult }) => {
     if (!analysisResult) return null;
     const summary = analysisResult?.farmer_summary || buildFallbackFarmerSummary(analysisResult);
@@ -4657,13 +5059,17 @@ const SatelliteAnalysis = () => {
           <div>
             <div className="sat-fqv-kicker">{tr('Farmer Quick View', 'کسان فوری جائزہ')}</div>
           </div>
-          <div className={`sat-fqv-status ${statusClass}`}>
-            {/needs\s*attention/i.test(String(summary.status_label || '')) ? tr('Field Overview', 'فیلڈ جائزہ') : (summary.status_label || tr('Field Overview', 'فیلڈ جائزہ'))}
+          <div className="sat-fqv-alerts">
+            <div className={`sat-fqv-status ${statusClass}`}>
+              {/needs\s*attention/i.test(String(summary.status_label || '')) ? tr('Field Overview', 'فیلڈ جائزہ') : (summary.status_label || tr('Field Overview', 'فیلڈ جائزہ'))}
+            </div>
           </div>
         </div>
 
         <CompactWeatherInfo
           city={quickViewCity}
+          weatherData={{ forecast: miniWeather.forecast, city: miniWeather.city }}
+          loadingExternal={miniWeatherLoading}
           variant="prominent"
           title={tr('Today Weather For This Field', 'آج کا موسم اس کھیت کے لیے')}
           subtitle={tr('Live city weather update', 'شہر کے موسم کی تازہ معلومات')}
@@ -5197,7 +5603,7 @@ const SatelliteAnalysis = () => {
       <div className="sat-outcome-head">
         <div>
           <div className="sat-report-kicker">{tr('Field History', 'فیلڈ ہسٹری')}</div>
-          <h3 className="sat-section-title">{tr('Before vs After (3-7 day follow-up)', 'پہلے بمقابلہ بعد (3-7 دن فالو اپ)')}</h3>
+          <h3 className="sat-section-title">{tr('Action Follow-up', 'ایکشن فالو اپ')}</h3>
         </div>
         {outcomeTrend?.change?.trend && (
           <span className={`sat-outcome-trend-pill ${trendPillClass(outcomeTrend.change.trend)}`}>
@@ -5205,10 +5611,6 @@ const SatelliteAnalysis = () => {
           </span>
         )}
       </div>
-
-      <p className="sat-outcome-copy">
-        {tr('History compares the latest run with the most recent run you marked as done. If none is marked done, it compares with the previous run.', 'یہ ہسٹری تازہ ترین رن کو اس رن سے موازنہ کرتی ہے جسے آپ نے done کیا ہو۔ اگر کوئی done نہ ہو تو پچھلے رن سے موازنہ ہوتا ہے۔')}
-      </p>
 
       <div className="sat-history-selector-wrap">
         <div className="sat-outcome-action-title">{tr('Farmer History Tab', 'کسان ہسٹری ٹیب')}</div>
@@ -5258,13 +5660,13 @@ const SatelliteAnalysis = () => {
 
       {latestPendingOutcome && (
         <div className="sat-outcome-action-box">
-          <div className="sat-outcome-action-title">Action completion</div>
+          <div className="sat-outcome-action-title">{tr('Action completion', 'ایکشن مکمل کریں')}</div>
           <div className="sat-outcome-action-meta">
-            Baseline run: {getHistoryDateLabel(latestPendingOutcome)}
+            {tr('Pending run date', 'زیر التوا رن کی تاریخ')}: {getHistoryDateLabel(latestPendingOutcome)}
           </div>
           <textarea
             className="sat-outcome-note"
-            placeholder="Optional note (e.g., irrigated 14 mm, applied urea on north patch)"
+            placeholder={tr('Optional note (e.g., irrigated 14 mm, applied urea on north patch)', 'اختیاری نوٹ (مثلاً 14 ملی میٹر آبپاشی، شمالی حصے میں یوریا)')}
             value={actionNoteDraft}
             onChange={(e) => setActionNoteDraft(e.target.value)}
             rows={2}
@@ -5275,10 +5677,33 @@ const SatelliteAnalysis = () => {
             disabled={markingOutcomeId === latestPendingOutcome.id}
             onClick={() => handleMarkActionDone(latestPendingOutcome.id)}
           >
-            {markingOutcomeId === latestPendingOutcome.id ? 'Saving...' : 'Mark Action Done'}
+            {markingOutcomeId === latestPendingOutcome.id
+              ? tr('Saving...', 'محفوظ ہو رہا ہے...')
+              : tr('Mark Action Done', 'ایکشن مکمل نشان زد کریں')}
           </button>
         </div>
       )}
+
+      {!latestPendingOutcome && (
+        <div className="sat-output-sub">
+          {tr('No pending action for this field. Create a new analysis run to get a new pending action.', 'اس فیلڈ کے لیے کوئی زیرِ التوا ایکشن نہیں۔ نیا تجزیہ رن کریں تاکہ نیا pending ایکشن بنے۔')}
+        </div>
+      )}
+
+      <div style={{ marginTop: '10px' }}>
+        <button
+          type="button"
+          className="sat-action-btn secondary"
+          onClick={() => setShowOutcomeDetails((prev) => !prev)}
+        >
+          {showOutcomeDetails
+            ? tr('Hide History Details', 'ہسٹری تفصیل چھپائیں')
+            : tr('Show History Details', 'ہسٹری تفصیل دکھائیں')}
+        </button>
+      </div>
+
+      {showOutcomeDetails && (
+        <>
 
       {outcomeTrend && (
         <div className="sat-outcome-metrics">
@@ -5445,12 +5870,44 @@ const SatelliteAnalysis = () => {
 
       {(outcomeLoading || farmerHistoryLoading) && <div className="sat-output-sub">{tr('Loading farmer history...', 'کسان کی ہسٹری لوڈ ہو رہی ہے۔۔۔')}</div>}
       {(outcomeError || farmerHistoryError) && <div className="sat-error">{outcomeError || farmerHistoryError}</div>}
+        </>
+      )}
     </section>
   );
 
   // ─── render ─────────────────────────────────────────────────────────────────
   return (
     <div className="sat-page sat-theme-light sat-theme-revamp">
+      {pageLoading && (
+        <div className="sat-loading-overlay sat-loading-satellite" aria-live="polite" aria-busy="true">
+          <div className="sat-loading-orbit">
+            <div className="sat-loading-orbit-ring" />
+            <div className="sat-loading-planet" />
+            <div className="sat-loading-sat">
+              <span className="sat-loading-sat-core" />
+              <span className="sat-loading-sat-panel" />
+            </div>
+          </div>
+          <div className="sat-loading-label">
+            {tr('Locking satellite view...', 'سیٹلائٹ ویو تیار ہو رہی ہے...')}
+          </div>
+        </div>
+      )}
+      {loading && (
+        <div className="sat-loading-overlay sat-analysis-loading" aria-live="polite" aria-busy="true">
+          <div className="sat-analysis-orbit">
+            <div className="sat-analysis-orbit-ring" />
+            <div className="sat-analysis-earth" />
+            <div className="sat-analysis-sat">
+              <span className="sat-analysis-sat-core" />
+              <span className="sat-analysis-sat-panel" />
+            </div>
+          </div>
+          <div className="sat-loading-label">
+            {tr('Scanning field from orbit...', 'مدار سے کھیت اسکین ہو رہا ہے...')}
+          </div>
+        </div>
+      )}
       <div className={`sat-shell ${isSidebarCollapsed ? 'sidebar-collapsed' : ''} ${historyReportMode ? 'no-sidebar' : ''}`}>
         {!historyReportMode && (
         <aside className={`sat-sidebar ${isSidebarCollapsed ? 'collapsed' : ''}`}>
@@ -5470,15 +5927,19 @@ const SatelliteAnalysis = () => {
           </div>
           <div className="sat-sidebar-links">
             <button className="sat-nav-btn sat-sidebar-btn" onClick={() => navigateWithPendingRevert('/crop-prediction')}>
+              <span className="sat-sidebar-icon" aria-hidden="true">🌾</span>
               {tr('Crop Prediction', 'فصل پیش گوئی')}
             </button>
             <button className="sat-nav-btn sat-sidebar-btn" onClick={() => navigateWithPendingRevert('/soil-analysis')}>
+              <span className="sat-sidebar-icon" aria-hidden="true">🧪</span>
               {tr('Soil Analysis', 'مٹی کا تجزیہ')}
             </button>
             <button className="sat-nav-btn sat-sidebar-btn" onClick={() => navigateWithPendingRevert('/past-trends')}>
+              <span className="sat-sidebar-icon" aria-hidden="true">📈</span>
               {tr('Past Trends', 'گزشتہ رجحانات')}
             </button>
             <button className="sat-nav-btn sat-sidebar-btn" onClick={() => navigateWithPendingRevert('/satellite-history')}>
+              <span className="sat-sidebar-icon" aria-hidden="true">🛰️</span>
               {tr('Your History', 'آپ کی ہسٹری')}
             </button>
           </div>
@@ -6131,7 +6592,16 @@ const SatelliteAnalysis = () => {
                             <h3 className="sat-section-title">
                               {tr('Field Heatmap', 'فیلڈ ہیٹ میپ')}
                             </h3>
-                            <div className="sat-heatmap-map-wrapper">
+                            <div className={`sat-heatmap-map-wrapper${showHeatmapAlert ? ` sat-heatmap-alert ${heatmapAlertLevel.toLowerCase()}` : ''}`}>
+                              {showHeatmapAlert && (
+                                <div className={`sat-heatmap-alert-ring ${heatmapAlertLevel.toLowerCase()}`} />
+                              )}
+                              {showHeatmapAlert && (
+                                <div className={`sat-map-alert-badge ${heatmapAlertLevel.toLowerCase()}`}>
+                                  <span className="sat-map-alert-dot" />
+                                  {heatmapAlertText}
+                                </div>
+                              )}
                               <MapContainer
                                 center={heatmapCenter || mapCenter}
                                 zoom={17}
@@ -6158,7 +6628,6 @@ const SatelliteAnalysis = () => {
                                     pathOptions={{ color: '#22c55e', fillColor: '#22c55e', fillOpacity: 0.12, weight: 2 }}
                                   />
                                 )}
-                                {heatmapCenter && <Marker position={heatmapCenter} />}
                               </MapContainer>
                               {heatmapLegend && (
                                 <div className="sat-heat-legend sat-heat-legend-panel">
@@ -6200,6 +6669,7 @@ const SatelliteAnalysis = () => {
                             )}
                           </section>
                         )}
+                        <HighAlertPanel analysisResult={result} />
                         <FarmerQuickView analysisResult={result} />
 
                         {historyReportMode && historyOverviewOnly && (
@@ -6265,6 +6735,8 @@ const SatelliteAnalysis = () => {
 
                   </>
                 )}
+
+                {!historyReportMode && showOutcomeHistoryActionPanel && renderOutcomeHistoryPanel()}
 
             </div>
           )}

@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Thermometer, Droplets, Wind, Cloud, Sun, Activity } from 'lucide-react';
 import {
   Chart as ChartJS,
@@ -28,6 +29,7 @@ ChartJS.register(
 );
 
 export default function WeatherVisualizationsEnhanced({ forecast }) {
+  const navigate = useNavigate();
   if (!forecast || forecast.length === 0) return null;
 
   const labels = forecast.map(day => 
@@ -131,7 +133,7 @@ export default function WeatherVisualizationsEnhanced({ forecast }) {
       legend: { 
         position: 'top',
         labels: {
-          color: '#e2e8f0',
+          color: '#334155',
           font: {
             size: 13,
             family: "'Inter', sans-serif"
@@ -142,10 +144,10 @@ export default function WeatherVisualizationsEnhanced({ forecast }) {
       tooltip: { 
         mode: 'index', 
         intersect: false,
-        backgroundColor: 'rgba(15, 23, 42, 0.95)',
-        titleColor: '#e2e8f0',
-        bodyColor: '#cbd5e1',
-        borderColor: '#334155',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        titleColor: '#0f172a',
+        bodyColor: '#334155',
+        borderColor: '#e2e8f0',
         borderWidth: 1,
         cornerRadius: 8,
         padding: 12,
@@ -163,11 +165,11 @@ export default function WeatherVisualizationsEnhanced({ forecast }) {
     scales: {
       x: {
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
+          color: 'rgba(15, 23, 42, 0.08)',
           drawBorder: false
         },
         ticks: {
-          color: '#94a3b8',
+          color: '#64748b',
           font: {
             size: 11,
             family: "'Inter', sans-serif"
@@ -177,11 +179,11 @@ export default function WeatherVisualizationsEnhanced({ forecast }) {
       y: { 
         beginAtZero: true,
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
+          color: 'rgba(15, 23, 42, 0.08)',
           drawBorder: false
         },
         ticks: {
-          color: '#94a3b8',
+          color: '#64748b',
           font: {
             size: 11,
             family: "'Inter', sans-serif"
@@ -213,21 +215,47 @@ export default function WeatherVisualizationsEnhanced({ forecast }) {
     <div id="weather" style={{
       minHeight: '100vh',
       padding: '2rem',
-      background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)'
+      background: 'linear-gradient(135deg, #f7fbf8 0%, #eef6f0 100%)'
     }}>
       <div style={{
         maxWidth: '1400px',
         margin: '0 auto'
       }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '1.5rem'
+        }}>
+          <button
+            onClick={() => navigate('/prediction-results')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              background: '#ffffff',
+              border: '1px solid rgba(34, 197, 94, 0.3)',
+              color: '#22c55e',
+              padding: '0.75rem 1.25rem',
+              borderRadius: '12px',
+              cursor: 'pointer',
+              fontSize: '0.95rem',
+              fontWeight: '600',
+              boxShadow: '0 6px 16px rgba(15, 23, 42, 0.08)'
+            }}
+          >
+            ← Back to Results
+          </button>
+        </div>
         {/* Header */}
         <div style={{
           textAlign: 'center',
           marginBottom: '3rem',
           padding: '2rem',
-          background: 'rgba(15, 23, 42, 0.6)',
+          background: '#ffffff',
           borderRadius: '20px',
           border: '1px solid rgba(34, 197, 94, 0.2)',
-          backdropFilter: 'blur(20px)'
+          boxShadow: '0 12px 30px rgba(15, 23, 42, 0.08)'
         }}>
           <h1 style={{
             fontSize: '3rem',
@@ -241,7 +269,7 @@ export default function WeatherVisualizationsEnhanced({ forecast }) {
             Weather Analysis Dashboard
           </h1>
           <p style={{
-            color: '#94a3b8',
+            color: '#64748b',
             fontSize: '1.1rem',
             maxWidth: '600px',
             margin: '0 auto',
@@ -289,11 +317,11 @@ export default function WeatherVisualizationsEnhanced({ forecast }) {
             }
           ].map((stat, index) => (
             <div key={index} style={{
-              background: 'rgba(30, 41, 59, 0.7)',
+              background: '#ffffff',
               padding: '2rem',
               borderRadius: '16px',
-              border: `1px solid ${stat.color}40`,
-              backdropFilter: 'blur(10px)',
+              border: `1px solid ${stat.color}30`,
+              boxShadow: '0 10px 24px rgba(15, 23, 42, 0.06)',
               transition: 'all 0.3s ease',
               cursor: 'pointer'
             }}
@@ -325,12 +353,12 @@ export default function WeatherVisualizationsEnhanced({ forecast }) {
                   <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: stat.color }}>
                     {stat.value}
                   </div>
-                  <div style={{ fontSize: '0.9rem', color: '#94a3b8', marginTop: '0.5rem' }}>
+                  <div style={{ fontSize: '0.9rem', color: '#64748b', marginTop: '0.5rem' }}>
                     {stat.title}
                   </div>
                 </div>
               </div>
-              <div style={{ fontSize: '0.9rem', color: '#cbd5e1', lineHeight: '1.5' }}>
+              <div style={{ fontSize: '0.9rem', color: '#64748b', lineHeight: '1.5' }}>
                 {stat.description}
               </div>
             </div>
@@ -340,18 +368,18 @@ export default function WeatherVisualizationsEnhanced({ forecast }) {
         {/* Main Charts Grid */}
         <div style={{ 
           display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(600px, 1fr))', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(620px, 1fr))', 
           gap: '2rem',
           marginBottom: '3rem'
         }}>
           {/* Temperature Chart */}
           <div style={{
-            background: 'rgba(30, 41, 59, 0.7)',
+            background: '#ffffff',
             padding: '2rem',
             borderRadius: '20px',
-            border: '1px solid rgba(34, 197, 94, 0.2)',
-            backdropFilter: 'blur(10px)',
-            height: '450px'
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 12px 28px rgba(15, 23, 42, 0.08)',
+            height: '520px'
           }}>
             <div style={{ 
               display: 'flex', 
@@ -376,32 +404,32 @@ export default function WeatherVisualizationsEnhanced({ forecast }) {
                   margin: 0, 
                   fontSize: '1.5rem', 
                   fontWeight: '600',
-                  color: '#f1f5f9' 
+                  color: '#0f172a' 
                 }}>
                   Temperature Analysis
                 </h3>
                 <p style={{ 
                   margin: '0.25rem 0 0 0', 
-                  color: '#94a3b8',
+                  color: '#64748b',
                   fontSize: '0.9rem' 
                 }}>
                   Daily minimum, average, and maximum temperatures
                 </p>
               </div>
             </div>
-            <div style={{ height: '320px' }}>
+            <div style={{ height: '380px' }}>
               <Line data={temperatureData} options={enhancedOptions} />
             </div>
           </div>
 
           {/* Rainfall Chart */}
           <div style={{
-            background: 'rgba(30, 41, 59, 0.7)',
+            background: '#ffffff',
             padding: '2rem',
             borderRadius: '20px',
-            border: '1px solid rgba(34, 197, 94, 0.2)',
-            backdropFilter: 'blur(10px)',
-            height: '450px'
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 12px 28px rgba(15, 23, 42, 0.08)',
+            height: '520px'
           }}>
             <div style={{ 
               display: 'flex', 
@@ -426,20 +454,20 @@ export default function WeatherVisualizationsEnhanced({ forecast }) {
                   margin: 0, 
                   fontSize: '1.5rem', 
                   fontWeight: '600',
-                  color: '#f1f5f9' 
+                  color: '#0f172a' 
                 }}>
                   Rainfall Distribution
                 </h3>
                 <p style={{ 
                   margin: '0.25rem 0 0 0', 
-                  color: '#94a3b8',
+                  color: '#64748b',
                   fontSize: '0.9rem' 
                 }}>
                   Daily precipitation accumulation
                 </p>
               </div>
             </div>
-            <div style={{ height: '320px' }}>
+            <div style={{ height: '380px' }}>
               <Bar data={rainfallData} options={enhancedOptions} />
             </div>
           </div>
@@ -447,13 +475,13 @@ export default function WeatherVisualizationsEnhanced({ forecast }) {
 
         {/* Secondary Chart */}
         <div style={{
-          background: 'rgba(30, 41, 59, 0.7)',
+          background: '#ffffff',
           padding: '2rem',
           borderRadius: '20px',
-          border: '1px solid rgba(34, 197, 94, 0.2)',
-          backdropFilter: 'blur(10px)',
+          border: '1px solid #e2e8f0',
+          boxShadow: '0 12px 28px rgba(15, 23, 42, 0.08)',
           marginBottom: '3rem',
-          height: '400px'
+          height: '460px'
         }}>
           <div style={{ 
             display: 'flex', 
@@ -478,31 +506,31 @@ export default function WeatherVisualizationsEnhanced({ forecast }) {
                 margin: 0, 
                 fontSize: '1.5rem', 
                 fontWeight: '600',
-                color: '#f1f5f9' 
+                color: '#0f172a' 
               }}>
                 Humidity Trends
               </h3>
               <p style={{ 
                 margin: '0.25rem 0 0 0', 
-                color: '#94a3b8',
+                color: '#64748b',
                 fontSize: '0.9rem' 
               }}>
                 Daily relative humidity patterns
               </p>
             </div>
           </div>
-          <div style={{ height: '250px' }}>
+          <div style={{ height: '320px' }}>
             <Line data={humidityData} options={enhancedOptions} />
           </div>
         </div>
 
         {/* Weather Conditions Summary */}
         <div style={{
-          background: 'rgba(34, 197, 94, 0.1)',
+          background: '#f4fbf6',
           borderRadius: '20px',
           padding: '2rem',
-          border: '1px solid rgba(34, 197, 94, 0.3)',
-          backdropFilter: 'blur(10px)'
+          border: '1px solid rgba(34, 197, 94, 0.25)',
+          boxShadow: '0 10px 24px rgba(15, 23, 42, 0.06)'
         }}>
           <h3 style={{ 
             color: '#22c55e', 
@@ -524,7 +552,7 @@ export default function WeatherVisualizationsEnhanced({ forecast }) {
             fontSize: '1rem'
           }}>
             <div style={{
-              background: 'rgba(255, 255, 255, 0.05)',
+              background: '#ffffff',
               padding: '1.5rem',
               borderRadius: '12px',
               border: '1px solid rgba(239, 68, 68, 0.3)'
@@ -536,13 +564,13 @@ export default function WeatherVisualizationsEnhanced({ forecast }) {
               <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ef4444' }}>
                 {weatherStats.hotDays} days
               </div>
-              <div style={{ fontSize: '0.9rem', color: '#94a3b8', marginTop: '0.5rem' }}>
+              <div style={{ fontSize: '0.9rem', color: '#64748b', marginTop: '0.5rem' }}>
                 Potential heat stress risk
               </div>
             </div>
             
             <div style={{
-              background: 'rgba(255, 255, 255, 0.05)',
+              background: '#ffffff',
               padding: '1.5rem',
               borderRadius: '12px',
               border: '1px solid rgba(59, 130, 246, 0.3)'
@@ -554,13 +582,13 @@ export default function WeatherVisualizationsEnhanced({ forecast }) {
               <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#3b82f6' }}>
                 {weatherStats.rainyDays} days
               </div>
-              <div style={{ fontSize: '0.9rem', color: '#94a3b8', marginTop: '0.5rem' }}>
+              <div style={{ fontSize: '0.9rem', color: '#64748b', marginTop: '0.5rem' }}>
                 Natural irrigation availability
               </div>
             </div>
             
             <div style={{
-              background: 'rgba(255, 255, 255, 0.05)',
+              background: '#ffffff',
               padding: '1.5rem',
               borderRadius: '12px',
               border: '1px solid rgba(245, 158, 11, 0.3)'
@@ -572,13 +600,13 @@ export default function WeatherVisualizationsEnhanced({ forecast }) {
               <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f59e0b' }}>
                 {weatherStats.dryDays} days
               </div>
-              <div style={{ fontSize: '0.9rem', color: '#94a3b8', marginTop: '0.5rem' }}>
+              <div style={{ fontSize: '0.9rem', color: '#64748b', marginTop: '0.5rem' }}>
                 Irrigation requirement days
               </div>
             </div>
             
             <div style={{
-              background: 'rgba(255, 255, 255, 0.05)',
+              background: '#ffffff',
               padding: '1.5rem',
               borderRadius: '12px',
               border: '1px solid rgba(22, 163, 74, 0.3)'
@@ -590,7 +618,7 @@ export default function WeatherVisualizationsEnhanced({ forecast }) {
               <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#16a34a' }}>
                 {weatherStats.avgWind} m/s
               </div>
-              <div style={{ fontSize: '0.9rem', color: '#94a3b8', marginTop: '0.5rem' }}>
+              <div style={{ fontSize: '0.9rem', color: '#64748b', marginTop: '0.5rem' }}>
                 Evaporation rate indicator
               </div>
             </div>

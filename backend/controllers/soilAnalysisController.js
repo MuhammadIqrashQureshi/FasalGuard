@@ -4,6 +4,7 @@
  */
 
 const soilAnalysisService = require('../services/soilAnalysisService');
+const SoilOutcome = require('../models/SoilOutcome');
 
 exports.analyzeDistrict = async (req, res) => {
     try {
@@ -19,6 +20,16 @@ exports.analyzeDistrict = async (req, res) => {
         const result = await soilAnalysisService.analyzeDistrict(district, currentCrop);
         
         if (result.success) {
+            if (req.user?._id) {
+                await SoilOutcome.create({
+                    user_id: req.user._id,
+                    analysis_type: 'district',
+                    district,
+                    crop: currentCrop || null,
+                    soil_params: null,
+                    result
+                });
+            }
             res.json(result);
         } else {
             res.status(400).json(result);
@@ -52,6 +63,16 @@ exports.analyzeManual = async (req, res) => {
         );
         
         if (result.success) {
+            if (req.user?._id) {
+                await SoilOutcome.create({
+                    user_id: req.user._id,
+                    analysis_type: 'manual',
+                    district: district || 'Manual Input',
+                    crop: current_crop || null,
+                    soil_params,
+                    result
+                });
+            }
             res.json(result);
         } else {
             res.status(400).json(result);

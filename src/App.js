@@ -16,12 +16,20 @@ import SoilAnalysis from './soilAnalysis';
 import SoilTrends from './components/SoilTrends';
 import SatelliteAnalysis from './SatelliteAnalysis';
 import FarmerHistoryPage from './FarmerHistoryPage';
+import VoiceChat from './VoiceChat';
+import HelpChatWidget from './components/HelpChatWidget';
 
 import './global.css';
 
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import './App.css';
 import AdminDashboard from './AdminDashboard';
+import AdminSlaTracker from './admin/AdminSlaTracker';
+import AdminHighRiskQueue from './admin/AdminHighRiskQueue';
+import AdminActionAnalytics from './admin/AdminActionAnalytics';
+import AdminEngagementHealth from './admin/AdminEngagementHealth';
+import AdminGeographyOps from './admin/AdminGeographyOps';
+import AdminUserActivity from './admin/AdminUserActivity';
 import { useLanguage } from './context/LanguageContext';
 
 function App() {
@@ -159,11 +167,35 @@ function App() {
         <Route path="/crop-prediction" element={
           isAuthenticated ? <CropPredictionPage /> : <Navigate to="/login" replace />
         } />
+        <Route path="/voice-chat" element={
+          isAuthenticated ? <VoiceChat /> : <Navigate to="/login" replace />
+        } />
         <Route path="/services" element={
           isAuthenticated ? <Services /> : <Navigate to="/login" replace />
         } />
         <Route path="/admin" element={
           isAuthenticated && user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/login" replace />
+        } />
+        <Route path="/admin/ops/sla" element={
+          isAuthenticated && user?.role === 'admin' ? <AdminSlaTracker /> : <Navigate to="/login" replace />
+        } />
+        <Route path="/admin/ops/high-risk" element={
+          isAuthenticated && user?.role === 'admin' ? <AdminHighRiskQueue /> : <Navigate to="/login" replace />
+        } />
+        <Route path="/admin/ops/action-completion" element={
+          isAuthenticated && user?.role === 'admin' ? <AdminActionAnalytics /> : <Navigate to="/login" replace />
+        } />
+        <Route path="/admin/ops/alert-effectiveness" element={
+          isAuthenticated && user?.role === 'admin' ? <Navigate to="/admin" replace /> : <Navigate to="/login" replace />
+        } />
+        <Route path="/admin/ops/engagement" element={
+          isAuthenticated && user?.role === 'admin' ? <AdminEngagementHealth /> : <Navigate to="/login" replace />
+        } />
+        <Route path="/admin/ops/geography" element={
+          isAuthenticated && user?.role === 'admin' ? <AdminGeographyOps /> : <Navigate to="/login" replace />
+        } />
+        <Route path="/admin/user-activity/:userId" element={
+          isAuthenticated && user?.role === 'admin' ? <AdminUserActivity /> : <Navigate to="/login" replace />
         } />
         
         {/* Individual pages that need to receive props */}
@@ -188,6 +220,7 @@ function App() {
           isAuthenticated ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />
         } />
       </Routes>
+      {isAuthenticated && <HelpChatWidget user={user} />}
     </div>
   );
 

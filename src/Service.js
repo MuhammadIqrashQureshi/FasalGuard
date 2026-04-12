@@ -8,6 +8,7 @@ const Services = () => {
   const [activeTab, setActiveTab] = useState(1);
   const [scrolled, setScrolled] = useState(false);
   const [visibleServices, setVisibleServices] = useState([]);
+  const [openFaq, setOpenFaq] = useState(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -36,6 +37,16 @@ const Services = () => {
 
     return () => observer.disconnect();
   }, []);
+
+  const resolveServiceRoute = (title) => {
+    const key = String(title || '').toLowerCase();
+    if (key.includes('weather') || key.includes('climate')) return '/crop-prediction';
+    if (key.includes('soil')) return '/soil-analysis';
+    if (key.includes('heatmap')) return '/satellite-analysis';
+    if (key.includes('satellite')) return '/satellite-analysis';
+    if (key.includes('past')) return '/past-trends';
+    return '/services';
+  };
 
   const styles = {
     page: {
@@ -331,6 +342,66 @@ const Services = () => {
       background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
       padding: '8rem 2rem',
     },
+    faqSection: {
+      padding: '7rem 2rem',
+      background: '#ffffff',
+    },
+    faqContainer: {
+      maxWidth: '1100px',
+      margin: '0 auto',
+      width: '100%',
+      textAlign: 'center',
+    },
+    faqGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+      gap: '1.5rem',
+      marginTop: '3rem',
+      textAlign: 'left',
+    },
+    faqCard: {
+      background: '#f8fafc',
+      borderRadius: '16px',
+      padding: '1.5rem',
+      border: '1px solid rgba(16,185,129,0.15)',
+      boxShadow: '0 10px 24px rgba(15, 23, 42, 0.06)',
+      transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+    },
+    faqHeader: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: '1rem',
+      cursor: 'pointer',
+      background: 'transparent',
+      border: 'none',
+      padding: 0,
+      width: '100%',
+      textAlign: 'left',
+    },
+    faqQuestion: {
+      fontSize: '1.05rem',
+      fontWeight: 600,
+      color: '#111',
+      marginBottom: 0,
+    },
+    faqAnswer: {
+      fontSize: '0.95rem',
+      color: '#6b7280',
+      lineHeight: '1.6',
+    },
+    faqIcon: {
+      width: '28px',
+      height: '28px',
+      borderRadius: '50%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'rgba(16,185,129,0.12)',
+      color: '#10b981',
+      fontWeight: 700,
+      flexShrink: 0,
+    },
     processContainer: {
       maxWidth: '1400px',
       margin: '0 auto',
@@ -458,6 +529,7 @@ const Services = () => {
       display: 'flex',
       flexDirection: 'column',
       gap: '1rem',
+      textAlign: 'left',
     },
     linkTitle: {
       fontSize: '1rem',
@@ -519,6 +591,16 @@ const Services = () => {
         .tab:hover {
           transform: translateY(-2px);
           box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .service-cta:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 10px 28px rgba(16,185,129,0.25);
+        }
+
+        .faq-card:hover {
+          transform: translateY(-6px);
+          box-shadow: 0 16px 30px rgba(15, 23, 42, 0.12);
         }
         
         .stat-card:hover .stat-icon {
@@ -688,12 +770,64 @@ const Services = () => {
                       color: '#fff',
                       marginTop: '1.5rem',
                     }}
-                    onClick={() => navigate('/crop-prediction')}
+                    onClick={() => navigate(resolveServiceRoute(service.title))}
+                    className="service-cta"
                   >
                     Try {service.title}
                     <ArrowRight size={18} />
                   </button>
                 </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section style={styles.faqSection}>
+        <div style={styles.faqContainer}>
+          <span style={styles.heroLabel}>FAQ</span>
+          <h2 style={styles.sectionTitle}>Common Questions</h2>
+          <p style={styles.sectionSubtitle}>
+            Quick answers to the most asked questions about our services.
+          </p>
+          <div style={styles.faqGrid}>
+            {[
+              {
+                q: 'How do I get weather predictions?',
+                a: 'Open Crop Prediction to see weather-driven recommendations and forecasts.'
+              },
+              {
+                q: 'Where can I see soil health details?',
+                a: 'Use the Soil Analysis page for pH, nutrients, and soil score.'
+              },
+              {
+                q: 'How do heatmaps help farmers?',
+                a: 'Heatmaps show stress zones so you can act on the right areas.'
+              },
+              {
+                q: 'What is Satellite Field Analysis & Alert System?',
+                a: 'It combines satellite data with alerts for timely field actions.'
+              },
+              {
+                q: 'Where can I view past trends?',
+                a: 'Open Past Trends for historical performance and yield insights.'
+              }
+            ].map((item, idx) => (
+              <div key={idx} style={styles.faqCard} className="faq-card">
+                <button
+                  type="button"
+                  style={styles.faqHeader}
+                  onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+                  aria-expanded={openFaq === idx}
+                  aria-controls={`faq-answer-${idx}`}
+                >
+                  <span style={styles.faqQuestion}>{item.q}</span>
+                  <span style={styles.faqIcon}>{openFaq === idx ? '-' : '+'}</span>
+                </button>
+                {openFaq === idx && (
+                  <div id={`faq-answer-${idx}`} style={styles.faqAnswer}>{item.a}</div>
+                )}
               </div>
             ))}
           </div>
@@ -779,17 +913,19 @@ const Services = () => {
             <div style={styles.footerLinks}>
               <div style={styles.linkColumn}>
                 <div style={styles.linkTitle}>Services</div>
-                <button style={styles.footerLink} onClick={() => navigate('/services')}>Weather Predictions</button>
-                <button style={styles.footerLink} onClick={() => navigate('/services')}>Climate Analysis</button>
-                <button style={styles.footerLink} onClick={() => navigate('/services')}>Soil Health</button>
-                <button style={styles.footerLink} onClick={() => navigate('/services')}>Heatmaps</button>
+                <button style={styles.footerLink} onClick={() => navigate('/crop-prediction')}>Weather Predictions</button>
+                <button style={styles.footerLink} onClick={() => navigate('/crop-prediction')}>Climate Analysis</button>
+                <button style={styles.footerLink} onClick={() => navigate('/soil-analysis')}>Soil Analysis & Health</button>
+                <button style={styles.footerLink} onClick={() => navigate('/satellite-analysis')}>Crop Health Heatmaps</button>
+                <button style={styles.footerLink} onClick={() => navigate('/satellite-analysis')}>Satellite Field Analysis & Alert System</button>
+                <button style={styles.footerLink} onClick={() => navigate('/past-trends')}>Past Trend Analysis</button>
               </div>
               
               <div style={styles.linkColumn}>
                 <div style={styles.linkTitle}>Platform</div>
                 <button style={styles.footerLink} onClick={() => navigate('/crop-prediction')}>Crop Prediction</button>
                 <button style={styles.footerLink} onClick={() => navigate('/past-trends')}>Past Trends</button>
-                <button style={styles.footerLink} onClick={() => navigate('/dashboard')}>Dashboard</button>
+                <button style={styles.footerLink} onClick={() => navigate('/prediction-results')}>Dashboard</button>
                 <button style={styles.footerLink}>Mobile App</button>
               </div>
               
@@ -799,6 +935,7 @@ const Services = () => {
                 <button style={styles.footerLink} onClick={() => navigate('/contact')}>Contact</button>
                 <button style={styles.footerLink}>Careers</button>
                 <button style={styles.footerLink}>Blog</button>
+                <button style={styles.footerLink} onClick={() => window.dispatchEvent(new Event('open-help-chat'))}>Help</button>
               </div>
             </div>
           </div>

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Leaf, ChevronDown, BarChart, Map, Sun, AlertCircle, CloudRain, Sprout, Shield, Cpu, Globe, TrendingUp, Users, Target, Clock, Database, Smartphone, Zap, CheckCircle, ArrowRight, Award, PieChart } from 'lucide-react';
 import { motion, useAnimation, useInView } from 'framer-motion';
 
-export default function HomePage({ onLogout }) {
+export default function HomePage({ onLogout, user }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const navigate = useNavigate();
   const [currentBg, setCurrentBg] = useState(0);
@@ -11,6 +11,7 @@ export default function HomePage({ onLogout }) {
   const [loading, setLoading] = useState(true);
   const [showDropdown, setShowDropdown] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [cropNavLoading, setCropNavLoading] = useState(false);
 
   const backgroundImages = [
     'https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=1920&q=85',
@@ -67,6 +68,24 @@ export default function HomePage({ onLogout }) {
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, [showDropdown]);
+
+  const handleStartPrediction = () => {
+    try {
+      sessionStorage.setItem('cp_page_load', '1');
+    } catch {
+      // ignore storage errors
+    }
+    navigate('/crop-prediction');
+  };
+
+  const handleCropNavClick = () => {
+    setCropNavLoading(true);
+    setTimeout(() => {
+      setCropNavLoading(false);
+      navigate('/crop-prediction');
+    }, 850);
+  };
+
 
   const styles = {
     page: {
@@ -532,7 +551,7 @@ export default function HomePage({ onLogout }) {
       alignItems: 'start',
     },
     footerBrand: {
-      
+      textAlign: 'left',
     },
     footerLinksGrid: {
       display: 'grid',
@@ -544,6 +563,7 @@ export default function HomePage({ onLogout }) {
       display: 'flex',
       flexDirection: 'column',
       gap: '0.75rem',
+      textAlign: 'left',
     },
     linkTitle: {
       fontSize: '0.85rem',
@@ -574,6 +594,47 @@ export default function HomePage({ onLogout }) {
       fontSize: '0.85rem',
       color: 'rgba(255,255,255,0.5)',
       fontWeight: 400,
+    },
+    cropOverlay: {
+      position: 'fixed',
+      inset: 0,
+      background: 'rgba(247, 251, 248, 0.92)',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '0.75rem',
+      zIndex: 2300,
+      backdropFilter: 'blur(4px)',
+    },
+    cropClouds: {
+      position: 'relative',
+      width: '200px',
+      height: '80px',
+    },
+    cropCloud: {
+      position: 'absolute',
+      borderRadius: '999px',
+      border: '2px solid #f59e0b',
+      background: 'transparent',
+      animation: 'float 1.8s ease-in-out infinite',
+    },
+    cropDrops: {
+      display: 'flex',
+      gap: '12px',
+      marginTop: '4px',
+    },
+    cropDrop: {
+      width: '8px',
+      height: '14px',
+      background: '#cbd5e1',
+      borderRadius: '999px',
+      animation: 'cropDrop 0.9s ease-in-out infinite',
+    },
+    cropLabel: {
+      color: '#14532d',
+      fontWeight: 700,
+      fontSize: '0.95rem',
     },
   };
 
@@ -628,6 +689,11 @@ export default function HomePage({ onLogout }) {
         @keyframes float {
           0%, 100% { transform: translateY(0px); }
           50% { transform: translateY(-10px); }
+        }
+        @keyframes cropDrop {
+          0% { transform: translateY(-6px); opacity: 0; }
+          50% { opacity: 1; }
+          100% { transform: translateY(8px); opacity: 0; }
         }
         @keyframes glow {
           0%, 100% { box-shadow: 0 0 20px rgba(16,185,129,0.3); }
@@ -777,8 +843,28 @@ export default function HomePage({ onLogout }) {
           <button style={styles.navLink} className="navLink" type="button" onClick={() => navigate('/about')}>About Us</button>
           <button style={styles.navLink} className="navLink" type="button" onClick={() => navigate('/services')}>Services</button>
           <button style={styles.navLink} className="navLink" type="button" onClick={() => navigate('/contact')}>Contact Us</button>
+          <motion.button
+            style={styles.navLink}
+            className="navLink"
+            type="button"
+            onClick={handleCropNavClick}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.96 }}
+          >
+            Crop Prediction
+          </motion.button>
           <button style={styles.navLink} className="navLink" type="button" onClick={() => navigate('/soil-analysis')}>Soil Analysis</button>
           <button style={styles.navLink} className="navLink" type="button" onClick={() => navigate('/satellite-analysis')}>Satellite</button>
+          <motion.button
+            style={styles.navLink}
+            className="navLink"
+            type="button"
+            onClick={() => navigate('/voice-chat')}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.96 }}
+          >
+            Voice Chat
+          </motion.button>
           <div style={{ position: 'relative', marginLeft: '1.5rem' }}>
             <span
               style={{ color: scrolled ? '#374151' : '#fff', fontSize: '1.5rem', cursor: 'pointer', transition: 'color 0.3s' }}
@@ -876,7 +962,7 @@ export default function HomePage({ onLogout }) {
           <motion.button 
             style={styles.exploreBtn} 
             className="exploreBtn"
-            onClick={() => navigate('/crop-prediction')}
+            onClick={handleStartPrediction}
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.8, duration: 0.5, type: "spring" }}
@@ -1187,38 +1273,32 @@ export default function HomePage({ onLogout }) {
               { 
                 icon: BarChart, 
                 title: "Yield Prediction", 
-                desc: "Know your harvest in advance",
-                onClick: () => navigate('/crop-prediction') // ADDED
+                desc: "Perfect yield insights before sowing",
+                onClick: () => navigate('/crop-prediction')
               },
               { 
                 icon: Map, 
                 title: "Field Mapping", 
-                desc: "See problem areas instantly",
-                onClick: () => navigate('/services') // ADDED
+                desc: "Map fields and detect hotspots",
+                onClick: () => navigate('/satellite-analysis')
               },
               { 
                 icon: Sun, 
                 title: "Soil Analysis", 
-                desc: "Optimize fertilizer usage",
-                onClick: () => navigate('/soil-analysis') // ADDED
+                desc: "Soil score, pH, and nutrients",
+                onClick: () => navigate('/soil-analysis')
               },
               { 
                 icon: AlertCircle, 
-                title: "Smart Alerts", 
-                desc: "Get notified when it matters",
-                onClick: () => navigate('/services') // ADDED
+                title: "Satellite Field Analysis & Alert", 
+                desc: "Field health maps with smart alerts",
+                onClick: () => navigate('/satellite-analysis')
               },
               { 
                 icon: CloudRain, 
                 title: "Weather Forecast", 
-                desc: "Plan ahead with confidence",
-                onClick: () => navigate('/prediction-results') // ADDED
-              },
-              { 
-                icon: Smartphone, 
-                title: "Mobile Access", 
-                desc: "Farm management on the go",
-                onClick: () => navigate('/services') // ADDED
+                desc: "Forecasts to plan your crop",
+                onClick: () => navigate('/crop-prediction')
               },
             ].map((item, index) => (
               <motion.div 
@@ -1267,7 +1347,7 @@ export default function HomePage({ onLogout }) {
           >
             <motion.button 
               style={styles.footerActionBtn}
-              onClick={() => navigate('/crop-prediction')}
+              onClick={handleStartPrediction}
               whileHover={{ scale: 1.05, boxShadow: '0 8px 32px rgba(16,185,129,0.5)' }}
               whileTap={{ scale: 0.95 }}
             >
@@ -1311,10 +1391,38 @@ export default function HomePage({ onLogout }) {
                 <div style={styles.linkTitle}>Features</div>
                 <motion.button 
                   style={styles.footerLink} 
+                  onClick={handleStartPrediction}
+                  whileHover={{ x: 5, color: '#10b981' }}
+                >
+                  Yield Prediction
+                </motion.button>
+                <motion.button 
+                  style={styles.footerLink} 
+                  onClick={() => navigate('/satellite-analysis')}
+                  whileHover={{ x: 5, color: '#10b981' }}
+                >
+                  Field Mapping
+                </motion.button>
+                <motion.button 
+                  style={styles.footerLink} 
+                  onClick={() => navigate('/soil-analysis')}
+                  whileHover={{ x: 5, color: '#10b981' }}
+                >
+                  Soil Analysis
+                </motion.button>
+                <motion.button 
+                  style={styles.footerLink}
+                  onClick={() => navigate('/satellite-analysis')}
+                  whileHover={{ x: 5, color: '#10b981' }}
+                >
+                  Satellite Field Analysis & Alert
+                </motion.button>
+                <motion.button 
+                  style={styles.footerLink}
                   onClick={() => navigate('/crop-prediction')}
                   whileHover={{ x: 5, color: '#10b981' }}
                 >
-                  Crop Prediction
+                  Weather Forecast
                 </motion.button>
                 <motion.button 
                   style={styles.footerLink} 
@@ -1322,20 +1430,6 @@ export default function HomePage({ onLogout }) {
                   whileHover={{ x: 5, color: '#10b981' }}
                 >
                   Past Trends
-                </motion.button>
-                <motion.button 
-                  style={styles.footerLink} 
-                  onClick={() => navigate('/soil-analysis')} // ADDED
-                  whileHover={{ x: 5, color: '#10b981' }}
-                >
-                  Soil Analysis
-                </motion.button>
-                <motion.button 
-                  style={styles.footerLink}
-                  onClick={() => navigate('/prediction-results')} // ADDED
-                  whileHover={{ x: 5, color: '#10b981' }}
-                >
-                  Weather Forecast
                 </motion.button>
               </div>
               
@@ -1361,6 +1455,13 @@ export default function HomePage({ onLogout }) {
                   whileHover={{ x: 5, color: '#10b981' }}
                 >
                   Services
+                </motion.button>
+                <motion.button
+                  style={styles.footerLink}
+                  onClick={() => window.dispatchEvent(new Event('open-help-chat'))}
+                  whileHover={{ x: 5, color: '#10b981' }}
+                >
+                  Help
                 </motion.button>
               </div>
               
@@ -1395,6 +1496,22 @@ export default function HomePage({ onLogout }) {
           </div>
         </div>
       </footer>
+
+      {cropNavLoading && (
+        <div style={styles.cropOverlay}>
+          <div style={styles.cropClouds}>
+            <span style={{ ...styles.cropCloud, width: '120px', height: '44px', left: 0, top: '18px' }}></span>
+            <span style={{ ...styles.cropCloud, width: '90px', height: '34px', right: 0, top: 0, animationDelay: '0.2s' }}></span>
+            <span style={{ ...styles.cropCloud, width: '32px', height: '32px', right: '18px', top: '10px', animationDelay: '0.35s' }}></span>
+          </div>
+          <div style={styles.cropDrops}>
+            <span style={{ ...styles.cropDrop, animationDelay: '0s' }}></span>
+            <span style={{ ...styles.cropDrop, animationDelay: '0.2s' }}></span>
+            <span style={{ ...styles.cropDrop, animationDelay: '0.4s' }}></span>
+          </div>
+          <div style={styles.cropLabel}>Preparing crop forecast...</div>
+        </div>
+      )}
     </div>
   );
 }

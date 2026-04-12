@@ -1,15 +1,38 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
+const jwt = require('jsonwebtoken');
 const SatelliteOutcome = require('../models/SatelliteOutcome');
 const User = require('../models/User');
 const { protect } = require('../middleware/auth');
+const { sendSatelliteAlertEmail } = require('../middleware/emailService');
 const {
   resolveRequestLanguage,
   localizeSatellitePayloadToUrdu,
 } = require('../utils/satelliteUrduTranslator');
 
 const ML_SERVICE_URL = process.env.PYTHON_ML_SERVICE_URL || 'http://localhost:5001';
+
+const optionalAuth = async (req, _res, next) => {
+  try {
+    const authHeader = req.headers.authorization || '';
+    if (!authHeader.startsWith('Bearer ')) return next();
+
+    const token = authHeader.split(' ')[1];
+    if (!token) return next();
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (!decoded?.id) return next();
+
+    const user = await User.findById(decoded.id).select('_id role accountStatus');
+    if (user && user.accountStatus === 'active') {
+      req.user = user;
+    }
+  } catch (_err) {
+    // Optional auth should never block the request.
+  }
+  return next();
+};
 
 const clampCoord = (value) => {
   const num = Number(value);
@@ -77,6 +100,13 @@ const parseAnalysisDate = (value) => {
   if (!value) return null;
   const parsed = new Date(`${String(value).slice(0, 10)}T00:00:00Z`);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const formatDateLabel = (value) => {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
 };
 
 const buildTrendFromHistory = (historyDocs) => {
@@ -425,8 +455,47 @@ router.get('/health', async (req, res) => {
   }
 });
 
+// POST /api/satellite/alerts/email
+router.post('/alerts/email', protect, async (req, res) => {
+  try {
+    const { payload } = req.body || {};
+    if (!payload) {
+      return res.status(400).json({ success: false, error: 'payload is required' });
+    }
+
+    const city = payload.city || payload.location || 'Unknown City';
+    const severity = payload.severity || 'Alert';
+    const dateLabel = payload.dateLabel || formatDateLabel(payload.analysisDate) || formatDateLabel(new Date());
+    const subject = payload.subject || `${severity} Alert - ${city} - ${dateLabel || 'Today'}`;
+
+    const alertPayload = {
+      ...payload,
+      city,
+      subject,
+      date: dateLabel || payload.date || 'Today',
+      generatedAt: payload.generatedAt || new Date().toLocaleString('en-GB'),
+      reason: payload.reason || 'Based on your latest satellite analysis',
+    };
+
+    const email = req.user?.email;
+    if (!email) {
+      return res.status(400).json({ success: false, error: 'User email not found' });
+    }
+
+    const response = await sendSatelliteAlertEmail(email, alertPayload);
+    if (!response.success) {
+      return res.status(500).json({ success: false, error: response.error || 'Failed to send alert' });
+    }
+
+    return res.status(200).json({ success: true, messageId: response.messageId });
+  } catch (error) {
+    console.error('Satellite alert email error:', error.message);
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // POST /api/satellite/outcomes
-router.post('/outcomes', async (req, res) => {
+router.post('/outcomes', optionalAuth, async (req, res) => {
   try {
     const {
       session_id,
@@ -473,6 +542,7 @@ router.post('/outcomes', async (req, res) => {
 
     const normalizedAnalysisDate = analysis_date ? String(analysis_date).slice(0, 10) : null;
 
+    const resolvedUserId = user_id || req.user?._id || undefined;
     let outcome;
     if (normalizedAnalysisDate) {
       const existing = await SatelliteOutcome.findOne({
@@ -493,7 +563,7 @@ router.post('/outcomes', async (req, res) => {
         },
         {
           $set: {
-            user_id: user_id || undefined,
+            user_id: resolvedUserId,
             saved_location_id: normalizedSavedLocationId,
             crop: String(crop || '').toLowerCase(),
             city: city || null,
@@ -511,10 +581,6 @@ router.post('/outcomes', async (req, res) => {
         { new: true, upsert: true, setDefaultsOnInsert: true },
       );
     } else {
-      const costTrackerForCreate = normalizedCostTracker !== undefined
-        ? (normalizedCostTracker.length > 0 ? normalizedCostTracker : null)
-        : null;
-
        const existing = await SatelliteOutcome.findOne({
          session_id,
          field_signature: fieldSignature,
@@ -533,7 +599,7 @@ router.post('/outcomes', async (req, res) => {
          },
          {
            $set: {
-             user_id: user_id || undefined,
+             user_id: resolvedUserId,
              saved_location_id: normalizedSavedLocationId,
              crop: String(crop || '').toLowerCase(),
              city: city || null,
@@ -576,6 +642,21 @@ router.post('/outcomes', async (req, res) => {
           field_signature: fieldSignature,
         },
       });
+    }
+
+    // Backfill missing user links for this session so admin analytics can map activity.
+    if (resolvedUserId) {
+      await SatelliteOutcome.updateMany(
+        {
+          session_id: String(session_id),
+          $or: [{ user_id: null }, { user_id: { $exists: false } }],
+        },
+        {
+          $set: {
+            user_id: resolvedUserId,
+          },
+        },
+      );
     }
 
     return res.status(201).json({

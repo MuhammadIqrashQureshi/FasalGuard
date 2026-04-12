@@ -74,40 +74,125 @@
   flex-wrap: wrap;
 }
 
+.sat-risk-alert {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  background: #fff5f5;
+  border: 1px solid #fecaca;
+}
+
 .sat-nav-btn {
-  border: 1px solid var(--sat-border);
-  border-radius: 999px;
-  background: #fff;
-  color: var(--sat-text);
-  font-weight: 600;
-  font-size: 0.83rem;
-  padding: 0.45rem 0.9rem;
+  border: 1px solid #d5dde5;
+  border-radius: 12px;
+  padding: 0.55rem 0.75rem;
+  color: #1f2937;
+  background: #ffffff;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
   cursor: pointer;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.sat-risk-radar.high {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 6px rgba(220, 38, 38, 0.15);
+}
+
+.sat-risk-radar.moderate {
+  border-color: #f59e0b;
+  background: radial-gradient(circle at center, rgba(245, 158, 11, 0.22), transparent 60%);
+  box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.18);
 }
 
 .sat-nav-btn:hover {
-  border-color: #a8cdb0;
-  background: #e9f5ec;
+  transform: translateY(-1px);
+  border-color: #b8c6d3;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
 }
 
-.sat-theme-toggle-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  font-weight: 700;
+.sat-risk-radar.moderate::after {
+  border-color: rgba(245, 158, 11, 0.6);
 }
 
-.sat-theme-toggle-track {
-  width: 40px;
-  height: 22px;
-  border-radius: 999px;
-  background: #dbe4ee;
-  border: 1px solid #c6d1dd;
-  padding: 2px;
-  display: inline-flex;
-  align-items: center;
-  transition: background 0.18s ease, border-color 0.18s ease;
+
+
+
+.sat-risk-radar.moderate .sat-risk-radar-line {
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0.0), rgba(245, 158, 11, 0.95));
 }
+
+.sat-risk-radar-pulse {
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  border: 2px solid rgba(220, 38, 38, 0.5);
+  animation: satRadarPulse 1.8s ease-out infinite;
+}
+
+.sat-risk-radar.moderate .sat-risk-radar-pulse {
+  border-color: rgba(245, 158, 11, 0.55);
+}
+
+.sat-risk-radar-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 10px rgba(220, 38, 38, 0.6);
+}
+
+.sat-risk-radar.moderate .sat-risk-radar-icon {
+  background: #f59e0b;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.6);
+}
+
+.sat-risk-alert-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.sat-risk-alert-title {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #991b1b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sat-risk-alert-sub {
+  font-size: 0.68rem;
+  color: #7f1d1d;
+}
+
+.sat-risk-radar.moderate + .sat-risk-alert-text .sat-risk-alert-title {
+  color: #92400e;
+}
+
+.sat-risk-radar.moderate + .sat-risk-alert-text .sat-risk-alert-sub {
+  color: #92400e;
+}
+
+
+@keyframes satRadarPulse {
+  0% { transform: scale(0.65); opacity: 0.9; }
+  100% { transform: scale(1.1); opacity: 0; }
+}
+
 
 .sat-theme-toggle-track.is-dark {
   background: #1f4d35;
@@ -138,6 +223,7 @@ main {
 
 .sat-welcome {
   margin-bottom: 1rem;
+  text-align: center;
 }
 
 .sat-title {
@@ -146,12 +232,17 @@ main {
   font-size: clamp(1.5rem, 2.6vw, 2.2rem);
   font-weight: 800;
   letter-spacing: -0.01em;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 35%, #0ea5e9 70%, #6366f1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .sat-subtitle {
   margin: 0.35rem 0 0.8rem;
   color: var(--sat-text-muted);
   font-size: 0.97rem;
+  text-align: center;
 }
 
 .sat-workflow-strip {
@@ -203,11 +294,30 @@ main {
   border-radius: var(--sat-radius-md);
   padding: 1rem;
   margin-bottom: 1rem;
-  background: #fff;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+  border-left: 4px solid rgba(34, 197, 94, 0.35);
 }
 
 .sat-section:last-of-type {
   margin-bottom: 0;
+}
+
+/* Colored accents for vertical sections */
+.sat-section:nth-of-type(1) {
+  border-left-color: rgba(14, 165, 233, 0.45);
+}
+
+.sat-section:nth-of-type(2) {
+  border-left-color: rgba(34, 197, 94, 0.45);
+}
+
+.sat-section:nth-of-type(3) {
+  border-left-color: rgba(245, 158, 11, 0.45);
+}
+
+.sat-section:nth-of-type(4) {
+  border-left-color: rgba(99, 102, 241, 0.45);
 }
 
 .sat-section-title {
@@ -567,12 +677,183 @@ main {
   box-shadow: var(--sat-shadow-1);
 }
 
+.sat-heatmap-alert {
+  border-color: #fecaca;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.18), 0 18px 40px rgba(220, 38, 38, 0.18);
+}
+
+.sat-heatmap-alert.moderate {
+  border-color: #fde68a;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.22), 0 18px 40px rgba(245, 158, 11, 0.18);
+}
+
+.sat-heatmap-alert-ring {
+  position: absolute;
+  inset: 6px;
+  border-radius: calc(var(--sat-radius-md) - 4px);
+  border: 3px solid rgba(220, 38, 38, 0.85);
+  box-shadow: inset 0 0 22px rgba(220, 38, 38, 0.35), 0 0 18px rgba(220, 38, 38, 0.45);
+  pointer-events: none;
+  animation: satHeatmapAlertPulse 2.2s ease-in-out infinite;
+  z-index: 5;
+}
+
+.sat-heatmap-alert-ring.moderate {
+  border-color: rgba(245, 158, 11, 0.85);
+  box-shadow: inset 0 0 20px rgba(245, 158, 11, 0.35), 0 0 18px rgba(245, 158, 11, 0.4);
+}
+
+.sat-heatmap-alert-label {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(220, 38, 38, 0.95);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  box-shadow: 0 6px 16px rgba(220, 38, 38, 0.35);
+}
+
+.sat-map-alert-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(220, 38, 38, 0.95);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  box-shadow: 0 6px 16px rgba(220, 38, 38, 0.35);
+  z-index: 650;
+}
+
+.sat-map-alert-badge.moderate {
+  background: rgba(245, 158, 11, 0.95);
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.35);
+}
+
+.sat-map-alert-badge.low {
+  background: rgba(16, 185, 129, 0.95);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+}
+
+.sat-heatmap-alert-ring.moderate .sat-heatmap-alert-label {
+  background: rgba(245, 158, 11, 0.95);
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.35);
+}
+
+.sat-heatmap-alert-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+}
+
+.sat-map-alert-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+}
+
+@keyframes satHeatmapAlertPulse {
+  0%,
+  100% { opacity: 0.95; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.01); }
+}
+
 .sat-map-wrapper {
   height: 430px;
 }
 
 .sat-heatmap-map-wrapper {
   height: 320px;
+}
+
+.sat-map-radar-icon {
+  background: transparent;
+  border: none;
+}
+
+.sat-map-radar {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid rgba(220, 38, 38, 0.6);
+  background: radial-gradient(circle at center, rgba(220, 38, 38, 0.18), transparent 60%);
+  box-shadow: 0 0 0 6px rgba(220, 38, 38, 0.12);
+  pointer-events: none;
+}
+
+.sat-map-radar.moderate {
+  border-color: rgba(245, 158, 11, 0.65);
+  background: radial-gradient(circle at center, rgba(245, 158, 11, 0.18), transparent 60%);
+  box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.14);
+}
+
+.sat-map-radar.low {
+  border-color: rgba(16, 185, 129, 0.6);
+  background: radial-gradient(circle at center, rgba(16, 185, 129, 0.18), transparent 60%);
+  box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.12);
+}
+
+.sat-map-radar-sweep {
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, rgba(220, 38, 38, 0.0) 0deg, rgba(220, 38, 38, 0.5) 35deg, rgba(220, 38, 38, 0.0) 70deg, rgba(220, 38, 38, 0.0) 360deg);
+  animation: satMapRadarSweep 2.2s linear infinite;
+}
+
+.sat-map-radar.moderate .sat-map-radar-sweep {
+  background: conic-gradient(from 0deg, rgba(245, 158, 11, 0.0) 0deg, rgba(245, 158, 11, 0.5) 35deg, rgba(245, 158, 11, 0.0) 70deg, rgba(245, 158, 11, 0.0) 360deg);
+}
+
+.sat-map-radar.low .sat-map-radar-sweep {
+  background: conic-gradient(from 0deg, rgba(16, 185, 129, 0.0) 0deg, rgba(16, 185, 129, 0.45) 35deg, rgba(16, 185, 129, 0.0) 70deg, rgba(16, 185, 129, 0.0) 360deg);
+}
+
+.sat-map-radar-core {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #dc2626;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 10px rgba(220, 38, 38, 0.6);
+}
+
+.sat-map-radar.moderate .sat-map-radar-core {
+  background: #f59e0b;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.6);
+}
+
+.sat-map-radar.low .sat-map-radar-core {
+  background: #10b981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+}
+
+@keyframes satMapRadarSweep {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .sat-map,
@@ -2415,6 +2696,318 @@ main {
   padding: 0.9rem;
 }
 
+.sat-high-alert-panel {
+  margin-top: 1rem;
+  padding: 0.95rem;
+  border-radius: 14px;
+  border: 1px solid #fecaca;
+  background: linear-gradient(180deg, #fff5f5 0%, #ffffff 100%);
+  box-shadow: 0 12px 30px rgba(185, 28, 28, 0.08);
+  animation: alertPop 0.6s ease;
+}
+
+.sat-high-alert-panel.moderate {
+  border-color: #fdba74;
+  background: linear-gradient(180deg, #fff7ed 0%, #ffffff 100%);
+  box-shadow: 0 12px 30px rgba(249, 115, 22, 0.08);
+}
+
+.sat-high-alert-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.8rem;
+}
+
+.sat-high-alert-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.sat-high-alert-radar {
+  position: relative;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(185, 28, 28, 0.12);
+  border: 1px solid rgba(185, 28, 28, 0.35);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.sat-high-alert-panel.moderate .sat-high-alert-radar {
+  background: rgba(234, 88, 12, 0.12);
+  border-color: rgba(234, 88, 12, 0.35);
+}
+
+.sat-high-alert-radar-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid rgba(185, 28, 28, 0.35);
+  animation: alertRadar 1.6s ease-in-out infinite;
+}
+
+.sat-high-alert-radar-sweep {
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, rgba(185, 28, 28, 0.0) 0deg, rgba(185, 28, 28, 0.45) 30deg, rgba(185, 28, 28, 0.0) 60deg, rgba(185, 28, 28, 0.0) 360deg);
+  animation: alertRadarSweep 1.8s linear infinite;
+  mix-blend-mode: multiply;
+}
+
+.sat-high-alert-panel.moderate .sat-high-alert-radar-ring {
+  border-color: rgba(234, 88, 12, 0.35);
+}
+
+.sat-high-alert-panel.moderate .sat-high-alert-radar-sweep {
+  background: conic-gradient(from 0deg, rgba(234, 88, 12, 0.0) 0deg, rgba(234, 88, 12, 0.45) 30deg, rgba(234, 88, 12, 0.0) 60deg, rgba(234, 88, 12, 0.0) 360deg);
+}
+
+.sat-high-alert-radar-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #b91c1c;
+  box-shadow: 0 0 8px rgba(185, 28, 28, 0.6);
+}
+
+.sat-high-alert-panel.moderate .sat-high-alert-radar-dot {
+  background: #ea580c;
+  box-shadow: 0 0 8px rgba(234, 88, 12, 0.6);
+}
+
+.sat-high-alert-kicker {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #b91c1c;
+}
+
+.sat-high-alert-panel.moderate .sat-high-alert-kicker {
+  color: #c2410c;
+}
+
+.sat-high-alert-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #7f1d1d;
+}
+
+.sat-high-alert-panel.moderate .sat-high-alert-title {
+  color: #9a3412;
+}
+
+.sat-high-alert-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.sat-high-alert-badge {
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  border: 1px solid #fecaca;
+  background: #fee2e2;
+  color: #7f1d1d;
+}
+
+.sat-high-alert-panel.moderate .sat-high-alert-badge {
+  border-color: #fdba74;
+  background: #ffedd5;
+  color: #9a3412;
+}
+
+.sat-high-alert-badge.urgent {
+  background: #b91c1c;
+  border-color: #b91c1c;
+  color: #ffffff;
+}
+
+.sat-high-alert-panel.moderate .sat-high-alert-badge.urgent {
+  background: #ea580c;
+  border-color: #ea580c;
+}
+
+.sat-high-alert-summary {
+  margin-top: 0.6rem;
+  font-size: 0.85rem;
+  color: #7f1d1d;
+  font-weight: 600;
+}
+
+.sat-high-alert-panel.moderate .sat-high-alert-summary {
+  color: #9a3412;
+}
+
+.sat-high-alert-grid {
+  margin-top: 0.7rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.6rem;
+}
+
+.sat-high-alert-card {
+  border: 1px solid #fee2e2;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 0.55rem 0.65rem;
+}
+
+.sat-high-alert-panel.moderate .sat-high-alert-card {
+  border-color: #fed7aa;
+}
+
+.sat-high-alert-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #9f1239;
+}
+
+.sat-high-alert-panel.moderate .sat-high-alert-label {
+  color: #c2410c;
+}
+
+.sat-high-alert-value {
+  margin-top: 0.2rem;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #7f1d1d;
+}
+
+.sat-high-alert-panel.moderate .sat-high-alert-value {
+  color: #9a3412;
+}
+
+.sat-high-alert-list {
+  margin-top: 0.7rem;
+  border-radius: 10px;
+  border: 1px solid #fee2e2;
+  background: #fff7f7;
+  padding: 0.55rem 0.7rem;
+}
+
+.sat-high-alert-panel.moderate .sat-high-alert-list {
+  border-color: #fed7aa;
+  background: #fff7ed;
+}
+
+.sat-high-alert-list-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #7f1d1d;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.3rem;
+}
+
+.sat-high-alert-panel.moderate .sat-high-alert-list-title {
+  color: #9a3412;
+}
+
+.sat-high-alert-list ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.78rem;
+  color: #7f1d1d;
+}
+
+.sat-high-alert-panel.moderate .sat-high-alert-list ul {
+  color: #9a3412;
+}
+
+.sat-high-alert-list li {
+  margin-bottom: 0.25rem;
+}
+
+.sat-high-alert-pop {
+  margin-top: 0.7rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 8px;
+  background: #7f1d1d;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+  animation: alertPulse 1.8s ease-in-out infinite;
+}
+
+.sat-high-alert-panel.moderate .sat-high-alert-pop {
+  background: #9a3412;
+}
+
+.sat-high-alert-cta {
+  margin-top: 0.65rem;
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  padding: 0.6rem 0.8rem;
+  background: #b91c1c;
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sat-high-alert-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(185, 28, 28, 0.2);
+}
+
+.sat-high-alert-panel.moderate .sat-high-alert-cta {
+  background: #ea580c;
+}
+
+@keyframes alertPop {
+  0% {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes alertPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+@keyframes alertRadar {
+  0% {
+    transform: scale(0.4);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+}
+
+@keyframes alertRadarSweep {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+
 .sat-action-row {
   display: flex;
   gap: 0.6rem;
@@ -2441,6 +3034,346 @@ main {
 
 .sat-action-btn.secondary:hover {
   background: #edf2f7;
+}
+
+/* Water/Nutrients/Planning/Economics panels */
+.sat-irrigation-schedule-panel {
+  border: 1px solid #cfe3d6;
+  border-radius: 16px;
+  background: #ffffff;
+  padding: 1rem;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+  margin-top: 0.8rem;
+}
+
+.sat-irrigation-schedule-panel .sat-section-title {
+  color: #0f172a;
+}
+
+.sat-irr-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-bottom: 0.8rem;
+}
+
+.sat-irr-subtitle {
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.sat-irr-meta {
+  background: #eef6f0;
+  color: #1b4332;
+  border: 1px solid #cfe3d6;
+  border-radius: 999px;
+  padding: 0.28rem 0.7rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.sat-irr-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.7rem;
+}
+
+.sat-irr-card {
+  border: 1px solid #dce6ef;
+  border-radius: 12px;
+  background: #f8fafc;
+  padding: 0.75rem 0.85rem;
+}
+
+.sat-irr-card.critical {
+  border-color: #a7d4b5;
+  background: #f0faf3;
+}
+
+.sat-irr-card.critical,
+.sat-irr-card.high {
+  border-left: 4px solid #1b4332;
+}
+
+.sat-irr-card.medium {
+  border-left: 4px solid #f59e0b;
+  border-color: #f3c695;
+  background: #fff7ed;
+}
+
+.sat-irr-card.low {
+  border-left: 4px solid #2d6a4f;
+  border-color: #b7d4bf;
+  background: #f4faf6;
+}
+
+.sat-irr-card.good {
+  border-color: #b7d4bf;
+  background: #f4faf6;
+}
+
+.sat-irr-card.warning {
+  border-color: #f8c28a;
+  background: #fff7ed;
+}
+
+.sat-irr-day {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #334155;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sat-irr-action {
+  margin-top: 0.35rem;
+  color: #0f172a;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.sat-irr-amount {
+  margin-top: 0.2rem;
+  color: #2d6a4f;
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.sat-irr-note {
+  margin-top: 0.25rem;
+  color: #64748b;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.sat-irr-tips {
+  margin-top: 0.7rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.sat-irr-tip-item {
+  border: 1px solid #dce6ef;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 0.6rem 0.7rem;
+  color: #334155;
+  font-size: 0.78rem;
+}
+
+.sat-fert-panel {
+  background: linear-gradient(180deg, #f4faf6 0%, #ffffff 100%);
+  border-color: #b7d4bf;
+}
+
+.sat-stage-checklist-panel {
+  background: linear-gradient(180deg, #eef6f0 0%, #ffffff 100%);
+  border-color: #c8dfc8;
+}
+
+.sat-roi-panel {
+  background: linear-gradient(180deg, #f7fbf8 0%, #ffffff 100%);
+  border-color: #cfe3d6;
+}
+
+.sat-rec-plan-card {
+  border-left: 4px solid #2d6a4f;
+}
+
+.sat-rec-plan-card.warning {
+  border-left-color: #f59e0b;
+}
+
+/* Loading animation (satellite orbit) */
+.sat-loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(247, 251, 248, 0.96) 0%, rgba(238, 246, 240, 0.92) 60%, rgba(247, 251, 248, 0.98) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  z-index: 2000;
+  backdrop-filter: blur(4px);
+}
+
+.sat-analysis-loading {
+  background: radial-gradient(circle at 20% 20%, rgba(226, 243, 233, 0.95), rgba(240, 248, 243, 0.92) 50%, rgba(248, 252, 250, 0.98) 100%);
+}
+
+.sat-loading-orbit {
+  position: relative;
+  width: 220px;
+  height: 220px;
+}
+
+.sat-loading-orbit-ring {
+  position: absolute;
+  inset: 18px;
+  border-radius: 50%;
+  border: 1px dashed rgba(45, 106, 79, 0.35);
+  box-shadow: 0 0 18px rgba(45, 106, 79, 0.08);
+}
+
+.sat-loading-planet {
+  position: absolute;
+  inset: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #f7fbf8, #e4efe8 55%, #cfe3d6 100%);
+  border: 2px solid #b7d4bf;
+  box-shadow: inset 0 0 18px rgba(45, 106, 79, 0.12);
+}
+
+.sat-loading-sat {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  transform-origin: -70px -70px;
+  animation: satOrbitSpin 3.8s linear infinite;
+}
+
+.sat-loading-sat-core {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: #1b4332;
+  top: 5px;
+  left: 5px;
+  box-shadow: 0 0 10px rgba(27, 67, 50, 0.4);
+}
+
+.sat-loading-sat-panel {
+  position: absolute;
+  width: 18px;
+  height: 6px;
+  background: #22c55e;
+  border-radius: 4px;
+  top: 7px;
+  left: -12px;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+}
+
+.sat-loading-label {
+  color: #1b4332;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+@keyframes satOrbitSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.sat-analysis-orbit {
+  position: relative;
+  width: 240px;
+  height: 240px;
+}
+
+.sat-analysis-orbit-ring {
+  position: absolute;
+  inset: 22px;
+  border-radius: 50%;
+  border: 2px solid rgba(34, 197, 94, 0.18);
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.12);
+}
+
+.sat-analysis-earth {
+  position: absolute;
+  inset: 52px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #ecfdf5, #cfeee0 55%, #a7dbc2 100%);
+  border: 2px solid #b7d4bf;
+  box-shadow: inset 0 0 16px rgba(34, 197, 94, 0.2);
+}
+
+.sat-analysis-sat {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 22px;
+  height: 22px;
+  transform-origin: -84px -84px;
+  animation: satAnalysisOrbit 5.6s linear infinite;
+}
+
+.sat-analysis-sat-core {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: #14532d;
+  top: 6px;
+  left: 6px;
+  box-shadow: 0 0 10px rgba(20, 83, 45, 0.4);
+}
+
+.sat-analysis-sat-panel {
+  position: absolute;
+  width: 18px;
+  height: 6px;
+  background: #34d399;
+  border-radius: 4px;
+  top: 8px;
+  left: -12px;
+  box-shadow: 0 0 10px rgba(52, 211, 153, 0.45);
+}
+
+@keyframes satAnalysisOrbit {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.sat-high-alert-headline {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #7f1d1d;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 0.5rem;
+}
+
+.sat-high-alert-subheadline {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #9f1239;
+  margin: 0 0 0.8rem;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.sat-high-alert-subheadline span {
+  display: inline-block;
+  padding-left: 100%;
+  animation: satRiskTicker 22s linear infinite;
+}
+
+@keyframes satRiskTicker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+/* Ensure light theme for revamp layout */
+.sat-page.sat-theme-revamp {
+  background: linear-gradient(135deg, #f7fbf8 0%, #eef6f0 50%, #f7fbf8 100%);
+  color: #0f172a;
+}
+
+.sat-page.sat-theme-revamp .sat-header {
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom: 1px solid rgba(34, 197, 94, 0.2);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.sat-page.sat-theme-revamp .sat-nav-btn {
+  background: #ffffff;
+  border-color: #dce6ef;
+  color: #1f2937;
 }
 
 @media (max-width: 980px) {
@@ -2938,6 +3871,47 @@ main {
   justify-content: space-between;
   align-items: flex-start;
   gap: 0.8rem;
+}
+
+.sat-fqv-alerts {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sat-risk-radar {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px solid #dc2626;
+  background: radial-gradient(circle at center, rgba(220, 38, 38, 0.15), transparent 62%);
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.12);
+  overflow: hidden;
+}
+
+.sat-risk-radar::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  border: 1px dashed rgba(220, 38, 38, 0.45);
+}
+
+.sat-risk-radar-line {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(220, 38, 38, 0.0), rgba(220, 38, 38, 0.95));
+  transform-origin: bottom center;
+  animation: satRadarSweep 2.2s linear infinite;
+}
+
+@keyframes satRadarSweep {
+  from { transform: translate(-50%, -100%) rotate(0deg); }
+  to { transform: translate(-50%, -100%) rotate(360deg); }
 }
 
 .sat-fqv-kicker {
@@ -5928,6 +6902,27 @@ main {
   padding: 0.62rem 0.72rem;
   text-align: left;
   justify-content: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.sat-sidebar-icon {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(47, 111, 85, 0.16), rgba(14, 116, 144, 0.12));
+  border: 1px solid rgba(47, 111, 85, 0.25);
+  font-size: 16px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+}
+
+.sat-sidebar .sat-nav-btn:hover .sat-sidebar-icon {
+  border-color: rgba(47, 111, 85, 0.45);
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
 }
 
 .sat-sidebar-collapse-btn {
@@ -7401,6 +8396,16 @@ main {
   background: #4ade80;
   display: inline-block;
   filter: none;
+}
+.sat-sidebar .sat-nav-btn {
+  border-color: #d5dde5;
+  background: #f5faf7;
+  box-shadow: none;
+  color: #1f2937;
+}
+.sat-sidebar .sat-nav-btn:hover {
+  background: #edf6f1;
+  border-color: #c7d6ce;
 }
 
 .sat-irrigation-insight-label {

@@ -1,0 +1,301 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+:root {
+  --ops-bg: #fffdf2;
+  --ops-card: #ffffff;
+  --ops-ink: #111827;
+  --ops-muted: #6b7280;
+  --ops-yellow: #f4c430;
+  --ops-yellow-dark: #d9a300;
+  --ops-border: rgba(17, 24, 39, 0.08);
+  --ops-shadow: 0 12px 30px rgba(17, 24, 39, 0.08);
+}
+
+.admin-ops {
+  min-height: 100vh;
+  background: radial-gradient(circle at top right, #fff3c4 0%, #fffdf2 45%, #ffffff 100%);
+  color: var(--ops-ink);
+  font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+}
+
+@keyframes opsFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes opsFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.admin-ops-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.85rem;
+  padding: 2.2rem 2rem 1.4rem 2rem;
+}
+
+.admin-ops-hero-image {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 1px solid rgba(17, 24, 39, 0.1);
+  background: linear-gradient(135deg, #fff8da 0%, #ecf8ef 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  box-shadow: var(--ops-shadow);
+  animation: opsFloat 3.2s ease-in-out infinite;
+}
+
+.admin-ops-title {
+  font-size: 2.6rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem 0;
+  background: linear-gradient(120deg, #1f7a4d, #f4c430, #ff8f5e);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.admin-ops-subtitle {
+  color: var(--ops-muted);
+  margin: 0;
+}
+
+.admin-ops-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-start;
+  align-self: stretch;
+}
+
+.admin-ops-button {
+  border: 1px solid var(--ops-border);
+  background: var(--ops-card);
+  color: var(--ops-ink);
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 6px 16px rgba(17, 24, 39, 0.08);
+}
+
+.admin-ops-button:hover {
+  border-color: rgba(244, 196, 48, 0.6);
+  transform: translateY(-2px);
+}
+
+.admin-ops-accent {
+  background: linear-gradient(135deg, #f4c430 0%, #ffdd6b 100%);
+  border-color: transparent;
+}
+
+.admin-ops-content {
+  padding: 0 2rem 2.5rem 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.admin-ops-content > * {
+  animation: opsFadeInUp 0.45s ease both;
+}
+
+.admin-ops-content > *:nth-child(2) { animation-delay: 0.04s; }
+.admin-ops-content > *:nth-child(3) { animation-delay: 0.08s; }
+.admin-ops-content > *:nth-child(4) { animation-delay: 0.12s; }
+.admin-ops-content > *:nth-child(5) { animation-delay: 0.16s; }
+
+.ops-top-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.ops-top-actions-left,
+.ops-top-actions-right {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.ops-card {
+  background: var(--ops-card);
+  border-radius: 18px;
+  border: 1px solid var(--ops-border);
+  box-shadow: var(--ops-shadow);
+  padding: 1.25rem 1.5rem;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.ops-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 34px rgba(17, 24, 39, 0.12);
+}
+
+.ops-card h3 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
+}
+
+.ops-insight {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  align-items: center;
+}
+
+.ops-insight-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ops-insight-strip {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: rgba(244, 196, 48, 0.2);
+  color: #7a5b00;
+}
+
+.ops-insight-highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.ops-highlight {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: rgba(31, 122, 77, 0.12);
+  color: #1f7a4d;
+}
+
+.ops-insight-visual {
+  width: 100%;
+  min-height: 160px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(244, 196, 48, 0.2), rgba(31, 122, 77, 0.15));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ops-grid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.ops-grid-3 {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.ops-grid-2 {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.ops-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ops-table th {
+  text-align: left;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ops-muted);
+  border-bottom: 1px solid var(--ops-border);
+  padding: 0.75rem 0.5rem;
+}
+
+.ops-table td {
+  padding: 0.85rem 0.5rem;
+  border-bottom: 1px solid rgba(17, 24, 39, 0.06);
+  font-size: 0.9rem;
+}
+
+.ops-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(244, 196, 48, 0.15);
+  color: #7a5b00;
+}
+
+.ops-muted {
+  color: var(--ops-muted);
+}
+
+.ops-empty {
+  text-align: center;
+  color: var(--ops-muted);
+  padding: 2rem 1rem;
+}
+
+.admin-ops-link-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-ops-link-card::after {
+  content: '';
+  position: absolute;
+  inset: auto -20% -45% -20%;
+  height: 120px;
+  background: radial-gradient(circle, rgba(244, 196, 48, 0.22) 0%, rgba(244, 196, 48, 0) 70%);
+  pointer-events: none;
+}
+
+.ops-heatmap {
+  display: grid;
+  grid-template-columns: repeat(24, minmax(12px, 1fr));
+  gap: 4px;
+  margin-top: 0.75rem;
+}
+
+.ops-heatmap-cell {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 4px;
+  background: #f3f4f6;
+  border: 1px solid rgba(17, 24, 39, 0.05);
+}
+
+@media (max-width: 768px) {
+  .admin-ops-header,
+  .admin-ops-content {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .admin-ops-title {
+    font-size: 2.1rem;
+  }
+}

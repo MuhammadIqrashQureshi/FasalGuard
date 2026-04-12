@@ -18,6 +18,152 @@ console.log('getRealTimeWeather function:', typeof weatherController.getRealTime
 router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 
+const clampText = (value = '', maxLen = 220) => {
+  const str = String(value || '').replace(/\s+/g, ' ').trim();
+  if (!str) return '';
+  return str.length > maxLen ? `${str.slice(0, maxLen - 1)}…` : str;
+};
+
+const safeNumber = (value) => {
+  const num = Number(value);
+  return Number.isFinite(num) ? num : null;
+};
+
+const estimateSpeechSeconds = (sections) => {
+  const words = sections.reduce((acc, section) => {
+    const text = section?.text || '';
+    return acc + text.split(/\s+/).filter(Boolean).length;
+  }, 0);
+  return Math.max(10, Math.round(words / 2.2));
+};
+
+const buildWeatherRiskSummary = (forecast = []) => {
+  const windowDays = forecast.slice(0, 7);
+  if (!windowDays.length) return 'Weather data is limited for the next week.';
+  const hotDays = windowDays.filter((d) => Number(d.T2M_MAX || d.T2M || 0) >= 35).length;
+  const rainTotal = windowDays.reduce((sum, d) => sum + Number(d.PRECTOTCORR || 0), 0);
+  const windyDays = windowDays.filter((d) => Number(d.WS2M || 0) >= 6).length;
+  const signals = [];
+  if (hotDays > 0) signals.push(`${hotDays} hot day${hotDays === 1 ? '' : 's'} (>=35C)`);
+  if (rainTotal >= 8) signals.push(`rain total ${Math.round(rainTotal)} mm`);
+  if (windyDays > 0) signals.push(`${windyDays} windy day${windyDays === 1 ? '' : 's'}`);
+  return signals.length ? `Next 3-7 days show ${signals.join(', ')}.` : 'No major weather risk signals in the next 3-7 days.';
+};
+
+const buildSatelliteVoiceSummary = ({ analysisResult, lang = 'en', mode = 'default' }) => {
+  const city = analysisResult?.city || analysisResult?.location?.city || 'the selected field';
+  const crop = analysisResult?.crop || analysisResult?.field_report?.crop || 'crop';
+  const riskLevel = analysisResult?.field_report?.risk_level || analysisResult?.risk_level || 'Unknown';
+  const health = analysisResult?.field_report?.health_label || analysisResult?.farmer_summary?.status_label || 'Unavailable';
+  const confidence = safeNumber(analysisResult?.metrics?.confidence || analysisResult?.field_report?.confidence);
+  const forecast = analysisResult?.weather_context?.forecast || analysisResult?.weather_context?.daily || [];
+  const irrigation = analysisResult?.farmer_summary?.irrigation || {};
+  const recommendations = Array.isArray(analysisResult?.recommendations) ? analysisResult.recommendations : [];
+  const actionList = recommendations.map((rec) => rec.summary || rec.action || rec.recommendation || rec.title).filter(Boolean);
+  const topActions = actionList.slice(0, mode === 'full' ? 5 : 3);
+  const warnings = [];
+  if (String(riskLevel).toLowerCase().includes('high')) warnings.push('High risk alert active');
+  if (analysisResult?.diagnosis?.days_to_critical != null) warnings.push(`Critical window in ${analysisResult.diagnosis.days_to_critical} day(s)`);
+  if (analysisResult?.weather_context?.summary?.rain_next_48h != null) {
+    const rain48 = Number(analysisResult.weather_context.summary.rain_next_48h || 0);
+    if (rain48 < 4) warnings.push('Low rain expected in 48 hours');
+  }
+
+  const sections = [
+    {
+      id: 'snapshot',
+      title: 'Snapshot',
+      text: clampText(`Field snapshot for ${city}. Crop ${crop}. Risk level ${riskLevel}. Field health ${health}.`, 180),
+    },
+    {
+      id: 'top-crop',
+      title: 'Top crop and confidence',
+      text: clampText(confidence != null
+        ? `Primary crop signal is ${crop} with model confidence ${Math.round(confidence * 100)} percent.`
+        : `Primary crop signal is ${crop}. Model confidence is not reported.`, 180),
+    },
+    {
+      id: 'weather-risk',
+      title: 'Weather risks (3 to 7 days)',
+      text: clampText(buildWeatherRiskSummary(forecast), 200),
+    },
+    {
+      id: 'irrigation',
+      title: 'Irrigation action (24 to 72 hours)',
+      text: clampText(irrigation?.irrigate_now
+        ? `Irrigate now. Apply ${irrigation.mm_low || ''}${irrigation.mm_low && irrigation.mm_high ? '-' : ''}${irrigation.mm_high || ''} mm within ${irrigation.timing_window || 'the next 24 to 72 hours'}.`
+        : 'No immediate irrigation flagged for the next 24 to 72 hours.', 200),
+    },
+    {
+      id: 'recommendations',
+      title: 'Actionable recommendations',
+      text: clampText(topActions.length
+        ? `Top actions: ${topActions.join('; ')}.`
+        : 'No specific recommendations available right now.', 240),
+    },
+    {
+      id: 'warnings',
+      title: 'Warning alerts',
+      text: clampText(warnings.length ? warnings.join('. ') : 'No critical alerts at this time.', 160),
+    },
+  ];
+
+  return { lang, mode, sections };
+};
+
+const buildPredictionVoiceSummary = ({ predictionData, inputData, lang = 'en', mode = 'default' }) => {
+  const city = predictionData?.location?.city || inputData?.city || 'the selected location';
+  const forecast = Array.isArray(predictionData?.forecast) ? predictionData.forecast : [];
+  const recs = Array.isArray(predictionData?.recommendations) ? predictionData.recommendations : [];
+  const topRec = recs[0] || {};
+  const cropName = topRec.crop || 'top crop';
+  const confidence = safeNumber(topRec?.metrics?.ml_confidence || topRec?.confidence || topRec?.metrics?.confidence);
+  const actionList = Array.isArray(topRec?.recommendation) ? topRec.recommendation : [];
+  const topActions = actionList.slice(0, mode === 'full' ? 5 : 3);
+  const warningSignals = [];
+  if (forecast.some((d) => Number(d.T2M_MAX || d.T2M || 0) >= 38)) warningSignals.push('Heat stress risk days ahead');
+  if (forecast.reduce((sum, d) => sum + Number(d.PRECTOTCORR || 0), 0) >= 12) warningSignals.push('Heavy rainfall window');
+
+  const sections = [
+    {
+      id: 'snapshot',
+      title: 'Snapshot',
+      text: clampText(`Forecast snapshot for ${city}. ${inputData?.days || 7} day analysis window.`, 180),
+    },
+    {
+      id: 'top-crop',
+      title: 'Top crop and confidence',
+      text: clampText(confidence != null
+        ? `Top crop recommendation is ${cropName} with confidence ${Math.round(confidence * 100)} percent.`
+        : `Top crop recommendation is ${cropName}. Confidence is not reported.`, 180),
+    },
+    {
+      id: 'weather-risk',
+      title: 'Weather risks (3 to 7 days)',
+      text: clampText(buildWeatherRiskSummary(forecast), 200),
+    },
+    {
+      id: 'irrigation',
+      title: 'Irrigation action (24 to 72 hours)',
+      text: 'Plan irrigation based on the next 2 to 3 days of rainfall and temperature. Avoid irrigation right before heavy rain.',
+    },
+    {
+      id: 'recommendations',
+      title: 'Actionable recommendations',
+      text: clampText(topActions.length
+        ? `Top actions: ${topActions.join('; ')}.`
+        : 'No specific recommendations available right now.', 220),
+    },
+    {
+      id: 'warnings',
+      title: 'Warning alerts',
+      text: clampText(warningSignals.length ? warningSignals.join('. ') : 'No critical alerts at this time.', 160),
+    },
+  ];
+
+  return { lang, mode, sections };
+};
+
 // CORS middleware (if not already in main app)
 router.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
@@ -411,6 +557,44 @@ router.post('/visualizations', async (req, res) => {
       error: error.message,
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
+  }
+});
+
+// Voice summary endpoint
+router.post('/voice-summary', async (req, res) => {
+  try {
+    const { type, analysis, input, options } = req.body || {};
+    const lang = options?.lang || req.headers['x-language'] || 'en';
+    const mode = options?.mode === 'full' ? 'full' : 'default';
+
+    if (type === 'satellite') {
+      if (!analysis) {
+        return res.status(400).json({ success: false, error: 'analysis payload is required' });
+      }
+      const script = buildSatelliteVoiceSummary({ analysisResult: analysis, lang, mode });
+      return res.json({
+        success: true,
+        script,
+        estimated_seconds: estimateSpeechSeconds(script.sections),
+      });
+    }
+
+    if (type === 'prediction') {
+      if (!analysis) {
+        return res.status(400).json({ success: false, error: 'analysis payload is required' });
+      }
+      const script = buildPredictionVoiceSummary({ predictionData: analysis, inputData: input, lang, mode });
+      return res.json({
+        success: true,
+        script,
+        estimated_seconds: estimateSpeechSeconds(script.sections),
+      });
+    }
+
+    return res.status(400).json({ success: false, error: 'type must be satellite or prediction' });
+  } catch (error) {
+    console.error('Voice summary error:', error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 

@@ -5,11 +5,14 @@ const weatherController = require('../controllers/weatherController');
 const cropRecommendationController = require('../controllers/cropRecommendationController');
 const mlPredictionController = require('../controllers/mlPredictionController');
 const unifiedPredictionRoutes = require('./unifiedPredictionRoutes');
+const Prediction = require('../models/Prediction');
+const { optionalProtect } = require('../middleware/auth');
+const crypto = require('crypto');
 
 // Define crops array
 const crops = ['cotton', 'wheat', 'maize', 'rice', 'sugarcane'];
 router.use('/unified', unifiedPredictionRoutes);
-router.post('/ai-prediction', async (req, res) => {
+router.post('/ai-prediction', optionalProtect, async (req, res) => {
   try {
     const { city, days = 7 } = req.body;
     
@@ -24,6 +27,51 @@ router.post('/ai-prediction', async (req, res) => {
     const predictionService = require('../services/predictionService');
     const result = await predictionService.getUnifiedPredictions(city, days);
     
+    const shouldSave = req.body?.save !== false;
+    if (req.user?._id && shouldSave) {
+      const sessionId = crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(16).toString('hex');
+      const topRec = Array.isArray(result?.recommendations) ? result.recommendations[0] : null;
+      const cropKey = topRec?.cropKey || topRec?.crop || 'wheat';
+      const predictedYield = topRec?.metrics?.ml_predicted_yield ?? topRec?.predicted_yield ?? null;
+      const confidence = topRec?.metrics?.ml_confidence ?? topRec?.confidence ?? null;
+      const recommendationText = Array.isArray(topRec?.recommendation) ? topRec.recommendation[0] : topRec?.recommendation?.primary_advice;
+      const weatherSummary = result?.weather_summary || {};
+
+      await Prediction.create({
+        user_id: req.user._id,
+        session_id: sessionId,
+        location: {
+          city: city || result?.location?.city || null,
+          latitude: result?.location?.coordinates?.lat,
+          longitude: result?.location?.coordinates?.lon,
+        },
+        crop: String(cropKey || '').toLowerCase(),
+        prediction: {
+          predicted_yield: predictedYield,
+          confidence,
+          model_used: topRec?.mlModelUsed || topRec?.predictionSource || null,
+          recommendation: {
+            primary_advice: recommendationText || null,
+            status: topRec?.suitability || null,
+          },
+          weather_summary: {
+            avg_temperature: weatherSummary?.avgTemp ?? weatherSummary?.avg_temperature ?? null,
+            total_rainfall: weatherSummary?.totalRainfall ?? weatherSummary?.total_rainfall ?? null,
+            max_temperature: weatherSummary?.maxTemp ?? weatherSummary?.max_temperature ?? null,
+            days_analyzed: result?.analysis?.weather_days ?? null,
+          }
+        },
+        weather_data: {
+          forecast_days: result?.analysis?.weather_days ?? days,
+          avg_temp: weatherSummary?.avgTemp ?? null,
+          total_rainfall: weatherSummary?.totalRainfall ?? null,
+          max_temp: weatherSummary?.maxTemp ?? null,
+          min_temp: weatherSummary?.minTemp ?? null,
+          humidity: weatherSummary?.avgHumidity ?? weatherSummary?.humidity ?? null,
+        }
+      });
+    }
+
     res.json({
       ...result,
       recommendation_engine: 'AI-Powered Crop Prediction',

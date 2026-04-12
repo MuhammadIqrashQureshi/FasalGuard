@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sprout, MapPin, Navigation, Calendar, Leaf, ArrowLeft, CloudRain, Droplets, Thermometer, Sun, CloudLightning, Eye, Wind, BarChart3 } from 'lucide-react';
@@ -7,6 +7,7 @@ import { useLanguage } from './context/LanguageContext';
 export default function CropPredictionPage() {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const [pageLoading, setPageLoading] = useState(false);
   const [predictionData, setPredictionData] = useState({
     city: '',
     latitude: '',
@@ -17,6 +18,20 @@ export default function CropPredictionPage() {
   const [showCitySelector, setShowCitySelector] = useState(true);
   const [weatherData, setWeatherData] = useState(null);
   const [loadingWeather, setLoadingWeather] = useState(false);
+
+  useEffect(() => {
+    let shouldShow = false;
+    try {
+      shouldShow = sessionStorage.getItem('cp_page_load') === '1';
+      sessionStorage.removeItem('cp_page_load');
+    } catch {
+      shouldShow = false;
+    }
+    if (!shouldShow) return;
+    setPageLoading(true);
+    const timer = setTimeout(() => setPageLoading(false), 700);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Fixed image URLs using reliable CDN sources for Pakistani cities
   const supportedCities = [
@@ -73,10 +88,12 @@ export default function CropPredictionPage() {
 
       console.log('🌱 Sending AI prediction request:', requestData);
 
+      const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:5000/api/predict/ai-prediction', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
         },
         body: JSON.stringify(requestData)
       });
@@ -119,23 +136,23 @@ export default function CropPredictionPage() {
   const styles = {
     page: {
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 30%, #334155 70%, #475569 100%)',
+      background: 'linear-gradient(135deg, #f7fbf8 0%, #eef6f0 50%, #f7fbf8 100%)',
       fontFamily: '"SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
-      color: '#f1f5f9',
+      color: '#0f172a',
       padding: 0,
       margin: 0,
       position: 'relative',
       overflowX: 'hidden',
     },
     header: {
-      background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.98) 100%)',
-      backdropFilter: 'blur(20px) saturate(180%)',
+      background: 'rgba(255, 255, 255, 0.92)',
+      backdropFilter: 'blur(16px) saturate(160%)',
       borderBottom: '1px solid rgba(34, 197, 94, 0.2)',
       padding: '1.25rem 2rem',
       position: 'sticky',
       top: 0,
       zIndex: 100,
-      boxShadow: '0 4px 24px rgba(0, 0, 0, 0.1), 0 1px 0 rgba(34, 197, 94, 0.1) inset',
+      boxShadow: '0 8px 24px rgba(15, 23, 42, 0.08)',
     },
     nav: {
       display: 'flex',
@@ -180,6 +197,17 @@ export default function CropPredictionPage() {
       margin: '0 auto',
       padding: '2rem 1rem',
     },
+    loadingOverlay: {
+      position: 'fixed',
+      inset: 0,
+      background: 'rgba(247, 251, 248, 0.92)',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1200,
+      backdropFilter: 'blur(4px)'
+    },
     welcomeSection: {
       textAlign: 'center',
       marginBottom: '3rem',
@@ -188,7 +216,7 @@ export default function CropPredictionPage() {
     pageTitle: {
       fontSize: '3rem',
       fontWeight: '300',
-      color: '#f1f5f9',
+      color: '#0f172a',
       marginBottom: '0.5rem',
       background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
       WebkitBackgroundClip: 'text',
@@ -197,7 +225,7 @@ export default function CropPredictionPage() {
     },
     pageSubtitle: {
       fontSize: '1.2rem',
-      color: '#94a3b8',
+      color: '#64748b',
       maxWidth: '600px',
       margin: '0 auto',
       lineHeight: '1.6',
@@ -207,7 +235,7 @@ export default function CropPredictionPage() {
       alignItems: 'center',
       justifyContent: 'center',
       gap: '0.75rem',
-      background: 'rgba(255,255,255,0.05)',
+      background: '#ffffff',
       backdropFilter: 'blur(10px)',
       padding: '1rem 1.5rem',
       borderRadius: '20px',
@@ -218,13 +246,13 @@ export default function CropPredictionPage() {
       marginRight: 'auto',
     },
     weatherMainCard: {
-      background: 'rgba(15, 23, 42, 0.85)',
+      background: '#ffffff',
       backdropFilter: 'blur(30px)',
       borderRadius: '28px',
       padding: '2.5rem',
       marginBottom: '2.5rem',
       border: '1px solid rgba(34, 197, 94, 0.2)',
-      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+      boxShadow: '0 18px 36px rgba(15, 23, 42, 0.08)',
       display: 'grid',
       gridTemplateColumns: '1fr 300px',
       gap: '2.5rem',
@@ -247,19 +275,19 @@ export default function CropPredictionPage() {
     tempDisplay: {
       fontSize: '7rem',
       fontWeight: '200',
-      color: '#f1f5f9',
+      color: '#0f172a',
       lineHeight: 1,
       letterSpacing: '-0.05em',
     },
     weatherTitle: {
       fontSize: '2.5rem',
       fontWeight: '300',
-      color: '#e2e8f0',
+      color: '#0f172a',
       marginBottom: '0.75rem',
     },
     weatherDesc: {
       fontSize: '1rem',
-      color: '#94a3b8',
+      color: '#64748b',
       lineHeight: '1.6',
       maxWidth: '500px',
     },
@@ -268,7 +296,7 @@ export default function CropPredictionPage() {
       justifyContent: 'space-between',
       alignItems: 'flex-end',
       height: '140px',
-      borderBottom: '1px solid rgba(148, 163, 184, 0.1)',
+      borderBottom: '1px solid rgba(15, 23, 42, 0.08)',
       paddingBottom: '1.5rem',
       marginTop: '1.5rem',
     },
@@ -284,7 +312,7 @@ export default function CropPredictionPage() {
     },
     hourlyTime: {
       fontSize: '0.85rem',
-      color: '#94a3b8',
+      color: '#64748b',
       marginBottom: '0.5rem',
       fontWeight: '500',
     },
@@ -296,7 +324,7 @@ export default function CropPredictionPage() {
     hourlyTemp: {
       fontSize: '1.25rem',
       fontWeight: '600',
-      color: '#f1f5f9',
+      color: '#0f172a',
     },
     sidePanel: {
       display: 'flex',
@@ -309,7 +337,7 @@ export default function CropPredictionPage() {
       alignItems: 'center',
       textAlign: 'center',
       padding: '1.5rem 1rem',
-      background: 'rgba(255,255,255,0.03)',
+      background: '#f8fafc',
       borderRadius: '16px',
       border: '1px solid rgba(34, 197, 94, 0.1)',
       transition: 'all 0.3s ease',
@@ -327,7 +355,7 @@ export default function CropPredictionPage() {
     },
     statLabel: {
       fontSize: '0.85rem',
-      color: '#94a3b8',
+      color: '#64748b',
       textTransform: 'uppercase',
       letterSpacing: '0.5px',
       marginBottom: '0.5rem',
@@ -358,7 +386,7 @@ export default function CropPredictionPage() {
       gap: '0.75rem',
       fontSize: '1.5rem',
       fontWeight: '600',
-      color: '#f1f5f9',
+      color: '#0f172a',
       marginBottom: '2rem',
     },
     citiesRow: {
@@ -376,8 +404,8 @@ export default function CropPredictionPage() {
       cursor: 'pointer',
       transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
       border: '1px solid rgba(34, 197, 94, 0.2)',
-      background: 'rgba(255,255,255,0.05)',
-      boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+      background: '#ffffff',
+      boxShadow: '0 12px 28px rgba(15, 23, 42, 0.08)',
     },
     cityCardHover: {
       transform: 'translateY(-8px) scale(1.02)',
@@ -418,17 +446,17 @@ export default function CropPredictionPage() {
       boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
     },
     predictionCard: {
-      background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%)',
+      background: '#ffffff',
       backdropFilter: 'blur(30px) saturate(150%)',
       borderRadius: '28px',
       padding: '3rem',
       border: '1px solid rgba(34, 197, 94, 0.25)',
-      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(34, 197, 94, 0.1) inset',
+      boxShadow: '0 18px 36px rgba(15, 23, 42, 0.08)',
     },
     sectionHeader: {
       fontSize: '1.5rem',
       fontWeight: '600',
-      color: '#f1f5f9',
+      color: '#0f172a',
       marginBottom: '2rem',
       display: 'flex',
       alignItems: 'center',
@@ -443,7 +471,7 @@ export default function CropPredictionPage() {
       display: 'flex',
       alignItems: 'center',
       gap: '0.75rem',
-      color: '#e2e8f0',
+      color: '#475569',
       marginBottom: '1rem',
       fontSize: '1rem',
       fontWeight: '500',
@@ -452,14 +480,14 @@ export default function CropPredictionPage() {
       width: '100%',
       padding: '1.25rem 1.5rem',
       borderRadius: '16px',
-      border: '1px solid rgba(34, 197, 94, 0.25)',
-      background: 'rgba(255,255,255,0.08)',
-      color: '#f1f5f9',
+      border: '1px solid rgba(148, 163, 184, 0.35)',
+      background: '#ffffff',
+      color: '#0f172a',
       fontSize: '1rem',
       outline: 'none',
       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       backdropFilter: 'blur(10px)',
-      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1) inset',
+      boxShadow: '0 2px 8px rgba(15, 23, 42, 0.08) inset',
     },
     grid2col: {
       display: 'grid',
@@ -473,9 +501,9 @@ export default function CropPredictionPage() {
     durationButton: {
       flex: 1,
       padding: '1.25rem',
-      border: '1px solid rgba(34, 197, 94, 0.3)',
-      background: 'rgba(255,255,255,0.06)',
-      color: '#e2e8f0',
+      border: '1px solid rgba(148, 163, 184, 0.35)',
+      background: '#ffffff',
+      color: '#334155',
       borderRadius: '16px',
       cursor: 'pointer',
       fontSize: '1rem',
@@ -509,7 +537,7 @@ export default function CropPredictionPage() {
       marginTop: '1rem',
     },
     infoBox: {
-      background: 'rgba(34, 197, 94, 0.1)',
+      background: '#eef6f0',
       borderRadius: '16px',
       padding: '1.75rem',
       border: '1px solid rgba(34, 197, 94, 0.2)',
@@ -518,7 +546,7 @@ export default function CropPredictionPage() {
     },
     infoText: {
       margin: 0,
-      color: '#f1f5f9',
+      color: '#475569',
       fontSize: '1rem',
       lineHeight: '1.6',
     },
@@ -537,9 +565,159 @@ export default function CropPredictionPage() {
   return (
     <div style={styles.page}>
       <style>{`
+        @keyframes cpCloudFloat {
+          0% { transform: translateX(-30px); opacity: 0.6; }
+          50% { transform: translateX(30px); opacity: 1; }
+          100% { transform: translateX(-30px); opacity: 0.6; }
+        }
+        .cp-cloud-loader {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          color: #22c55e;
+          font-weight: 700;
+        }
+        .cp-cloud {
+          width: 58px;
+          height: 32px;
+          background: #e2f2e9;
+          border-radius: 20px;
+          position: relative;
+          box-shadow: 0 10px 20px rgba(34, 197, 94, 0.2);
+          animation: cpCloudFloat 2.8s ease-in-out infinite;
+        }
+        .cp-cloud::before,
+        .cp-cloud::after {
+          content: '';
+          position: absolute;
+          background: #eef8f2;
+          width: 28px;
+          height: 28px;
+          border-radius: 50%;
+          top: -12px;
+        }
+        .cp-cloud::before { left: 6px; }
+        .cp-cloud::after { right: 6px; }
+      `}</style>
+
+      {isLoading && (
+        <div style={styles.loadingOverlay}>
+          <div className="cp-cloud-loader">
+            <div className="cp-cloud" />
+            <div>{t('fetchingPrediction', 'Fetching AI prediction...')}</div>
+          </div>
+        </div>
+      )}
+      {pageLoading && (
+        <div className="cp-loading-overlay" aria-live="polite" aria-busy="true">
+          <div className="cp-loading-sky">
+            <div className="cp-loading-sun" />
+            <div className="cp-loading-cloud" />
+            <div className="cp-loading-rain">
+              {Array.from({ length: 8 }).map((_, idx) => (
+                <span key={`cp-drop-${idx}`} className="cp-loading-drop" />
+              ))}
+            </div>
+          </div>
+          <div className="cp-loading-label">Preparing crop forecast...</div>
+        </div>
+      )}
+      <style>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+        @keyframes cpCloudFloat {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-6px); }
+        }
+        @keyframes cpRainFall {
+          0% { transform: translateY(-8px); opacity: 0.2; }
+          50% { opacity: 0.8; }
+          100% { transform: translateY(10px); opacity: 0.2; }
+        }
+        .cp-loading-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(247, 251, 248, 0.92);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 1rem;
+          z-index: 2000;
+          backdrop-filter: blur(4px);
+        }
+        .cp-loading-sky {
+          position: relative;
+          width: 220px;
+          height: 140px;
+        }
+        .cp-loading-sun {
+          position: absolute;
+          width: 34px;
+          height: 34px;
+          border-radius: 50%;
+          border: 2px solid #f59e0b;
+          top: 12px;
+          right: 36px;
+          box-shadow: 0 0 10px rgba(245, 158, 11, 0.35);
+        }
+        .cp-loading-cloud {
+          position: absolute;
+          width: 120px;
+          height: 38px;
+          border-radius: 999px;
+          border: 2px solid #f59e0b;
+          top: 40px;
+          left: 30px;
+          background: rgba(255, 255, 255, 0.6);
+          animation: cpCloudFloat 3.6s ease-in-out infinite;
+        }
+        .cp-loading-cloud::before,
+        .cp-loading-cloud::after {
+          content: "";
+          position: absolute;
+          border: 2px solid #f59e0b;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.6);
+        }
+        .cp-loading-cloud::before {
+          width: 44px;
+          height: 44px;
+          top: -24px;
+          left: 18px;
+        }
+        .cp-loading-cloud::after {
+          width: 54px;
+          height: 54px;
+          top: -30px;
+          left: 52px;
+        }
+        .cp-loading-rain {
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: 12px;
+          height: 50px;
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
+          gap: 8px;
+          padding: 0 40px;
+        }
+        .cp-loading-drop {
+          width: 4px;
+          height: 16px;
+          background: #cbd5e1;
+          border-radius: 999px;
+          animation: cpRainFall 1.1s ease-in-out infinite;
+        }
+        .cp-loading-drop:nth-child(2n) { animation-delay: -0.3s; }
+        .cp-loading-drop:nth-child(3n) { animation-delay: -0.6s; }
+        .cp-loading-label {
+          color: #1b4332;
+          font-weight: 700;
+          font-size: 0.95rem;
         }
         @keyframes float {
           0%, 100% { transform: translateY(0px); }
@@ -551,13 +729,13 @@ export default function CropPredictionPage() {
           height: 12px;
         }
         ::-webkit-scrollbar-track {
-          background: rgba(15, 23, 42, 0.5);
+          background: rgba(15, 23, 42, 0.08);
           border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb {
           background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
           border-radius: 10px;
-          border: 2px solid rgba(15, 23, 42, 0.5);
+          border: 2px solid rgba(15, 23, 42, 0.08);
         }
         ::-webkit-scrollbar-thumb:hover {
           background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
@@ -565,7 +743,7 @@ export default function CropPredictionPage() {
         /* Firefox scrollbar */
         * {
           scrollbar-width: thin;
-          scrollbar-color: #22c55e rgba(15, 23, 42, 0.5);
+          scrollbar-color: #22c55e rgba(15, 23, 42, 0.08);
         }
         .input-focus:focus {
           border-color: #22c55e !important;

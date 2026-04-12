@@ -3,6 +3,10 @@ const express = require('express');
 const router = express.Router();
 const Prediction = require('../models/Prediction');
 const User = require('../models/User');
+const SatelliteOutcome = require('../models/SatelliteOutcome');
+const Feedback = require('../models/Feedback');
+const SoilOutcome = require('../models/SoilOutcome');
+const mongoose = require('mongoose');
 const mlPredictionController = require('../controllers/mlPredictionController');
 const weatherController = require('../controllers/weatherController');
 const { sendBroadcastEmail } = require('../middleware/emailService');
@@ -343,17 +347,21 @@ router.get('/user-stats', checkAdmin, async (req, res) => {
 // Get all users list
 router.get('/users', checkAdmin, async (req, res) => {
   try {
-    const { page = 1, limit = 50 } = req.query;
+    const { page = 1, limit = 50, all = 'false' } = req.query;
     
     const skip = (page - 1) * limit;
+    const returnAll = String(all).toLowerCase() === 'true';
     
     // Get users with their prediction count
-    const users = await User.find()
+    let userQuery = User.find()
       .select('name email createdAt isVerified lastLogin role accountStatus')
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(parseInt(limit))
-      .lean();
+      .sort({ createdAt: -1 });
+
+    if (!returnAll) {
+      userQuery = userQuery.skip(skip).limit(parseInt(limit));
+    }
+
+    const users = await userQuery.lean();
     
     // Get prediction count and last activity for each user
     const usersWithActivity = await Promise.all(
@@ -395,13 +403,161 @@ router.get('/users', checkAdmin, async (req, res) => {
       success: true,
       users: usersWithActivity,
       pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
+        page: returnAll ? 1 : parseInt(page),
+        limit: returnAll ? total : parseInt(limit),
         total,
-        pages: Math.ceil(total / limit)
+        pages: returnAll ? 1 : Math.ceil(total / limit)
       }
     });
   } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get per-user satellite tracking summary (latest outcome per user)
+router.get('/users/satellite-summary', checkAdmin, async (req, res) => {
+  try {
+    const directLatestByUser = await SatelliteOutcome.aggregate([
+      {
+        $match: {
+          user_id: { $exists: true, $ne: null },
+        },
+      },
+      {
+        $sort: { createdAt: -1 },
+      },
+      {
+        $group: {
+          _id: '$user_id',
+          latest: { $first: '$$ROOT' },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          session_id: '$latest.session_id',
+          crop: '$latest.crop',
+          city: '$latest.city',
+          analysis_date: '$latest.analysis_date',
+          action_status: '$latest.action_status',
+          createdAt: '$latest.createdAt',
+          risk_level: '$latest.metrics.risk_level',
+          days_to_critical: '$latest.metrics.days_to_critical',
+          stress_probability: '$latest.metrics.stress_probability',
+          recommendations: '$latest.raw_result.recommendations',
+          urgency: '$latest.raw_result.diagnosis.urgency',
+        },
+      },
+    ]);
+
+    // Fallback for historical outcome rows saved without user_id.
+    const orphanLatestBySession = await SatelliteOutcome.aggregate([
+      {
+        $match: {
+          $or: [{ user_id: null }, { user_id: { $exists: false } }],
+          session_id: { $exists: true, $ne: null },
+        },
+      },
+      {
+        $sort: { createdAt: -1 },
+      },
+      {
+        $group: {
+          _id: '$session_id',
+          latest: { $first: '$$ROOT' },
+        },
+      },
+      {
+        $project: {
+          session_id: '$_id',
+          crop: '$latest.crop',
+          city: '$latest.city',
+          analysis_date: '$latest.analysis_date',
+          action_status: '$latest.action_status',
+          createdAt: '$latest.createdAt',
+          risk_level: '$latest.metrics.risk_level',
+          days_to_critical: '$latest.metrics.days_to_critical',
+          stress_probability: '$latest.metrics.stress_probability',
+          recommendations: '$latest.raw_result.recommendations',
+          urgency: '$latest.raw_result.diagnosis.urgency',
+        },
+      },
+    ]);
+
+    const orphanSessionIds = orphanLatestBySession
+      .map((entry) => String(entry.session_id || '').trim())
+      .filter(Boolean);
+
+    const sessionToUserMap = {};
+    if (orphanSessionIds.length > 0) {
+      const predictionSessionOwners = await Prediction.aggregate([
+        {
+          $match: {
+            session_id: { $in: orphanSessionIds },
+            user_id: { $exists: true, $ne: null },
+          },
+        },
+        {
+          $sort: { timestamp: -1 },
+        },
+        {
+          $group: {
+            _id: '$session_id',
+            user_id: { $first: '$user_id' },
+          },
+        },
+      ]);
+
+      predictionSessionOwners.forEach((row) => {
+        if (row?._id && row?.user_id) {
+          sessionToUserMap[String(row._id)] = String(row.user_id);
+        }
+      });
+    }
+
+    const mergedEntries = [...directLatestByUser];
+    orphanLatestBySession.forEach((entry) => {
+      const mappedUserId = sessionToUserMap[String(entry.session_id || '')];
+      if (!mappedUserId) return;
+      mergedEntries.push({
+        ...entry,
+        _id: mappedUserId,
+      });
+    });
+
+    const summaryByUser = {};
+    mergedEntries.forEach((entry) => {
+      const recs = Array.isArray(entry.recommendations) ? entry.recommendations : [];
+      const topActions = recs
+        .slice(0, 3)
+        .map((r) => r?.action || r?.summary || r?.type)
+        .filter(Boolean)
+        .map((text) => String(text).replace(/\s+/g, ' ').trim());
+
+      const userKey = String(entry._id);
+      const existing = summaryByUser[userKey];
+      const existingTs = existing?.updated_at ? new Date(existing.updated_at).getTime() : 0;
+      const nextTs = entry?.createdAt ? new Date(entry.createdAt).getTime() : 0;
+      if (existing && nextTs <= existingTs) {
+        return;
+      }
+
+      summaryByUser[userKey] = {
+        city: entry.city || 'Unknown',
+        crop: entry.crop || 'unknown',
+        risk_level: entry.risk_level || 'Unknown',
+        action_status: entry.action_status || 'pending',
+        days_to_critical: Number.isFinite(Number(entry.days_to_critical)) ? Number(entry.days_to_critical) : null,
+        stress_probability: Number.isFinite(Number(entry.stress_probability)) ? Number(entry.stress_probability) : null,
+        urgency: entry.urgency || '',
+        top_actions: topActions,
+        updated_at: entry.createdAt,
+      };
+    });
+
+    res.json({ success: true, summaries: summaryByUser, total: Object.keys(summaryByUser).length });
+  } catch (error) {
+    console.error('Satellite summary error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -574,18 +730,21 @@ async function getModelPerformance() {
     predictions: p.predictions,
     avg_confidence: (p.avg_confidence * 100)?.toFixed(2) || 0,
     avg_yield: p.avg_yield?.toFixed(2) || 0,
-    accuracy: 85 // This should be calculated based on actual vs predicted
+    accuracy: null
   }));
 }
 
 function calculateModelAccuracy(performance) {
   if (!performance || performance.length === 0) return 0;
-  
-  const totalAccuracy = performance.reduce((sum, model) => {
-    return sum + (parseFloat(model.accuracy) || 0);
-  }, 0);
-  
-  return (totalAccuracy / performance.length).toFixed(2);
+
+  const valid = performance
+    .map((model) => Number.parseFloat(model.accuracy))
+    .filter((value) => Number.isFinite(value));
+
+  if (valid.length === 0) return 0;
+
+  const totalAccuracy = valid.reduce((sum, value) => sum + value, 0);
+  return (totalAccuracy / valid.length).toFixed(2);
 }
 
 async function getSystemHealth() {
@@ -623,7 +782,7 @@ async function getSystemHealth() {
     {
       name: 'ML Prediction Service',
       status: mlHealth.healthy ? 'up' : 'down',
-      response_time: 100, // Mock value
+      response_time: null,
       description: 'Machine Learning models for crop prediction'
     },
     {
@@ -641,13 +800,18 @@ async function getSystemHealth() {
     {
       name: 'Authentication Service',
       status: 'up',
-      response_time: 50,
+      response_time: null,
       description: 'User authentication and authorization'
     }
   ];
 
   const overall = services.every(s => s.status === 'up') ? 'Healthy' : 'Degraded';
-  const avgResponseTime = services.reduce((sum, s) => sum + s.response_time, 0) / services.length;
+  const responseTimes = services
+    .map((service) => service.response_time)
+    .filter((value) => Number.isFinite(value));
+  const avgResponseTime = responseTimes.length > 0
+    ? responseTimes.reduce((sum, value) => sum + value, 0) / responseTimes.length
+    : null;
 
   return { overall, services, avgResponseTime };
 }
@@ -1020,6 +1184,475 @@ router.post('/broadcast-email', checkAdmin, async (req, res) => {
     });
   } catch (error) {
     console.error('Broadcast email error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// SLA and response tracker
+router.get('/ops/sla', checkAdmin, async (req, res) => {
+  try {
+    const days = Math.max(1, parseInt(req.query.days || '30', 10));
+    const now = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    const pendingOlderThan10m = await Feedback.countDocuments({
+      status: 'pending',
+      createdAt: { $lte: new Date(now.getTime() - 10 * 60 * 1000) }
+    });
+
+    const feedback = await Feedback.find({
+      createdAt: { $gte: startDate, $lte: now }
+    }).select('createdAt repliedAt status').lean();
+
+    const total = feedback.length;
+    const resolved = feedback.filter((f) => f.status === 'done').length;
+    const replied = feedback.filter((f) => f.repliedAt).length;
+
+    const responseTimes = feedback
+      .filter((f) => f.repliedAt)
+      .map((f) => (new Date(f.repliedAt).getTime() - new Date(f.createdAt).getTime()) / (1000 * 60 * 60));
+
+    const avgFirstResponseHours = responseTimes.length > 0
+      ? responseTimes.reduce((sum, h) => sum + h, 0) / responseTimes.length
+      : null;
+
+    const dailyResponseMap = {};
+    feedback.forEach((f) => {
+      if (!f.repliedAt) return;
+      const dayKey = new Date(f.createdAt).toISOString().slice(0, 10);
+      const hours = (new Date(f.repliedAt).getTime() - new Date(f.createdAt).getTime()) / (1000 * 60 * 60);
+      if (!dailyResponseMap[dayKey]) {
+        dailyResponseMap[dayKey] = { totalHours: 0, count: 0 };
+      }
+      dailyResponseMap[dayKey].totalHours += hours;
+      dailyResponseMap[dayKey].count += 1;
+    });
+
+    const dailyResponse = Object.keys(dailyResponseMap)
+      .sort()
+      .map((date) => ({
+        date,
+        avg_hours: dailyResponseMap[date].count > 0
+          ? Number((dailyResponseMap[date].totalHours / dailyResponseMap[date].count).toFixed(2))
+          : null
+      }));
+
+    res.json({
+      success: true,
+      period: { startDate, endDate: now, days },
+      totals: {
+        total,
+        pending: total - resolved,
+        resolved,
+        replied
+      },
+      pending_older_than_10m: pendingOlderThan10m,
+      avg_first_response_hours: avgFirstResponseHours !== null ? Number(avgFirstResponseHours.toFixed(2)) : null,
+      resolved_rate: total > 0 ? Number(((resolved / total) * 100).toFixed(2)) : null,
+      daily_response: dailyResponse
+    });
+  } catch (error) {
+    console.error('SLA metrics error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// High-risk farmer queue
+router.get('/ops/high-risk', checkAdmin, async (req, res) => {
+  try {
+    const limit = Math.max(1, parseInt(req.query.limit || '50', 10));
+    const latestByUser = await SatelliteOutcome.aggregate([
+      { $match: { user_id: { $exists: true, $ne: null } } },
+      { $sort: { createdAt: -1 } },
+      {
+        $group: {
+          _id: '$user_id',
+          latest: { $first: '$$ROOT' }
+        }
+      },
+      {
+        $project: {
+          user_id: '$_id',
+          city: '$latest.city',
+          crop: '$latest.crop',
+          risk_level: '$latest.metrics.risk_level',
+          days_to_critical: '$latest.metrics.days_to_critical',
+          stress_probability: '$latest.metrics.stress_probability',
+          action_status: '$latest.action_status',
+          updated_at: '$latest.createdAt'
+        }
+      }
+    ]);
+
+    const userIds = latestByUser.map((row) => row.user_id).filter(Boolean);
+    const users = await User.find({ _id: { $in: userIds } })
+      .select('name email lastLogin accountStatus')
+      .lean();
+
+    const userMap = new Map(users.map((u) => [String(u._id), u]));
+    const queue = latestByUser
+      .map((entry) => {
+        const risk = String(entry.risk_level || '').toLowerCase();
+        const daysToCritical = Number.isFinite(Number(entry.days_to_critical)) ? Number(entry.days_to_critical) : null;
+        return {
+          ...entry,
+          user: userMap.get(String(entry.user_id)) || null,
+          risk_level: entry.risk_level || 'Unknown',
+          days_to_critical: daysToCritical
+        };
+      })
+      .filter((entry) => {
+        const risk = String(entry.risk_level || '').toLowerCase();
+        const days = entry.days_to_critical;
+        return risk === 'high' || (days !== null && days <= 3);
+      })
+      .sort((a, b) => {
+        const aDays = a.days_to_critical ?? Number.POSITIVE_INFINITY;
+        const bDays = b.days_to_critical ?? Number.POSITIVE_INFINITY;
+        if (aDays !== bDays) return aDays - bDays;
+        return String(a.risk_level).localeCompare(String(b.risk_level));
+      })
+      .slice(0, limit);
+
+    res.json({ success: true, total: queue.length, queue });
+  } catch (error) {
+    console.error('High risk queue error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Query resolution analytics
+router.get('/ops/action-completion', checkAdmin, async (req, res) => {
+  try {
+    const weeks = Math.max(1, parseInt(req.query.weeks || '12', 10));
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - weeks * 7);
+
+    const byWeekRaw = await Feedback.aggregate([
+      { $match: { createdAt: { $gte: startDate, $lte: endDate } } },
+      {
+        $group: {
+          _id: {
+            year: { $isoWeekYear: '$createdAt' },
+            week: { $isoWeek: '$createdAt' },
+            status: { $ifNull: ['$status', 'pending'] }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { '_id.year': 1, '_id.week': 1 } }
+    ]);
+
+    const byWeekMap = {};
+    byWeekRaw.forEach((row) => {
+      const key = `${row._id.year}-W${String(row._id.week).padStart(2, '0')}`;
+      if (!byWeekMap[key]) {
+        byWeekMap[key] = { week: key, pending: 0, done: 0 };
+      }
+      if (row._id.status === 'done') byWeekMap[key].done = row.count;
+      if (row._id.status === 'pending') byWeekMap[key].pending = row.count;
+    });
+
+    const byDayRaw = await Feedback.aggregate([
+      { $match: { createdAt: { $gte: startDate, $lte: endDate } } },
+      {
+        $group: {
+          _id: {
+            date: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+            status: { $ifNull: ['$status', 'pending'] }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { '_id.date': 1 } }
+    ]);
+
+    const byDayMap = {};
+    byDayRaw.forEach((row) => {
+      const key = row._id.date;
+      if (!byDayMap[key]) {
+        byDayMap[key] = { date: key, pending: 0, done: 0 };
+      }
+      if (row._id.status === 'done') byDayMap[key].done = row.count;
+      if (row._id.status === 'pending') byDayMap[key].pending = row.count;
+    });
+
+    res.json({
+      success: true,
+      period: { startDate, endDate, weeks },
+      by_week: Object.values(byWeekMap),
+      by_day: Object.values(byDayMap)
+    });
+  } catch (error) {
+    console.error('Query resolution analytics error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Alert effectiveness
+router.get('/ops/alert-effectiveness', checkAdmin, async (req, res) => {
+  try {
+    const days = Math.max(1, parseInt(req.query.days || '90', 10));
+    const limit = Math.max(1, parseInt(req.query.limit || '200', 10));
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    const doneActions = await SatelliteOutcome.find({
+      action_status: 'done',
+      action_done_at: { $ne: null, $gte: startDate, $lte: endDate }
+    }).sort({ action_done_at: -1 }).limit(limit).lean();
+
+    const samples = [];
+    for (const action of doneActions) {
+      const previous = await SatelliteOutcome.findOne({
+        session_id: action.session_id,
+        field_signature: action.field_signature,
+        createdAt: { $lt: action.action_done_at }
+      }).sort({ createdAt: -1 }).lean();
+
+      const before = previous?.metrics?.stress_probability;
+      const after = action?.metrics?.stress_probability;
+      if (!Number.isFinite(Number(before)) || !Number.isFinite(Number(after))) {
+        continue;
+      }
+
+      const change = Number((Number(after) - Number(before)).toFixed(3));
+      samples.push({
+        user_id: action.user_id,
+        city: action.city || 'Unknown',
+        crop: action.crop || 'unknown',
+        before: Number(before),
+        after: Number(after),
+        change,
+        action_done_at: action.action_done_at
+      });
+    }
+
+    const improved = samples.filter((s) => s.change < 0).length;
+    const worsened = samples.filter((s) => s.change > 0).length;
+    const unchanged = samples.length - improved - worsened;
+    const avgChange = samples.length > 0
+      ? samples.reduce((sum, s) => sum + s.change, 0) / samples.length
+      : null;
+
+    res.json({
+      success: true,
+      period: { startDate, endDate, days },
+      summary: {
+        sample_count: samples.length,
+        avg_change: avgChange !== null ? Number(avgChange.toFixed(3)) : null,
+        improved,
+        worsened,
+        unchanged
+      },
+      samples
+    });
+  } catch (error) {
+    console.error('Alert effectiveness error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// User engagement health
+router.get('/ops/engagement', checkAdmin, async (req, res) => {
+  try {
+    const days = Math.max(1, parseInt(req.query.days || '30', 10));
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    const users = await User.find().select('lastLogin createdAt').lean();
+
+    const inactivityThreshold = new Date();
+    inactivityThreshold.setDate(inactivityThreshold.getDate() - 14);
+
+    let inactiveCount = 0;
+    const heatmap = Array.from({ length: 7 }, () => Array.from({ length: 24 }, () => 0));
+
+    users.forEach((user) => {
+      const lastLogin = user.lastLogin || user.createdAt;
+      if (!lastLogin || new Date(lastLogin) < inactivityThreshold) {
+        inactiveCount += 1;
+      }
+      if (!user.lastLogin) return;
+      const date = new Date(user.lastLogin);
+      const day = date.getDay();
+      const hour = date.getHours();
+      heatmap[day][hour] += 1;
+    });
+
+    const cropUsage = await Prediction.countDocuments({
+      user_id: { $exists: true, $ne: null },
+      timestamp: { $gte: startDate, $lte: endDate }
+    });
+    const satelliteUsage = await SatelliteOutcome.countDocuments({
+      user_id: { $exists: true, $ne: null },
+      saved_location_id: { $exists: true, $ne: null },
+      createdAt: { $gte: startDate, $lte: endDate }
+    });
+    const soilUsage = await SoilOutcome.countDocuments({
+      user_id: { $exists: true, $ne: null },
+      createdAt: { $gte: startDate, $lte: endDate }
+    });
+
+    res.json({
+      success: true,
+      period: { startDate, endDate, days },
+      inactive_over_14d: inactiveCount,
+      last_login_heatmap: heatmap,
+      usage_split: {
+        crop_predictions: cropUsage,
+        satellite_runs: satelliteUsage,
+        soil_analyses: soilUsage,
+        soil_tracked: true
+      }
+    });
+  } catch (error) {
+    console.error('Engagement health error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Geography operations view
+router.get('/ops/geography', checkAdmin, async (req, res) => {
+  try {
+    const days = Math.max(1, parseInt(req.query.days || '30', 10));
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    const riskByCityRaw = await SatelliteOutcome.aggregate([
+      { $match: { createdAt: { $gte: startDate, $lte: endDate }, city: { $exists: true, $ne: null } } },
+      {
+        $group: {
+          _id: { city: '$city', risk: '$metrics.risk_level' },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { '_id.city': 1 } }
+    ]);
+
+    const riskByCity = riskByCityRaw.map((row) => ({
+      city: row._id.city || 'Unknown',
+      risk_level: row._id.risk || 'Unknown',
+      count: row.count
+    }));
+
+    const pendingFeedback = await Feedback.find({ status: 'pending' })
+      .select('email')
+      .lean();
+    const emails = [...new Set(pendingFeedback.map((f) => String(f.email || '').toLowerCase()).filter(Boolean))];
+    const users = await User.find({ email: { $in: emails } })
+      .select('email farmLocations')
+      .lean();
+    const emailToCity = new Map();
+    users.forEach((u) => {
+      const city = u.farmLocations && u.farmLocations.length > 0
+        ? (u.farmLocations[0].city || 'Unknown')
+        : 'Unknown';
+      emailToCity.set(String(u.email || '').toLowerCase(), city);
+    });
+
+    const pendingByCityMap = {};
+    pendingFeedback.forEach((item) => {
+      const city = emailToCity.get(String(item.email || '').toLowerCase()) || 'Unknown';
+      if (!pendingByCityMap[city]) pendingByCityMap[city] = 0;
+      pendingByCityMap[city] += 1;
+    });
+
+    const pendingByCity = Object.keys(pendingByCityMap).map((city) => ({
+      city,
+      pending: pendingByCityMap[city]
+    }));
+
+    res.json({
+      success: true,
+      period: { startDate, endDate, days },
+      risk_distribution: riskByCity,
+      unresolved_queries_by_city: pendingByCity
+    });
+  } catch (error) {
+    console.error('Geography ops error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// User activity detail
+router.get('/users/:userId/activity', checkAdmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const limit = Math.max(1, parseInt(req.query.limit || '25', 10));
+
+    const user = await User.findById(userId)
+      .select('name email lastLogin accountStatus createdAt')
+      .lean();
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const predictions = await Prediction.find({ user_id: userId })
+      .sort({ timestamp: -1 })
+      .limit(limit)
+      .select('timestamp crop location prediction')
+      .lean();
+
+    const satelliteRuns = [];
+    if (mongoose.Types.ObjectId.isValid(userId)) {
+      const satelliteAgg = await SatelliteOutcome.aggregate([
+        {
+          $match: {
+            user_id: new mongoose.Types.ObjectId(userId),
+            saved_location_id: { $exists: true, $ne: null }
+          }
+        },
+        { $sort: { createdAt: -1 } },
+        {
+          $group: {
+            _id: '$saved_location_id',
+            latest: { $first: '$$ROOT' }
+          }
+        },
+        {
+          $project: {
+            _id: '$latest._id',
+            createdAt: '$latest.createdAt',
+            city: '$latest.city',
+            crop: '$latest.crop',
+            metrics: '$latest.metrics',
+            saved_location_id: '$latest.saved_location_id'
+          }
+        },
+        { $limit: limit }
+      ]);
+      satelliteRuns.push(...satelliteAgg);
+    }
+
+    const feedback = await Feedback.find({ email: user.email })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .select('createdAt status repliedAt message')
+      .lean();
+
+    const soilAnalyses = await SoilOutcome.find({ user_id: userId })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .select('createdAt analysis_type district crop')
+      .lean();
+
+    res.json({
+      success: true,
+      user,
+      predictions,
+      satellite_runs: satelliteRuns,
+      feedback,
+      soil_analyses: soilAnalyses
+    });
+  } catch (error) {
+    console.error('User activity error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });

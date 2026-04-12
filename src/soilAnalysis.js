@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './soilAnalysis.css';
 import { useNavigate } from 'react-router-dom';
 
 const SoilAnalysis = () => {
+    const [pageLoading, setPageLoading] = useState(true);
     const [analysisType, setAnalysisType] = useState('district');
     const [district, setDistrict] = useState('Lahore');
     const [currentCrop, setCurrentCrop] = useState('');
@@ -20,6 +21,10 @@ const SoilAnalysis = () => {
     const [result, setResult] = useState(null);
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    useEffect(() => {
+        const timer = setTimeout(() => setPageLoading(false), 1200);
+        return () => clearTimeout(timer);
+    }, []);
 
     const API_BASE_URL = 'http://localhost:5000';
     
@@ -46,19 +51,29 @@ const SoilAnalysis = () => {
         setError('');
         setResult(null);
         try {
+            const token = localStorage.getItem('token');
+            const headers = token ? { Authorization: `Bearer ${token}` } : {};
             let response;
             
             if (analysisType === 'district') {
-                response = await axios.post(`${API_BASE_URL}/api/soil/district`, {
-                    district,
-                    currentCrop: currentCrop === 'None' ? null : currentCrop
-                });
+                response = await axios.post(
+                    `${API_BASE_URL}/api/soil/district`,
+                    {
+                        district,
+                        currentCrop: currentCrop === 'None' ? null : currentCrop
+                    },
+                    { headers }
+                );
             } else {
-                response = await axios.post(`${API_BASE_URL}/api/soil/manual`, {
-                    soil_params: soilParams,
-                    district: district || 'Manual Input',
-                    current_crop: currentCrop === 'None' ? null : currentCrop
-                });
+                response = await axios.post(
+                    `${API_BASE_URL}/api/soil/manual`,
+                    {
+                        soil_params: soilParams,
+                        district: district || 'Manual Input',
+                        current_crop: currentCrop === 'None' ? null : currentCrop
+                    },
+                    { headers }
+                );
             }
 
             if (response.data.success) {
@@ -122,10 +137,21 @@ const SoilAnalysis = () => {
 
     return (
         <div className="soil-analysis-page">
+            {pageLoading && (
+                <div className="soil-loading-overlay" aria-live="polite" aria-busy="true">
+                    <div className="soil-loading-sprout">
+                        <span className="soil-loading-stem" />
+                        <span className="soil-loading-leaf soil-loading-leaf-left" />
+                        <span className="soil-loading-leaf soil-loading-leaf-right" />
+                        <span className="soil-loading-soil" />
+                    </div>
+                    <div className="soil-loading-label">Preparing soil insights...</div>
+                </div>
+            )}
             {/* Header */}
             <header className="soil-header">
                 <nav className="soil-nav">
-                    <button className="soil-logo-btn">
+                    <button className="soil-logo-btn" onClick={() => navigate('/')}>
                         <span>🌱</span>
                         <span>FASALGUARD</span>
                     </button>

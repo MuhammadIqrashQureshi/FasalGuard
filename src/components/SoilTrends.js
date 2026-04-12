@@ -371,23 +371,23 @@ const SoilTrends = () => {
 const styles = {
     container: {
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 30%, #334155 70%, #475569 100%)',
+        background: 'linear-gradient(135deg, #f7fbf8 0%, #eef6f0 50%, #f7fbf8 100%)',
         fontFamily: '"SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
-        color: '#f1f5f9',
+        color: '#0f172a',
         padding: 0,
         margin: 0,
         position: 'relative',
         overflowX: 'hidden'
     },
     header: {
-        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.98) 100%)',
-        backdropFilter: 'blur(20px) saturate(180%)',
+        background: 'rgba(255, 255, 255, 0.92)',
+        backdropFilter: 'blur(16px) saturate(160%)',
         borderBottom: '1px solid rgba(34, 197, 94, 0.2)',
         padding: '1.25rem 2rem',
         position: 'sticky',
         top: 0,
         zIndex: 100,
-        boxShadow: '0 4px 24px rgba(0, 0, 0, 0.1), 0 1px 0 rgba(34, 197, 94, 0.1) inset'
+        boxShadow: '0 8px 24px rgba(15, 23, 42, 0.08)'
     },
     nav: {
         display: 'flex',
@@ -445,7 +445,7 @@ const styles = {
     pageTitle: {
         fontSize: '3rem',
         fontWeight: '300',
-        color: '#f1f5f9',
+        color: '#0f172a',
         marginBottom: '0.5rem',
         background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
         WebkitBackgroundClip: 'text',
@@ -460,15 +460,15 @@ const styles = {
     },
     districtSidebar: {
         width: '220px',
-        background: 'rgba(15, 23, 42, 0.95)',
-        backdropFilter: 'blur(30px) saturate(150%)',
+        background: '#ffffff',
+        backdropFilter: 'blur(10px) saturate(140%)',
         borderRadius: '28px',
         padding: '1.5rem',
         border: '1px solid rgba(34, 197, 94, 0.25)',
         height: 'fit-content',
         position: 'sticky',
         top: '8rem',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(34, 197, 94, 0.1) inset'
+        boxShadow: '0 18px 36px rgba(15, 23, 42, 0.08)'
     },
     sidebarHeader: {
         marginBottom: '1.5rem',
@@ -494,8 +494,8 @@ const styles = {
         cursor: 'pointer',
         fontSize: '1rem',
         fontWeight: '600',
-        color: '#e2e8f0',
-        background: 'rgba(255, 255, 255, 0.05)',
+        color: '#334155',
+        background: '#f8fafc',
         backdropFilter: 'blur(10px)',
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         textAlign: 'left',
@@ -520,12 +520,12 @@ const styles = {
     },
     mainContent: {
         flex: 1,
-        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%)',
-        backdropFilter: 'blur(30px) saturate(150%)',
+        background: '#ffffff',
+        backdropFilter: 'blur(10px) saturate(140%)',
         borderRadius: '28px',
         padding: '3rem',
         border: '1px solid rgba(34, 197, 94, 0.25)',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(34, 197, 94, 0.1) inset'
+        boxShadow: '0 18px 36px rgba(15, 23, 42, 0.08)'
     },
     chartSection: {
         marginBottom: '2rem'
@@ -533,7 +533,7 @@ const styles = {
     chartTitle: {
         fontSize: '1.5rem',
         fontWeight: '600',
-        color: '#f1f5f9',
+        color: '#0f172a',
         marginBottom: '1.5rem',
         textTransform: 'uppercase',
         letterSpacing: '1px',
@@ -547,8 +547,8 @@ const styles = {
         borderRadius: '20px',
         overflow: 'hidden',
         border: '2px solid rgba(34, 197, 94, 0.3)',
-        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
-        backgroundColor: '#0f172a',
+        boxShadow: '0 18px 36px rgba(15, 23, 42, 0.12)',
+        backgroundColor: '#f8fafc',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center'
@@ -557,7 +557,7 @@ const styles = {
         width: '100%',
         height: '100%',
         objectFit: 'contain', // Changed from 'cover' to 'contain' to show full image
-        backgroundColor: '#0f172a',
+        backgroundColor: '#f8fafc',
         padding: '1rem', // Added padding to ensure full visibility
         transform: 'scale(0.9)' // Zoomed out to show entire graph
     },
@@ -566,7 +566,7 @@ const styles = {
         bottom: 0,
         left: 0,
         right: 0,
-        background: 'linear-gradient(transparent, rgba(15, 23, 42, 0.9))',
+        background: 'linear-gradient(transparent, rgba(15, 23, 42, 0.6))',
         padding: '1.5rem',
         textAlign: 'center'
     },
@@ -582,7 +582,7 @@ const styles = {
     sectionTitle: {
         fontSize: '1.75rem',
         fontWeight: '600',
-        color: '#f1f5f9',
+        color: '#0f172a',
         marginBottom: '1.5rem',
         textAlign: 'center',
         textTransform: 'uppercase',
@@ -594,7 +594,7 @@ const styles = {
         gap: '1.5rem'
     },
     statCard: {
-        background: 'rgba(255, 255, 255, 0.05)',
+        background: '#ffffff',
         backdropFilter: 'blur(10px)',
         borderRadius: '20px',
         padding: '1.75rem',
@@ -638,7 +638,7 @@ const styles = {
     },
     statUnit: {
         fontSize: '1.2rem',
-        color: '#94a3b8',
+        color: '#64748b',
         fontWeight: '600'
     },
     optimalRange: {
@@ -651,7 +651,7 @@ const styles = {
     },
     optimalLabel: {
         fontSize: '0.875rem',
-        color: '#94a3b8',
+        color: '#64748b',
         fontWeight: '600'
     },
     optimalValue: {
@@ -665,14 +665,14 @@ const styles = {
     },
     effectLabel: {
         fontSize: '0.875rem',
-        color: '#94a3b8',
+        color: '#64748b',
         fontWeight: '600',
         marginBottom: '0.25rem',
         display: 'block'
     },
     effectText: {
         fontSize: '0.875rem',
-        color: '#f1f5f9',
+        color: '#475569',
         fontWeight: '500',
         lineHeight: '1.4'
     },
@@ -681,7 +681,7 @@ const styles = {
     },
     scoreLabel: {
         fontSize: '0.875rem',
-        color: '#94a3b8',
+        color: '#64748b',
         fontWeight: '600',
         marginBottom: '0.5rem'
     },

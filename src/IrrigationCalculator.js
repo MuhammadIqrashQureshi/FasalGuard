@@ -1,5 +1,6 @@
 // components/EnhancedIrrigationCalculator.jsx
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Droplets, Calendar, Clock, CloudRain, Cloud, 
   Thermometer, Wind, Sun, Activity, AlertCircle,
@@ -33,6 +34,7 @@ ChartJS.register(
 );
 
 export default function EnhancedIrrigationCalculator({ predictionData, city }) {
+  const navigate = useNavigate();
   const [irrigationData, setIrrigationData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [soilType, setSoilType] = useState('loamy');
@@ -215,7 +217,7 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
     plugins: {
       legend: { 
         labels: {
-          color: '#e2e8f0',
+          color: '#334155',
           font: {
             size: 12,
             family: "'Inter', sans-serif"
@@ -225,10 +227,10 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
       tooltip: { 
         mode: 'index', 
         intersect: false,
-        backgroundColor: 'rgba(15, 23, 42, 0.95)',
-        titleColor: '#e2e8f0',
-        bodyColor: '#cbd5e1',
-        borderColor: '#334155',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        titleColor: '#0f172a',
+        bodyColor: '#334155',
+        borderColor: '#e2e8f0',
         borderWidth: 1,
         cornerRadius: 8
       }
@@ -236,11 +238,11 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
     scales: {
       x: {
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
+          color: 'rgba(15, 23, 42, 0.08)',
           drawBorder: false
         },
         ticks: {
-          color: '#94a3b8',
+          color: '#64748b',
           font: {
             size: 11,
             family: "'Inter', sans-serif"
@@ -253,11 +255,11 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
         position: 'left',
         beginAtZero: true,
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
+          color: 'rgba(15, 23, 42, 0.08)',
           drawBorder: false
         },
         ticks: {
-          color: '#94a3b8',
+          color: '#64748b',
           font: {
             size: 11,
             family: "'Inter', sans-serif"
@@ -279,7 +281,7 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
           drawOnChartArea: false,
         },
         ticks: {
-          color: '#94a3b8',
+          color: '#64748b',
         },
         title: {
           display: true,
@@ -297,7 +299,7 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+        background: 'linear-gradient(135deg, #f7fbf8 0%, #eef6f0 100%)',
         padding: '2rem'
       }}>
         <div style={{ textAlign: 'center', color: '#94a3b8' }}>
@@ -329,22 +331,22 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
         <div style={{
           textAlign: 'center',
           padding: '3rem',
-          background: 'rgba(30, 41, 59, 0.7)',
+          background: '#ffffff',
           borderRadius: '20px',
           border: '1px solid rgba(14, 165, 233, 0.3)',
-          backdropFilter: 'blur(10px)',
+          boxShadow: '0 12px 28px rgba(15, 23, 42, 0.08)',
           maxWidth: '600px'
         }}>
           <Droplets size={64} color="#0ea5e9" style={{ marginBottom: '1.5rem', opacity: 0.7 }} />
           <h2 style={{
             fontSize: '2rem',
             fontWeight: 'bold',
-            color: '#f1f5f9',
+            color: '#0f172a',
             marginBottom: '1rem'
           }}>
             Smart Irrigation Calculator
           </h2>
-          <p style={{ color: '#94a3b8', fontSize: '1.1rem', marginBottom: '2rem' }}>
+          <p style={{ color: '#64748b', fontSize: '1.1rem', marginBottom: '2rem' }}>
             Select a city and crop to calculate optimal irrigation schedule
           </p>
         </div>
@@ -356,18 +358,44 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
     <div id="irrigation" style={{
       minHeight: '100vh',
       padding: '2rem',
-      background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)'
+      background: 'linear-gradient(135deg, #f7fbf8 0%, #eef6f0 100%)'
     }}>
       <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '1.5rem'
+        }}>
+          <button
+            onClick={() => navigate('/prediction-results')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              background: '#ffffff',
+              border: '1px solid rgba(34, 197, 94, 0.3)',
+              color: '#22c55e',
+              padding: '0.75rem 1.25rem',
+              borderRadius: '12px',
+              cursor: 'pointer',
+              fontSize: '0.95rem',
+              fontWeight: '600',
+              boxShadow: '0 6px 16px rgba(15, 23, 42, 0.08)'
+            }}
+          >
+            ← Back to Results
+          </button>
+        </div>
         {/* Header */}
         <div style={{
           textAlign: 'center',
           marginBottom: '3rem',
           padding: '2rem',
-          background: 'rgba(15, 23, 42, 0.6)',
+          background: '#ffffff',
           borderRadius: '20px',
           border: '1px solid rgba(14, 165, 233, 0.3)',
-          backdropFilter: 'blur(20px)'
+          boxShadow: '0 12px 28px rgba(15, 23, 42, 0.08)'
         }}>
           <h1 style={{
             fontSize: '2.5rem',
@@ -381,7 +409,7 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
             Smart Irrigation Management
           </h1>
           <p style={{
-            color: '#94a3b8',
+            color: '#64748b',
             fontSize: '1.1rem',
             maxWidth: '600px',
             margin: '0 auto',
@@ -393,12 +421,12 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
 
         {/* Controls */}
         <div style={{
-          background: 'rgba(30, 41, 59, 0.7)',
+          background: '#ffffff',
           padding: '1.5rem',
           borderRadius: '16px',
           border: '1px solid rgba(14, 165, 233, 0.2)',
           marginBottom: '2rem',
-          backdropFilter: 'blur(10px)'
+          boxShadow: '0 10px 24px rgba(15, 23, 42, 0.06)'
         }}>
           <div style={{
             display: 'grid',
@@ -412,7 +440,7 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
                 display: 'block',
                 fontSize: '0.9rem',
                 fontWeight: '600',
-                color: '#94a3b8',
+                color: '#64748b',
                 marginBottom: '0.75rem'
               }}>
                 Select Crop
@@ -425,11 +453,11 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
                     style={{
                       padding: '0.75rem 1.25rem',
                       borderRadius: '10px',
-                      border: `2px solid ${selectedCrop === option.value ? '#0ea5e9' : 'rgba(255, 255, 255, 0.1)'}`,
+                      border: `2px solid ${selectedCrop === option.value ? '#0ea5e9' : '#e2e8f0'}`,
                       background: selectedCrop === option.value 
-                        ? 'rgba(14, 165, 233, 0.2)' 
-                        : 'rgba(255, 255, 255, 0.05)',
-                      color: selectedCrop === option.value ? '#0ea5e9' : '#cbd5e1',
+                        ? 'rgba(14, 165, 233, 0.12)' 
+                        : '#ffffff',
+                      color: selectedCrop === option.value ? '#0ea5e9' : '#334155',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
@@ -455,7 +483,7 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
                 display: 'block',
                 fontSize: '0.9rem',
                 fontWeight: '600',
-                color: '#94a3b8',
+                color: '#64748b',
                 marginBottom: '0.75rem'
               }}>
                 Soil Type
@@ -472,11 +500,11 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
                     style={{
                       padding: '0.75rem 1rem',
                       borderRadius: '10px',
-                      border: `2px solid ${soilType === soil.value ? soil.color : 'rgba(255, 255, 255, 0.1)'}`,
+                      border: `2px solid ${soilType === soil.value ? soil.color : '#e2e8f0'}`,
                       background: soilType === soil.value 
-                        ? `${soil.color}20`
-                        : 'rgba(15, 23, 42, 0.7)',
-                      color: soilType === soil.value ? soil.color : '#cbd5e1',
+                        ? `${soil.color}12`
+                        : '#ffffff',
+                      color: soilType === soil.value ? soil.color : '#334155',
                       cursor: 'pointer',
                       transition: 'all 0.2s ease',
                       fontSize: '0.85rem',
@@ -508,7 +536,7 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
                       fontSize: '0.75rem', 
                       opacity: 0.8,
                       lineHeight: '1.2',
-                      color: '#94a3b8'
+                      color: '#64748b'
                     }}>
                       {soil.desc.split(',')[0]}
                     </div>
@@ -523,7 +551,7 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
                 display: 'block',
                 fontSize: '0.9rem',
                 fontWeight: '600',
-                color: '#94a3b8',
+                color: '#64748b',
                 marginBottom: '0.75rem'
               }}>
                 Area (hectares)
@@ -540,14 +568,14 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
                     flex: 1,
                     height: '6px',
                     borderRadius: '3px',
-                    background: 'rgba(255, 255, 255, 0.1)',
+                    background: '#e2e8f0',
                     outline: 'none',
                     appearance: 'none',
                     cursor: 'pointer'
                   }}
                 />
                 <div style={{
-                  background: 'rgba(14, 165, 233, 0.2)',
+                  background: 'rgba(14, 165, 233, 0.12)',
                   border: '1px solid rgba(14, 165, 233, 0.3)',
                   borderRadius: '8px',
                   padding: '0.5rem 1rem',
@@ -557,7 +585,7 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
                   <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#0ea5e9' }}>
                     {area}
                   </div>
-                  <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>hectares</div>
+                  <div style={{ fontSize: '0.8rem', color: '#64748b' }}>hectares</div>
                 </div>
               </div>
             </div>
@@ -602,11 +630,11 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
             }
           ].map((metric, index) => (
             <div key={index} style={{
-              background: 'rgba(30, 41, 59, 0.7)',
+              background: '#ffffff',
               padding: '1.5rem',
               borderRadius: '14px',
               border: `1px solid ${metric.color}40`,
-              backdropFilter: 'blur(10px)',
+              boxShadow: '0 8px 20px rgba(15, 23, 42, 0.06)',
               transition: 'all 0.2s ease',
               cursor: 'default'
             }}>
@@ -627,12 +655,12 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
                   <div style={{ fontSize: '2rem', fontWeight: 'bold', color: metric.color }}>
                     {metric.value}
                   </div>
-                  <div style={{ fontSize: '0.9rem', color: '#94a3b8', marginTop: '0.25rem' }}>
+                  <div style={{ fontSize: '0.9rem', color: '#64748b', marginTop: '0.25rem' }}>
                     {metric.title}
                   </div>
                 </div>
               </div>
-              <div style={{ fontSize: '0.85rem', color: '#cbd5e1', lineHeight: '1.4' }}>
+              <div style={{ fontSize: '0.85rem', color: '#64748b', lineHeight: '1.4' }}>
                 {metric.description}
               </div>
             </div>
@@ -648,12 +676,12 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
         }}>
           {/* Irrigation Schedule Chart */}
           <div style={{
-            background: 'rgba(30, 41, 59, 0.7)',
+            background: '#ffffff',
             padding: '1.5rem',
             borderRadius: '16px',
             border: '1px solid rgba(14, 165, 233, 0.2)',
-            backdropFilter: 'blur(10px)',
-            height: '400px'
+            boxShadow: '0 12px 28px rgba(15, 23, 42, 0.08)',
+            height: '520px'
           }}>
             <div style={{ 
               display: 'flex', 
@@ -678,31 +706,31 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
                   margin: 0, 
                   fontSize: '1.25rem', 
                   fontWeight: '600',
-                  color: '#f1f5f9' 
+                  color: '#0f172a' 
                 }}>
                   Irrigation Schedule
                 </h3>
                 <p style={{ 
                   margin: '0.25rem 0 0 0', 
-                  color: '#94a3b8',
+                  color: '#64748b',
                   fontSize: '0.85rem' 
                 }}>
                   7-day forecast for {selectedCrop}
                 </p>
               </div>
             </div>
-            <div style={{ height: '280px' }}>
+            <div style={{ height: '360px' }}>
               <Line data={scheduleChartData} options={chartOptions} />
             </div>
           </div>
 
           {/* Irrigation Method & Next Schedule */}
           <div style={{
-            background: 'rgba(30, 41, 59, 0.7)',
+            background: '#ffffff',
             padding: '1.5rem',
             borderRadius: '16px',
             border: '1px solid rgba(14, 165, 233, 0.2)',
-            backdropFilter: 'blur(10px)'
+            boxShadow: '0 12px 28px rgba(15, 23, 42, 0.08)'
           }}>
             <div style={{ 
               display: 'flex', 
@@ -727,13 +755,13 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
                   margin: 0, 
                   fontSize: '1.25rem', 
                   fontWeight: '600',
-                  color: '#f1f5f9' 
+                  color: '#0f172a' 
                 }}>
                   Next Irrigation
                 </h3>
                 <p style={{ 
                   margin: '0.25rem 0 0 0', 
-                  color: '#94a3b8',
+                  color: '#64748b',
                   fontSize: '0.85rem' 
                 }}>
                   Recommended timing and method
@@ -764,7 +792,7 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
                 display: 'flex', 
                 alignItems: 'center', 
                 gap: '0.5rem',
-                color: '#94a3b8',
+                color: '#64748b',
                 fontSize: '0.85rem'
               }}>
                 <Clock size={14} />
@@ -774,7 +802,7 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
 
             <div style={{ marginBottom: '1.5rem' }}>
               <h4 style={{ 
-                color: '#f1f5f9', 
+                color: '#0f172a', 
                 marginBottom: '0.75rem', 
                 fontSize: '1.1rem',
                 display: 'flex',
@@ -798,7 +826,7 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
                 }}>
                   {(irrigationData.irrigation_method?.recommended || 'Sprinkler Irrigation').split(' ')[0]}
                 </div>
-                <div style={{ color: '#e2e8f0', fontSize: '0.85rem' }}>
+                <div style={{ color: '#475569', fontSize: '0.85rem' }}>
                   Efficiency: <strong style={{ color: '#10b981' }}>
                     {irrigationData.irrigation_method?.efficiency || 85}%
                   </strong>
@@ -808,7 +836,7 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
 
             <div>
               <h4 style={{ 
-                color: '#f1f5f9', 
+                color: '#0f172a', 
                 marginBottom: '0.75rem', 
                 fontSize: '1.1rem',
                 display: 'flex',
@@ -832,7 +860,7 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
                 }}>
                   {irrigationData.current_daily_water_req_mm || 8.5} mm/day
                 </div>
-                <div style={{ color: '#94a3b8', fontSize: '0.85rem', marginTop: '0.25rem' }}>
+                <div style={{ color: '#64748b', fontSize: '0.85rem', marginTop: '0.25rem' }}>
                   per hectare
                 </div>
               </div>
@@ -843,11 +871,11 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
         {/* Water Saving Tips - Simplified */}
         {irrigationData.water_savings_tips && irrigationData.water_savings_tips.length > 0 && (
           <div style={{
-            background: 'rgba(14, 165, 233, 0.1)',
+            background: 'rgba(14, 165, 233, 0.08)',
             borderRadius: '16px',
             padding: '1.5rem',
             border: '1px solid rgba(14, 165, 233, 0.3)',
-            backdropFilter: 'blur(10px)',
+            boxShadow: '0 10px 24px rgba(15, 23, 42, 0.06)',
             marginBottom: '2rem'
           }}>
             <h3 style={{ 
@@ -870,13 +898,13 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
             }}>
               {irrigationData.water_savings_tips.slice(0, 4).map((tip, i) => (
                 <div key={i} style={{
-                  background: 'rgba(255, 255, 255, 0.05)',
+                  background: '#ffffff',
                   padding: '1rem',
                   borderRadius: '10px',
                   border: '1px solid rgba(14, 165, 233, 0.3)',
                   fontSize: '0.9rem',
                   lineHeight: '1.5',
-                  color: '#cbd5e1'
+                  color: '#475569'
                 }}>
                   <strong style={{ color: '#0ea5e9' }}>Tip {i + 1}:</strong> {tip}
                 </div>
@@ -888,14 +916,14 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
         {/* Environmental Conditions - Simplified */}
         {predictionData?.forecast && (
           <div style={{
-            background: 'rgba(30, 41, 59, 0.7)',
+            background: '#ffffff',
             borderRadius: '16px',
             padding: '1.5rem',
             border: '1px solid rgba(14, 165, 233, 0.2)',
-            backdropFilter: 'blur(10px)'
+            boxShadow: '0 10px 24px rgba(15, 23, 42, 0.06)'
           }}>
             <h3 style={{ 
-              color: '#f1f5f9', 
+              color: '#0f172a', 
               marginBottom: '1rem', 
               fontSize: '1.5rem',
               display: 'flex',
@@ -914,7 +942,7 @@ export default function EnhancedIrrigationCalculator({ predictionData, city }) {
               fontSize: '0.9rem'
             }}>
               <div style={{
-                background: 'rgba(255, 255, 255, 0.05)',
+                background: '#ffffff',
                 padding: '1rem',
                 borderRadius: '10px',
                 border: '1px solid rgba(239, 68, 68, 0.3)',

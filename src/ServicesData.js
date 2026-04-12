@@ -78,8 +78,8 @@ export const servicesData = [
   },
   {
     id: 5,
-    title: 'Smart Alerts System',
-    subtitle: 'Real-Time Notifications & Warnings',
+    title: 'Satellite Field Analysis & Alert System',
+    subtitle: 'Real-Time Notifications & Field Alerts',
     description: 'Receive instant alerts about critical conditions including weather warnings, pest outbreaks, irrigation needs, and harvesting time recommendations.',
     features: [
       'Weather alert notifications',

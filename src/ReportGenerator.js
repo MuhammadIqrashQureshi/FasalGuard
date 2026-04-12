@@ -1,5 +1,6 @@
 // components/EnhancedReportGenerator.jsx
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Download, FileText, Printer, Share2, CheckCircle, Clock,
   BookOpen, BarChart, Target, Users, Award, Zap,
@@ -7,6 +8,7 @@ import {
 } from 'lucide-react';
 import './global.css';
 export default function EnhancedReportGenerator({ predictionData, city }) {
+  const navigate = useNavigate();
   const [generating, setGenerating] = useState(false);
   const [reportInfo, setReportInfo] = useState(null);
   const [downloadProgress, setDownloadProgress] = useState(0);
@@ -166,18 +168,44 @@ export default function EnhancedReportGenerator({ predictionData, city }) {
     <div id="report" style={{
       minHeight: '100vh',
       padding: '2rem',
-      background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)'
+      background: 'linear-gradient(135deg, #f7fbf8 0%, #eef6f0 100%)'
     }}>
       <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '1.5rem'
+        }}>
+          <button
+            onClick={() => navigate('/prediction-results')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              background: '#ffffff',
+              border: '1px solid rgba(34, 197, 94, 0.3)',
+              color: '#22c55e',
+              padding: '0.75rem 1.25rem',
+              borderRadius: '12px',
+              cursor: 'pointer',
+              fontSize: '0.95rem',
+              fontWeight: '600',
+              boxShadow: '0 6px 16px rgba(15, 23, 42, 0.08)'
+            }}
+          >
+            ← Back to Results
+          </button>
+        </div>
         {/* Header */}
         <div style={{
           textAlign: 'center',
           marginBottom: '3rem',
           padding: '2rem',
-          background: 'rgba(15, 23, 42, 0.6)',
+          background: '#ffffff',
           borderRadius: '20px',
           border: '1px solid rgba(34, 197, 94, 0.3)',
-          backdropFilter: 'blur(20px)'
+          boxShadow: '0 12px 28px rgba(15, 23, 42, 0.08)'
         }}>
           <h1 style={{
             fontSize: '3rem',
@@ -191,7 +219,7 @@ export default function EnhancedReportGenerator({ predictionData, city }) {
             Professional Report Generator
           </h1>
           <p style={{
-            color: '#94a3b8',
+            color: '#64748b',
             fontSize: '1.1rem',
             maxWidth: '600px',
             margin: '0 auto',
@@ -203,12 +231,12 @@ export default function EnhancedReportGenerator({ predictionData, city }) {
 
         {/* Action Section */}
         <div style={{
-          background: 'rgba(30, 41, 59, 0.7)',
+          background: '#ffffff',
           padding: '2rem',
           borderRadius: '20px',
           border: '1px solid rgba(34, 197, 94, 0.2)',
           marginBottom: '3rem',
-          backdropFilter: 'blur(10px)'
+          boxShadow: '0 12px 28px rgba(15, 23, 42, 0.08)'
         }}>
           <div style={{ 
             display: 'flex', 
@@ -223,13 +251,13 @@ export default function EnhancedReportGenerator({ predictionData, city }) {
                 margin: 0, 
                 fontSize: '2rem', 
                 fontWeight: 'bold',
-                color: '#f1f5f9'
+                color: '#0f172a'
               }}>
                 Generate Full Report
               </h2>
               <p style={{ 
                 margin: '0.5rem 0 0 0', 
-                color: '#94a3b8',
+                color: '#64748b',
                 fontSize: '1rem' 
               }}>
                 Create a comprehensive PDF report with all analysis data
@@ -288,9 +316,9 @@ export default function EnhancedReportGenerator({ predictionData, city }) {
                 <button
                   onClick={() => window.open(`http://localhost:5000/api/analysis/download-report/${reportInfo.id}`, '_blank')}
                   style={{
-                    background: 'rgba(30, 41, 59, 0.8)',
-                    border: '1px solid rgba(59, 130, 246, 0.3)',
-                    color: '#3b82f6',
+                    background: '#ffffff',
+                    border: '1px solid rgba(59, 130, 246, 0.35)',
+                    color: '#1d4ed8',
                     padding: '1rem 2rem',
                     borderRadius: '12px',
                     cursor: 'pointer',
@@ -330,7 +358,7 @@ export default function EnhancedReportGenerator({ predictionData, city }) {
                 justifyContent: 'space-between', 
                 marginBottom: '0.75rem' 
               }}>
-                <span style={{ fontSize: '1rem', color: '#94a3b8', fontWeight: '500' }}>
+                <span style={{ fontSize: '1rem', color: '#64748b', fontWeight: '500' }}>
                   Generating PDF Report...
                 </span>
                 <span style={{ fontSize: '1rem', color: '#22c55e', fontWeight: '600' }}>
@@ -339,10 +367,10 @@ export default function EnhancedReportGenerator({ predictionData, city }) {
               </div>
               <div style={{
                 height: '10px',
-                background: 'rgba(255, 255, 255, 0.1)',
+                background: '#e2e8f0',
                 borderRadius: '5px',
                 overflow: 'hidden',
-                backdropFilter: 'blur(10px)'
+                boxShadow: 'inset 0 1px 2px rgba(15, 23, 42, 0.12)'
               }}>
                 <div style={{
                   width: `${downloadProgress}%`,
@@ -369,15 +397,15 @@ export default function EnhancedReportGenerator({ predictionData, city }) {
 
         {/* Report Preview */}
         <div style={{
-          background: 'rgba(30, 41, 59, 0.7)',
+          background: '#ffffff',
           borderRadius: '20px',
           padding: '2rem',
           border: '1px solid rgba(34, 197, 94, 0.2)',
           marginBottom: '3rem',
-          backdropFilter: 'blur(10px)'
+          boxShadow: '0 12px 28px rgba(15, 23, 42, 0.08)'
         }}>
           <h3 style={{ 
-            color: '#f1f5f9', 
+            color: '#0f172a', 
             marginBottom: '2rem', 
             fontSize: '2rem',
             display: 'flex',
@@ -427,13 +455,13 @@ export default function EnhancedReportGenerator({ predictionData, city }) {
                   margin: '0 0 0.75rem 0', 
                   fontSize: '1.3rem',
                   fontWeight: 'bold',
-                  color: '#f1f5f9'
+                  color: '#0f172a'
                 }}>
                   {section.title}
                 </h4>
                 <p style={{ 
                   margin: 0, 
-                  color: '#cbd5e1',
+                  color: '#64748b',
                   fontSize: '0.95rem',
                   lineHeight: '1.6',
                   marginBottom: '1rem'
@@ -465,15 +493,15 @@ export default function EnhancedReportGenerator({ predictionData, city }) {
         {/* Weather Summary */}
         {stats && (
           <div style={{
-            background: 'rgba(30, 41, 59, 0.7)',
+            background: '#ffffff',
             borderRadius: '20px',
             padding: '2rem',
             border: '1px solid rgba(34, 197, 94, 0.2)',
             marginBottom: '3rem',
-            backdropFilter: 'blur(10px)'
+            boxShadow: '0 12px 28px rgba(15, 23, 42, 0.08)'
           }}>
             <h3 style={{ 
-              color: '#f1f5f9', 
+              color: '#0f172a', 
               marginBottom: '2rem', 
               fontSize: '2rem',
               display: 'flex',
@@ -559,11 +587,11 @@ export default function EnhancedReportGenerator({ predictionData, city }) {
 
         {/* Report Benefits */}
         <div style={{
-          background: 'rgba(34, 197, 94, 0.1)',
+          background: '#f4fbf6',
           borderRadius: '20px',
           padding: '2rem',
           border: '1px solid rgba(34, 197, 94, 0.3)',
-          backdropFilter: 'blur(10px)',
+          boxShadow: '0 12px 28px rgba(15, 23, 42, 0.08)',
           marginBottom: '3rem'
         }}>
           <h3 style={{ 
@@ -635,7 +663,7 @@ export default function EnhancedReportGenerator({ predictionData, city }) {
                 </div>
                 <p style={{ 
                   margin: 0, 
-                  color: '#e2e8f0', 
+                  color: '#475569', 
                   fontSize: '1rem',
                   lineHeight: '1.6' 
                 }}>
@@ -678,7 +706,7 @@ export default function EnhancedReportGenerator({ predictionData, city }) {
                 </h3>
                 <p style={{ 
                   margin: '0.5rem 0 0 0', 
-                  color: '#94a3b8',
+                  color: '#64748b',
                   fontSize: '0.9rem' 
                 }}>
                   Download or share your previously generated report
@@ -733,9 +761,9 @@ export default function EnhancedReportGenerator({ predictionData, city }) {
                     }
                   }}
                   style={{
-                    background: 'rgba(30, 41, 59, 0.8)',
-                    border: '1px solid rgba(107, 114, 128, 0.3)',
-                    color: '#94a3b8',
+                    background: '#ffffff',
+                    border: '1px solid rgba(148, 163, 184, 0.4)',
+                    color: '#334155',
                     padding: '0.75rem 1.5rem',
                     borderRadius: '10px',
                     cursor: 'pointer',
@@ -745,17 +773,17 @@ export default function EnhancedReportGenerator({ predictionData, city }) {
                     alignItems: 'center',
                     gap: '0.5rem',
                     transition: 'all 0.3s ease',
-                    backdropFilter: 'blur(10px)'
+                    boxShadow: '0 8px 20px rgba(15, 23, 42, 0.08)'
                   }}
                   onMouseEnter={(e) => {
-                    e.target.style.background = '#6b7280';
-                    e.target.style.color = 'white';
+                    e.target.style.background = '#334155';
+                    e.target.style.color = '#ffffff';
                     e.target.style.transform = 'translateY(-2px)';
                     e.target.style.boxShadow = '0 8px 20px rgba(107, 114, 128, 0.3)';
                   }}
                   onMouseLeave={(e) => {
-                    e.target.style.background = 'rgba(30, 41, 59, 0.8)';
-                    e.target.style.color = '#94a3b8';
+                    e.target.style.background = '#ffffff';
+                    e.target.style.color = '#334155';
                     e.target.style.transform = 'translateY(0)';
                     e.target.style.boxShadow = 'none';
                   }}
@@ -779,26 +807,26 @@ export default function EnhancedReportGenerator({ predictionData, city }) {
                 fontSize: '0.95rem'
               }}>
                 <div>
-                  <div style={{ color: '#94a3b8', marginBottom: '0.25rem' }}>Report ID:</div>
-                  <div style={{ color: '#f1f5f9', fontWeight: '600', fontFamily: 'monospace' }}>
+                  <div style={{ color: '#64748b', marginBottom: '0.25rem' }}>Report ID:</div>
+                  <div style={{ color: '#0f172a', fontWeight: '600', fontFamily: 'monospace' }}>
                     {reportInfo.id.substring(0, 8)}...{reportInfo.id.substring(reportInfo.id.length - 8)}
                   </div>
                 </div>
                 <div>
-                  <div style={{ color: '#94a3b8', marginBottom: '0.25rem' }}>File Name:</div>
-                  <div style={{ color: '#f1f5f9', fontWeight: '600' }}>
+                  <div style={{ color: '#64748b', marginBottom: '0.25rem' }}>File Name:</div>
+                  <div style={{ color: '#0f172a', fontWeight: '600' }}>
                     {reportInfo.file_name}
                   </div>
                 </div>
                 <div>
-                  <div style={{ color: '#94a3b8', marginBottom: '0.25rem' }}>Generated:</div>
-                  <div style={{ color: '#f1f5f9', fontWeight: '600' }}>
+                  <div style={{ color: '#64748b', marginBottom: '0.25rem' }}>Generated:</div>
+                  <div style={{ color: '#0f172a', fontWeight: '600' }}>
                     {new Date(reportInfo.generated_at).toLocaleString()}
                   </div>
                 </div>
                 <div>
-                  <div style={{ color: '#94a3b8', marginBottom: '0.25rem' }}>File Size:</div>
-                  <div style={{ color: '#f1f5f9', fontWeight: '600' }}>
+                  <div style={{ color: '#64748b', marginBottom: '0.25rem' }}>File Size:</div>
+                  <div style={{ color: '#0f172a', fontWeight: '600' }}>
                     {(Math.random() * 2 + 1.5).toFixed(1)} MB
                   </div>
                 </div>
@@ -818,7 +846,7 @@ export default function EnhancedReportGenerator({ predictionData, city }) {
           backdropFilter: 'blur(20px)'
         }}>
           <h3 style={{ 
-            color: '#f1f5f9', 
+            color: '#0f172a', 
             marginBottom: '1.5rem', 
             fontSize: '2rem',
             fontWeight: 'bold'
@@ -846,7 +874,7 @@ export default function EnhancedReportGenerator({ predictionData, city }) {
               }}>
                 <div style={{ fontSize: '2.5rem' }}>{feature.icon}</div>
                 <div style={{ 
-                  color: '#e2e8f0', 
+                  color: '#475569', 
                   fontSize: '1rem',
                   fontWeight: '500'
                 }}>

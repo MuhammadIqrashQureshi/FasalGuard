@@ -1,5 +1,5 @@
 const { transporter } = require('./emailConfig');
-const { verificationEmailTemplate, welcomeEmailTemplate } = require('./emailTemplates');
+const { verificationEmailTemplate, welcomeEmailTemplate, satelliteAlertEmailTemplate } = require('./emailTemplates');
 
 const sendVerificationEmail = async (email, verificationCode) => {
   try {
@@ -81,8 +81,27 @@ const sendBroadcastEmail = async (email, name, subject, message) => {
   }
 };
 
+const sendSatelliteAlertEmail = async (email, payload) => {
+  try {
+    const subject = payload?.subject || 'FasalGuard Field Alert';
+    const html = satelliteAlertEmailTemplate(payload);
+    const response = await transporter.sendMail({
+      from: `"FasalGuard" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject,
+      text: payload?.summary || 'Field alert generated.',
+      html,
+    });
+    return { success: true, messageId: response.messageId };
+  } catch (error) {
+    console.log('Satellite alert email error:', error);
+    return { success: false, error: error.message };
+  }
+};
+
 module.exports = {
   sendVerificationEmail,
   sendWelcomeEmail,
-  sendBroadcastEmail
+  sendBroadcastEmail,
+  sendSatelliteAlertEmail
 };

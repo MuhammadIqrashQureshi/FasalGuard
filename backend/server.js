@@ -92,21 +92,37 @@ app.use('/api/satellite', satelliteRoutes);
 // Weather API endpoint
 app.get('/api/weather', async (req, res) => {
   try {
-    const { city, days = 7 } = req.query;
-    
-    if (!city) {
+    const { city, days = 7, lat, lon, latitude, longitude } = req.query;
+    const finalLat = latitude ?? lat;
+    const finalLon = longitude ?? lon;
+
+    if (!city && (finalLat === undefined || finalLon === undefined)) {
       return res.status(400).json({
         success: false,
-        error: 'City parameter is required'
+        error: 'City parameter or latitude/longitude is required'
       });
     }
 
-    console.log(`🌤️ Fetching weather for ${city}...`);
-    const weatherData = await app.locals.weatherController.getRealTimeWeather(city, parseInt(days));
-    
+    const forecastDays = parseInt(days, 10);
+    let weatherData;
+    let cityLabel = city;
+
+    if (city) {
+      console.log(`🌤️ Fetching weather for ${city}...`);
+      weatherData = await app.locals.weatherController.getRealTimeWeather(city, forecastDays);
+    } else {
+      console.log(`🌤️ Fetching weather for coords ${finalLat}, ${finalLon}...`);
+      weatherData = await app.locals.weatherController.getRealTimeWeatherByCoords(
+        parseFloat(finalLat),
+        parseFloat(finalLon),
+        forecastDays,
+      );
+      cityLabel = weatherData?.summary?.city || `Lat:${finalLat},Lon:${finalLon}`;
+    }
+
     res.json({
       success: true,
-      city,
+      city: cityLabel,
       forecast: weatherData.forecast,
       summary: weatherData.summary
     });

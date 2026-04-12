@@ -245,7 +245,7 @@ export default function PastTrends({ onLogout }) {
   // Interactive Chart Component
   const InteractiveChart = ({ data, type = 'yield' }) => {
     const maxValue = type === 'yield' ? getMaxYield() : getMaxProduction();
-    const chartHeight = 300;
+    const chartHeight = 390;
     
     return (
       <div style={{ 
@@ -265,7 +265,7 @@ export default function PastTrends({ onLogout }) {
           flexDirection: 'column',
           justifyContent: 'space-between',
           fontSize: '0.75rem',
-          color: '#94a3b8'
+          color: '#64748b'
         }}>
           <span>{maxValue.toFixed(1)}</span>
           <span>{(maxValue * 0.75).toFixed(1)}</span>
@@ -319,17 +319,17 @@ export default function PastTrends({ onLogout }) {
                       bottom: '100%',
                       left: '50%',
                       transform: 'translateX(-50%)',
-                      background: 'rgba(15, 23, 42, 0.95)',
-                      backdropFilter: 'blur(10px)',
+                      background: 'rgba(255, 255, 255, 0.95)',
+                      backdropFilter: 'blur(8px)',
                       padding: '0.5rem 0.75rem',
                       borderRadius: '8px',
-                      border: '1px solid rgba(34, 197, 94, 0.3)',
+                      border: '1px solid rgba(34, 197, 94, 0.35)',
                       fontSize: '0.75rem',
                       fontWeight: '600',
-                      color: '#22c55e',
+                      color: '#1f513c',
                       whiteSpace: 'nowrap',
                       marginBottom: '8px',
-                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
+                      boxShadow: '0 10px 20px rgba(15, 23, 42, 0.12)'
                     }}
                   >
                     {value.toFixed(2)} {type === 'yield' ? 't/ha' : 'M tons'}
@@ -354,7 +354,7 @@ export default function PastTrends({ onLogout }) {
                 flex: 1,
                 textAlign: 'center',
                 fontSize: '0.7rem',
-                color: hoveredYear === item.year ? '#22c55e' : '#64748b',
+                color: hoveredYear === item.year ? '#1f513c' : '#64748b',
                 fontWeight: hoveredYear === item.year ? '600' : '400',
                 transition: 'all 0.3s ease'
               }}
@@ -377,8 +377,8 @@ export default function PastTrends({ onLogout }) {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
-      color: '#e2e8f0',
+      background: 'linear-gradient(135deg, #f7fbf8 0%, #edf5f0 50%, #f7fbf8 100%)',
+      color: '#1f2937',
       position: 'relative',
       overflow: 'hidden'
     }}>
@@ -400,14 +400,14 @@ export default function PastTrends({ onLogout }) {
         }
 
         ::-webkit-scrollbar-track {
-          background: rgba(15, 23, 42, 0.5);
+          background: #e7efe9;
           border-radius: 10px;
         }
 
         ::-webkit-scrollbar-thumb {
           background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
           border-radius: 10px;
-          border: 2px solid rgba(15, 23, 42, 0.5);
+          border: 2px solid #e7efe9;
         }
 
         ::-webkit-scrollbar-thumb:hover {
@@ -431,15 +431,15 @@ export default function PastTrends({ onLogout }) {
         }
 
         .glassmorphism {
-          background: rgba(15, 23, 42, 0.7);
-          backdrop-filter: blur(20px) saturate(180%);
-          border: 1px solid rgba(34, 197, 94, 0.2);
+          background: rgba(255, 255, 255, 0.86);
+          backdrop-filter: blur(16px) saturate(160%);
+          border: 1px solid rgba(34, 197, 94, 0.25);
         }
 
         .glassmorphism-light {
-          background: rgba(30, 41, 59, 0.6);
-          backdrop-filter: blur(15px) saturate(150%);
-          border: 1px solid rgba(34, 197, 94, 0.15);
+          background: rgba(255, 255, 255, 0.7);
+          backdrop-filter: blur(12px) saturate(140%);
+          border: 1px solid rgba(34, 197, 94, 0.18);
         }
 
         .glow-border {
@@ -530,10 +530,10 @@ export default function PastTrends({ onLogout }) {
           right: 0,
           zIndex: 100,
           padding: '1.5rem 3rem',
-          background: 'rgba(15, 23, 42, 0.8)',
-          backdropFilter: 'blur(20px)',
+          background: 'rgba(255, 255, 255, 0.9)',
+          backdropFilter: 'blur(16px)',
           borderBottom: '1px solid rgba(34, 197, 94, 0.2)',
-          boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)'
+          boxShadow: '0 8px 24px rgba(15, 23, 42, 0.08)'
         }}
       >
         <div style={{
@@ -556,10 +556,10 @@ export default function PastTrends({ onLogout }) {
             }}
           >
             <div style={{
-              background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(22, 163, 74, 0.1) 100%)',
+              background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.18) 0%, rgba(22, 163, 74, 0.1) 100%)',
               padding: '0.75rem',
               borderRadius: '50%',
-              border: '2px solid rgba(34, 197, 94, 0.3)',
+              border: '2px solid rgba(34, 197, 94, 0.25)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
@@ -570,7 +570,7 @@ export default function PastTrends({ onLogout }) {
               <h1 style={{
                 fontSize: '1.5rem',
                 fontWeight: '700',
-                color: '#22c55e',
+                color: '#1f513c',
                 letterSpacing: '2px',
                 margin: 0
               }}>
@@ -578,7 +578,7 @@ export default function PastTrends({ onLogout }) {
               </h1>
               <p style={{
                 fontSize: '0.75rem',
-                color: '#94a3b8',
+                color: '#6b7280',
                 letterSpacing: '3px',
                 textTransform: 'uppercase',
                 margin: 0
@@ -595,9 +595,9 @@ export default function PastTrends({ onLogout }) {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                background: 'rgba(34, 197, 94, 0.15)',
+                background: 'rgba(34, 197, 94, 0.12)',
                 border: '1px solid rgba(34, 197, 94, 0.3)',
-                color: '#22c55e',
+                color: '#1f513c',
                 padding: '0.75rem 1.5rem',
                 borderRadius: '12px',
                 cursor: 'pointer',
@@ -606,11 +606,11 @@ export default function PastTrends({ onLogout }) {
                 transition: 'all 0.3s ease'
               }}
               onMouseEnter={(e) => {
-                e.target.style.background = 'rgba(34, 197, 94, 0.25)';
+                e.target.style.background = 'rgba(34, 197, 94, 0.18)';
                 e.target.style.transform = 'translateY(-2px)';
               }}
               onMouseLeave={(e) => {
-                e.target.style.background = 'rgba(34, 197, 94, 0.15)';
+                e.target.style.background = 'rgba(34, 197, 94, 0.12)';
                 e.target.style.transform = 'translateY(0)';
               }}
             >
@@ -647,7 +647,7 @@ export default function PastTrends({ onLogout }) {
           </h2>
           <p style={{
             fontSize: '1.1rem',
-            color: '#94a3b8',
+            color: '#64748b',
             fontWeight: '500'
           }}>
             Comprehensive climate impact data from 2013-2023
@@ -698,11 +698,11 @@ export default function PastTrends({ onLogout }) {
                     style={{
                       background: selectedCrop === cropKey
                         ? 'linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(22, 163, 74, 0.3) 100%)'
-                        : 'rgba(30, 41, 59, 0.6)',
+                        : '#ffffff',
                       border: selectedCrop === cropKey
                         ? '2px solid #22c55e'
                         : '1px solid rgba(71, 85, 105, 0.5)',
-                      color: selectedCrop === cropKey ? '#22c55e' : '#cbd5e1',
+                      color: selectedCrop === cropKey ? '#1f513c' : '#334155',
                       padding: '1rem 1.25rem',
                       borderRadius: '12px',
                       cursor: 'pointer',
@@ -777,7 +777,7 @@ export default function PastTrends({ onLogout }) {
                       </div>
                       <div style={{
                         fontSize: '0.75rem',
-                        color: '#94a3b8',
+                        color: '#64748b',
                         textTransform: 'uppercase',
                         letterSpacing: '1px'
                       }}>
@@ -831,7 +831,7 @@ export default function PastTrends({ onLogout }) {
                       <Loader size={48} color="#22c55e" style={{
                         animation: 'spin 1s linear infinite'
                       }} />
-                      <p style={{ color: '#94a3b8', fontSize: '1rem' }}>
+                      <p style={{ color: '#64748b', fontSize: '1rem' }}>
                         Loading {currentCrop.name} data...
                       </p>
                     </div>
@@ -913,7 +913,7 @@ export default function PastTrends({ onLogout }) {
                       </h4>
                     </div>
                     <p style={{
-                      color: '#cbd5e1',
+                      color: '#475569',
                       fontSize: '0.9rem',
                       lineHeight: '1.6',
                       marginBottom: '0.75rem'
@@ -923,7 +923,7 @@ export default function PastTrends({ onLogout }) {
                       </span>
                     </p>
                     <p style={{
-                      color: '#94a3b8',
+                      color: '#64748b',
                       fontSize: '0.85rem',
                       lineHeight: '1.5'
                     }}>
@@ -975,7 +975,7 @@ export default function PastTrends({ onLogout }) {
                       </h4>
                     </div>
                     <p style={{
-                      color: '#cbd5e1',
+                      color: '#475569',
                       fontSize: '0.9rem',
                       lineHeight: '1.6',
                       marginBottom: '0.75rem'
@@ -985,7 +985,7 @@ export default function PastTrends({ onLogout }) {
                       </span>
                     </p>
                     <p style={{
-                      color: '#94a3b8',
+                      color: '#64748b',
                       fontSize: '0.85rem',
                       lineHeight: '1.5'
                     }}>
@@ -1046,7 +1046,7 @@ export default function PastTrends({ onLogout }) {
                         transition={{ delay: 0.7 + index * 0.1 }}
                         style={{
                           padding: '1rem 1.25rem',
-                          background: 'rgba(30, 41, 59, 0.5)',
+                          background: '#ffffff',
                           border: '1px solid rgba(34, 197, 94, 0.2)',
                           borderRadius: '12px',
                           display: 'flex',
@@ -1067,7 +1067,7 @@ export default function PastTrends({ onLogout }) {
                           flexShrink: 0
                         }} />
                         <p style={{
-                          color: '#cbd5e1',
+                          color: '#475569',
                           fontSize: '0.95rem',
                           margin: 0,
                           lineHeight: '1.5'
@@ -1104,7 +1104,7 @@ export default function PastTrends({ onLogout }) {
                     💡 Recommendations for {currentCrop.name}
                   </h3>
                   <p style={{
-                    color: '#cbd5e1',
+                    color: '#475569',
                     fontSize: '1rem',
                     lineHeight: '1.7',
                     marginBottom: '1rem'
@@ -1114,7 +1114,7 @@ export default function PastTrends({ onLogout }) {
                     {currentCrop.climateInsights.temperature.optimal}</strong> and maintaining appropriate moisture levels.
                   </p>
                   <p style={{
-                    color: '#94a3b8',
+                    color: '#64748b',
                     fontSize: '0.95rem',
                     lineHeight: '1.6',
                     margin: 0

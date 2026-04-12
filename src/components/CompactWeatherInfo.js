@@ -32,15 +32,28 @@ const pickCurrentWeather = (data) => {
   };
 };
 
-export default function CompactWeatherInfo({ city = '', title, subtitle, variant = 'compact' }) {
+export default function CompactWeatherInfo({ city = '', title, subtitle, variant = 'compact', weatherData = null, loadingExternal = false }) {
   const { language } = useLanguage();
   const tr = (en, ur) => (language === 'ur' ? ur : en);
   const [loading, setLoading] = useState(false);
   const [weather, setWeather] = useState(null);
   const normalizedCity = String(city || '').trim();
+  const hasExternalWeather = weatherData !== null;
+  const displayCity = String((weatherData && weatherData.city) || normalizedCity).trim();
   const isProminent = variant === 'prominent';
+  const isLoading = hasExternalWeather ? loadingExternal : loading;
 
   useEffect(() => {
+    if (!hasExternalWeather) return;
+    setWeather(pickCurrentWeather(weatherData));
+  }, [hasExternalWeather, weatherData]);
+
+  useEffect(() => {
+    if (hasExternalWeather) {
+      setLoading(false);
+      return;
+    }
+
     if (!normalizedCity) {
       setWeather(null);
       return;
@@ -65,7 +78,7 @@ export default function CompactWeatherInfo({ city = '', title, subtitle, variant
     return () => {
       isMounted = false;
     };
-  }, [normalizedCity]);
+  }, [hasExternalWeather, normalizedCity]);
 
   const weatherSummary = useMemo(() => {
     if (!weather) return null;
@@ -123,18 +136,18 @@ export default function CompactWeatherInfo({ city = '', title, subtitle, variant
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
         <div>
           <div style={titleStyle}>{title || tr('Current Weather', 'موجودہ موسم')}</div>
-          <div style={subtitleStyle}>{subtitle || normalizedCity || tr('Selected city', 'منتخب شہر')}</div>
+          <div style={subtitleStyle}>{subtitle || displayCity || tr('Selected city', 'منتخب شہر')}</div>
         </div>
-        <div style={subtitleStyle}>{normalizedCity || tr('City unavailable', 'شہر دستیاب نہیں')}</div>
+        <div style={subtitleStyle}>{displayCity || tr('City unavailable', 'شہر دستیاب نہیں')}</div>
       </div>
 
-      {loading && <div style={{ fontSize: isProminent ? '0.9rem' : '0.8rem', marginTop: '8px' }}>{tr('Loading weather...', 'موسم لوڈ ہو رہا ہے...')}</div>}
+      {isLoading && <div style={{ fontSize: isProminent ? '0.9rem' : '0.8rem', marginTop: '8px' }}>{tr('Loading weather...', 'موسم لوڈ ہو رہا ہے...')}</div>}
 
-      {!loading && !weatherSummary && (
+      {!isLoading && !weatherSummary && (
         <div style={{ fontSize: isProminent ? '0.9rem' : '0.8rem', marginTop: '8px' }}>{tr('Weather data unavailable.', 'موسم کا ڈیٹا دستیاب نہیں۔')}</div>
       )}
 
-      {!loading && weatherSummary && (
+      {!isLoading && weatherSummary && (
         <>
           <div
             style={{

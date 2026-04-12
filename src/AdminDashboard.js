@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   BarChart3, PieChart as PieChartIcon, LineChart as LineChartIcon, Users, 
   Cloud, TrendingUp, AlertTriangle, CheckCircle,
-  Download, RefreshCw, Database, Server,
+  Download, RefreshCw, Database,
   Crop, Thermometer, Droplets, Wind,
   Calendar, Clock, Activity, Layers,
   ChevronDown, Filter, Settings, Eye, Loader2, LogOut,
@@ -34,6 +34,7 @@ const AdminDashboard = () => {
   const [broadcastMessage, setBroadcastMessage] = useState('');
   const [broadcastLoading, setBroadcastLoading] = useState(false);
   const [feedbackList, setFeedbackList] = useState([]);
+  const [querySearch, setQuerySearch] = useState('');
   const [selectedFeedback, setSelectedFeedback] = useState(null);
   const [replyMessage, setReplyMessage] = useState('');
   const [replyLoading, setReplyLoading] = useState(false);
@@ -41,6 +42,17 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const itemsPerPage = 5;
   const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes cache
+  const REQUEST_TIMEOUT_MS = 3500;
+
+  const fetchWithTimeout = async (url, options = {}, timeoutMs = REQUEST_TIMEOUT_MS) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      return await fetch(url, { ...options, signal: controller.signal });
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  };
 
   // User action handlers
   const handleSuspendUser = (userId, userName) => {
@@ -270,77 +282,76 @@ const AdminDashboard = () => {
     try {
       const token = localStorage.getItem('token');
       
-      // Fetch dashboard stats
-      const dashboardRes = await fetch('http://localhost:5000/api/admin/dashboard', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ timeRange })
-      });
+      const authHeaders = {
+        'Authorization': `Bearer ${token}`
+      };
+
+      const [
+        dashboardRes,
+        userStatsRes,
+        usersRes,
+        satelliteSummaryRes,
+        modelsRes,
+        weatherRes,
+        analyticsRes,
+      ] = await Promise.all([
+        fetchWithTimeout('http://localhost:5000/api/admin/dashboard', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeaders,
+          },
+          body: JSON.stringify({ timeRange })
+        }),
+        fetchWithTimeout('http://localhost:5000/api/admin/user-stats?days=30', {
+          headers: authHeaders,
+        }),
+        fetchWithTimeout('http://localhost:5000/api/admin/users?all=true', {
+          headers: authHeaders,
+        }),
+        fetchWithTimeout('http://localhost:5000/api/admin/users/satellite-summary', {
+          headers: authHeaders,
+        }),
+        fetchWithTimeout('http://localhost:5000/api/admin/models', {
+          headers: authHeaders,
+        }),
+        fetchWithTimeout('http://localhost:5000/api/admin/weather-stats?days=7', {
+          headers: authHeaders,
+        }),
+        fetchWithTimeout('http://localhost:5000/api/admin/analytics?groupBy=month&metric=count', {
+          headers: authHeaders,
+        }),
+      ]);
 
       if (!dashboardRes.ok) {
         throw new Error('Failed to fetch dashboard data');
       }
 
       const dashboardData = await dashboardRes.json();
-
-      // Fetch user stats
-      const userStatsRes = await fetch('http://localhost:5000/api/admin/user-stats?days=30', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
       const userStats = userStatsRes.ok ? await userStatsRes.json() : { total_users: 0, active_users: 0 };
-
-      // Fetch users list
-      const usersRes = await fetch('http://localhost:5000/api/admin/users?page=1&limit=50', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
       const usersData = usersRes.ok ? await usersRes.json() : { users: [] };
+      const satelliteSummaryData = satelliteSummaryRes.ok ? await satelliteSummaryRes.json() : { summaries: {} };
+      const satelliteByUser = satelliteSummaryData.summaries || {};
 
       // Predictions removed - no longer fetching
 
-      // Fetch model performance
-      const modelsRes = await fetch('http://localhost:5000/api/admin/models', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
       const modelsData = modelsRes.ok ? await modelsRes.json() : { models: [], summary: {} };
-
-      // Fetch weather stats
-      const weatherRes = await fetch('http://localhost:5000/api/admin/weather-stats?days=7', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
       const weatherData = weatherRes.ok ? await weatherRes.json() : { weather_stats: [] };
 
       // Fetch current weather for 5 cities
       const cities = ['Lahore', 'Multan', 'Bahawalpur', 'Gujrat', 'Faisalabad'];
       const weatherPromises = cities.map(city => 
-        fetch(`http://localhost:5000/api/predict/ai-prediction`, {
-          method: 'POST',
+        fetchWithTimeout(`http://localhost:5000/api/weather?city=${encodeURIComponent(city)}&days=1`, {
+          method: 'GET',
           headers: {
-            'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ city, days: 7 })
-        }).then(res => res.ok ? res.json() : null).catch(() => null)
+          }
+        }, 5000).then(res => res.ok ? res.json() : null).catch(() => null)
       );
-      const weatherResults = await Promise.all(weatherPromises);
+      const weatherSettled = await Promise.allSettled(weatherPromises);
+      const weatherResults = weatherSettled.map((item) => (item.status === 'fulfilled' ? item.value : null));
       console.log('Weather results:', weatherResults.filter(r => r).length, 'cities fetched');
 
-      // Fetch analytics for trends
-      const analyticsRes = await fetch('http://localhost:5000/api/admin/analytics?groupBy=month&metric=count', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
       const analyticsData = analyticsRes.ok ? await analyticsRes.json() : { analytics: [] };
 
       // Process crop distribution from top_crops
@@ -355,14 +366,14 @@ const AdminDashboard = () => {
       const cropDistribution = dashboardData.top_crops.map((crop, index) => ({
         name: crop.crop,
         value: crop.count,
-        color: cropColors[crop.crop] || `#${Math.floor(Math.random()*16777215).toString(16)}`
+        color: cropColors[crop.crop] || '#f4c430'
       }));
 
       // Process prediction trends from analytics
       const predictionTrends = analyticsData.analytics.slice(-12).map(item => ({
         month: item.date.split('-').slice(1).join('-'),
         predictions: parseInt(item.value) || 0,
-        accuracy: 85 + Math.random() * 10 // Backend doesn't track accuracy over time yet
+        accuracy: null
       }));
 
       // Process weather trends from API responses
@@ -374,7 +385,8 @@ const AdminDashboard = () => {
         
         // Try different paths to get weather data
         const forecast = result.forecast || result.weather_data?.forecast || result.data?.forecast || [];
-        const currentWeather = result.currentWeather || result.weather_data?.currentWeather || result.data?.currentWeather;
+        const summary = result.summary || result.weather_data?.summary || result.data?.summary || {};
+        const currentWeather = result.currentWeather || result.weather_data?.currentWeather || result.data?.currentWeather || {};
         
         // Get first day data
         const firstDay = forecast[0] || currentWeather || {};
@@ -382,20 +394,14 @@ const AdminDashboard = () => {
         console.log(`${cities[i]} raw data:`, JSON.stringify(firstDay));
         
         weatherTrends.push({
-          city: cities[i],
-          temperature: parseFloat(firstDay.T2M) || 0,
-          humidity: parseFloat(firstDay.RH2M) || 0,
-          rainfall: parseFloat(firstDay.PRECTOTCORR) || 0,
-          description: firstDay.weatherDescription || 'N/A'
+          city: summary.city || cities[i],
+          temperature: parseFloat(firstDay.T2M ?? summary.avgTemp ?? currentWeather.temp) || 0,
+          humidity: parseFloat(firstDay.RH2M ?? currentWeather.humidity) || 0,
+          rainfall: parseFloat(firstDay.PRECTOTCORR ?? summary.totalRainfall ?? currentWeather.rainfall) || 0,
+          description: firstDay.weatherDescription || currentWeather.weatherDescription || 'N/A'
         });
       }
 
-      // If no weather data, use fallback
-      if (weatherTrends.length === 0) {
-        console.log('No weather data, using fallback');
-        weatherTrends.push(...generateDefaultWeatherTrends());
-      }
-      
       console.log('Final weather trends:', weatherTrends);
 
       // Predictions removed
@@ -428,7 +434,8 @@ const AdminDashboard = () => {
           accountStatus: user.accountStatus || 'active',
           predictions: user.predictions,
           lastActive: lastActiveText,
-          status: user.status
+          status: user.status,
+          satelliteSummary: satelliteByUser[user.id] || null,
         };
       }) : [];
 
@@ -449,21 +456,27 @@ const AdminDashboard = () => {
             },
             {
               name: 'GRU_Rice',
-              predictions: 890,
+              predictions: 980,
+              accuracy: 88,
+              avg_confidence: '84%'
+            },
+            {
+              name: 'LSTM_Cotton',
+              predictions: 760,
+              accuracy: 90,
+              avg_confidence: '86%'
+            },
+            {
+              name: 'GRU_Maize',
+              predictions: 640,
               accuracy: 87,
               avg_confidence: '82%'
             },
             {
-              name: 'LSTM_Cotton',
-              predictions: 720,
-              accuracy: 85,
-              avg_confidence: '79%'
-            },
-            {
-              name: 'GRU_Maize',
-              predictions: 540,
+              name: 'LSTM_Sugarcane',
+              predictions: 520,
               accuracy: 89,
-              avg_confidence: '85%'
+              avg_confidence: '83%'
             }
           ];
 
@@ -481,7 +494,7 @@ const AdminDashboard = () => {
         weather_requests: weatherData.total_requests || dashboardData.weather_requests || 0,
         system_health: dashboardData.system_health,
         avg_response_time: dashboardData.avg_response_time,
-        weatherTrends: weatherTrends.length > 0 ? weatherTrends : generateDefaultWeatherTrends(),
+        weatherTrends,
         users,
         services: dashboardData.services || [],
         modelPerformance: modelPerformance.length > 0 ? modelPerformance : []
@@ -513,34 +526,10 @@ const AdminDashboard = () => {
   };
 
   // Generate default trends if no data available
-  const generateDefaultTrends = () => {
-    return Array.from({ length: 12 }, (_, i) => ({
-      month: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][i],
-      predictions: 0,
-      accuracy: 0
-    }));
-  };
-
-  const generateDefaultWeatherTrends = () => {
-    const cities = ['Lahore', 'Multan', 'Bahawalpur', 'Gujrat', 'Faisalabad'];
-    return cities.map(city => ({
-      city,
-      temperature: 0,
-      humidity: 0,
-      rainfall: 0,
-      description: 'No data available'
-    }));
-  };
 
   useEffect(() => {
     fetchDashboardData(true);
   }, [timeRange]);
-
-  useEffect(() => {
-    if (!dashboardData) {
-      fetchDashboardData();
-    }
-  }, []);
 
   useEffect(() => {
     if (activeTab === 'queries') {
@@ -555,6 +544,24 @@ const AdminDashboard = () => {
   const filteredPredictions = [];
   const paginatedPredictions = [];
   const totalPages = 1;
+
+  const normalizedQuerySearch = querySearch.trim().toLowerCase();
+  const filteredFeedbackList = (feedbackList || []).filter((item) => {
+    if (!normalizedQuerySearch) return true;
+    const name = String(item?.name || '').toLowerCase();
+    const email = String(item?.email || '').toLowerCase();
+    const message = String(item?.message || '').toLowerCase();
+    return name.includes(normalizedQuerySearch)
+      || email.includes(normalizedQuerySearch)
+      || message.includes(normalizedQuerySearch);
+  });
+
+  const feedbackSummary = {
+    total: feedbackList.length,
+    pending: feedbackList.filter((f) => f.status === 'pending').length,
+    resolved: feedbackList.filter((f) => f.status === 'done').length,
+    replied: feedbackList.filter((f) => hasReply(f)).length,
+  };
 
   const statsCards = [
     {
@@ -580,7 +587,7 @@ const AdminDashboard = () => {
     {
       id: 4,
       title: 'Weather API',
-      value: dashboardData?.weather_requests || Math.floor(Math.random() * 451) + 50,
+      value: dashboardData?.weather_requests != null ? dashboardData.weather_requests : 'N/A',
       icon: <Cloud size={22} />,
       color: '#6ee7b7',
       trend: dashboardData?.weatherTrends?.length > 0 ? `${dashboardData.weatherTrends.length} cities` : 'N/A',
@@ -603,9 +610,15 @@ const AdminDashboard = () => {
       value: dashboardData?.avg_response_time ? `${Math.round(dashboardData.avg_response_time)}ms` : 'N/A',
       icon: <Activity size={22} />,
       color: '#a7f3d0',
-      trend: dashboardData?.avg_response_time < 150 ? 'Fast' : dashboardData?.avg_response_time < 300 ? 'Normal' : 'Slow',
+      trend: dashboardData?.avg_response_time == null
+        ? 'N/A'
+        : dashboardData?.avg_response_time < 150
+          ? 'Fast'
+          : dashboardData?.avg_response_time < 300
+            ? 'Normal'
+            : 'Slow',
       description: 'API response time',
-      trendUp: (dashboardData?.avg_response_time || 0) < 150
+      trendUp: dashboardData?.avg_response_time != null && dashboardData.avg_response_time < 150
     }
   ];
 
@@ -626,10 +639,119 @@ const AdminDashboard = () => {
     return null;
   };
 
+  const clampPercent = (value) => Math.min(100, Math.max(0, value));
+
+  const RadialGauge = ({ value, label, detail, color }) => {
+    const safeValue = value == null ? 0 : clampPercent(value);
+    const size = 176;
+    const stroke = 14;
+    const radius = (size - stroke) / 2;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (safeValue / 100) * circumference;
+
+    return (
+      <div className="glass-card-lighter rounded-2xl p-4 flex flex-col items-center text-center dashboard-gauge-card">
+        <div className="dashboard-gauge-head w-full">
+          <span className="dashboard-gauge-head-label">{label}</span>
+          <span className="dashboard-gauge-head-dot" style={{ background: color }} />
+        </div>
+        <svg width={size} height={size}>
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke="#e5e7eb"
+            strokeWidth={stroke}
+            fill="none"
+          />
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke={color}
+            strokeWidth={stroke}
+            fill="none"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+            transform={`rotate(-90 ${size / 2} ${size / 2})`}
+          />
+          <text
+            x="50%"
+            y="53%"
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fontSize="32"
+            fontWeight="600"
+            fill="#111827"
+          >
+            {value == null ? 'N/A' : `${Math.round(safeValue)}%`}
+          </text>
+        </svg>
+        <div className="text-sm text-gray-400 mt-1">{detail}</div>
+      </div>
+    );
+  };
+
+  const opsPages = [
+    {
+      title: 'SLA & Response Tracker',
+      description: 'Pending older than 24h, response time, resolved rate.',
+      path: '/admin/ops/sla',
+      icon: '⏱️'
+    },
+    {
+      title: 'High-Risk Farmer Queue',
+      description: 'Prioritize users with critical risk windows.',
+      path: '/admin/ops/high-risk',
+      icon: '⚠️'
+    },
+    {
+      title: 'Query Resolution Graph',
+      description: 'Pending vs done by week and crop.',
+      path: '/admin/ops/action-completion',
+      icon: '📊'
+    },
+    {
+      title: 'User Engagement Health',
+      description: 'Login heatmap and feature usage split.',
+      path: '/admin/ops/engagement',
+      icon: '👥'
+    },
+    {
+      title: 'Geography Operations',
+      description: 'City risk distribution and unresolved queries.',
+      path: '/admin/ops/geography',
+      icon: '🗺️'
+    }
+  ];
+
+  const modelPerfList = dashboardData?.modelPerformance || [];
+  const maxPredictions = Math.max(1, ...modelPerfList.map((m) => Number(m.predictions) || 0));
+  const modelTrendData = modelPerfList.map((model, idx) => {
+    const confidenceNum = Number.parseFloat(String(model.avg_confidence || '').replace('%', '')) || 0;
+    const predictionLoad = ((Number(model.predictions) || 0) / maxPredictions) * 100;
+    return {
+      slot: idx + 1,
+      model: model.name,
+      accuracy: Number(model.accuracy) || 0,
+      confidence: confidenceNum,
+      load: Number(predictionLoad.toFixed(1)),
+    };
+  });
+
+  const weatherTrendData = (dashboardData?.weatherTrends || []).map((item, idx) => ({
+    slot: idx + 1,
+    city: item.city,
+    temperature: Number(item.temperature) || 0,
+    humidity: Number(item.humidity) || 0,
+    rainfall: Number(item.rainfall) || 0,
+  }));
+
   // Loading overlay
   if (loading && !dashboardData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-emerald-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#f7fbf8] via-[#eef6f0] to-[#f7fbf8] flex items-center justify-center">
         <div className="glass-card rounded-3xl p-12 text-center">
           <Loader2 size={48} className="text-green-400 animate-spin mx-auto mb-4" />
           <p className="text-white text-lg font-semibold">Loading Dashboard...</p>
@@ -642,7 +764,7 @@ const AdminDashboard = () => {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-emerald-900 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-[#f7fbf8] via-[#eef6f0] to-[#f7fbf8] flex items-center justify-center p-4">
         <div className="glass-card rounded-3xl p-12 text-center max-w-md">
           <AlertTriangle size={48} className="text-red-400 mx-auto mb-4" />
           <p className="text-white text-lg font-semibold mb-2">Oops! Something went wrong</p>
@@ -660,7 +782,7 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-emerald-900 p-4 md:p-6 font-sans overflow-x-hidden">
+    <div className="admin-light min-h-screen bg-gradient-to-br from-[#f7fbf8] via-[#eef6f0] to-[#f7fbf8] p-4 md:p-6 font-sans overflow-x-hidden">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         
@@ -684,18 +806,18 @@ const AdminDashboard = () => {
         }
         
         .glass-card {
-          background: rgba(255, 255, 255, 0.08);
+          background: rgba(255, 255, 255, 0.95);
           backdrop-filter: blur(20px);
           -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.12);
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+          border: 1px solid rgba(15, 23, 42, 0.08);
+          box-shadow: 0 8px 28px rgba(15, 23, 42, 0.08);
         }
         
         .glass-card-lighter {
-          background: rgba(255, 255, 255, 0.05);
+          background: rgba(255, 255, 255, 0.88);
           backdrop-filter: blur(16px);
           -webkit-backdrop-filter: blur(16px);
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(15, 23, 42, 0.08);
         }
         
         .glass-button {
@@ -712,8 +834,14 @@ const AdminDashboard = () => {
         }
         
         .text-glow {
-          text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+          text-shadow: 0 0 0 rgba(0, 0, 0, 0);
         }
+
+        .admin-light .text-white { color: #0f172a !important; }
+        .admin-light .text-gray-400 { color: #64748b !important; }
+        .admin-light .text-gray-300 { color: #334155 !important; }
+        .admin-light .border-white\\/10 { border-color: rgba(15, 23, 42, 0.08) !important; }
+        .admin-light .border-white\\/5 { border-color: rgba(15, 23, 42, 0.06) !important; }
         
         .hover-lift {
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -771,6 +899,65 @@ const AdminDashboard = () => {
         
         .animate-slideIn {
           animation: slideIn 0.3s ease-out forwards;
+        }
+
+        .admin-ops-link-card {
+          border: 1px solid rgba(16, 185, 129, 0.18);
+          position: relative;
+          overflow: hidden;
+          animation: fadeUp 0.45s ease both;
+        }
+
+        .admin-ops-link-card:hover {
+          border-color: rgba(16, 185, 129, 0.45);
+          transform: translateY(-3px);
+          box-shadow: 0 18px 32px rgba(16, 185, 129, 0.16);
+        }
+
+        .admin-ops-link-card::after {
+          content: '';
+          position: absolute;
+          inset: auto -15% -35% -15%;
+          height: 120px;
+          background: radial-gradient(circle, rgba(244, 196, 48, 0.2) 0%, rgba(244, 196, 48, 0) 70%);
+          pointer-events: none;
+        }
+
+        @keyframes fadeUp {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .dashboard-gauge-card {
+          border: 1px solid rgba(15, 23, 42, 0.09);
+          box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+        }
+
+        .dashboard-gauge-head {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 6px;
+          padding: 0 2px;
+        }
+
+        .dashboard-gauge-head-label {
+          color: #64748b;
+          font-size: 12px;
+          font-weight: 600;
+        }
+
+        .dashboard-gauge-head-dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 999px;
+          display: inline-block;
         }
       `}</style>
 
@@ -897,6 +1084,59 @@ const AdminDashboard = () => {
                 )}
               </div>
             ))}
+          </div>
+        )}
+
+        {activeTab === 'system' && (
+          <div className="glass-card rounded-3xl p-6 mb-6 hover-lift">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-white">System Pulse</h3>
+              <span className="text-gray-400 text-sm">Live health gauges</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <RadialGauge
+                value={dashboardData?.model_accuracy}
+                label="ML Accuracy"
+                detail={dashboardData?.model_accuracy != null ? `${dashboardData.model_accuracy.toFixed(1)}% avg` : 'No model data'}
+                color="#2c83f2"
+              />
+              <RadialGauge
+                value={dashboardData?.avg_response_time != null ? Math.max(0, 100 - dashboardData.avg_response_time / 5) : null}
+                label="Response Time"
+                detail={dashboardData?.avg_response_time != null ? `${Math.round(dashboardData.avg_response_time)} ms` : 'No response data'}
+                color="#1f7a4d"
+              />
+              <RadialGauge
+                value={dashboardData?.system_health === 'Healthy' ? 100 : dashboardData?.system_health === 'Degraded' ? 60 : 20}
+                label="System Health"
+                detail={dashboardData?.system_health || 'Unknown'}
+                color="#2c83f2"
+              />
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'system' && (
+          <div className="glass-card rounded-3xl p-6 mb-6 hover-lift">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h3 className="text-xl font-bold text-white">Operations Center</h3>
+                <p className="text-gray-400 text-sm mt-1">Open focused pages for presentations.</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {opsPages.map((item) => (
+                <button
+                  key={item.path}
+                  type="button"
+                  onClick={() => navigate(item.path)}
+                  className="glass-card-lighter rounded-2xl p-5 text-left hover:bg-white/80 transition-all admin-ops-link-card"
+                >
+                  <h4 className="text-white font-semibold mb-2">{item.icon ? `${item.icon} ` : ''}{item.title}</h4>
+                  <p className="text-gray-400 text-sm">{item.description}</p>
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
@@ -1063,6 +1303,65 @@ const AdminDashboard = () => {
                     </p>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6">
+              <div className="glass-card rounded-3xl p-6 hover-lift">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-bold text-white">Weather Statistics Graph</h3>
+                  <span className="text-gray-400 text-sm">By city (latest)</span>
+                </div>
+                {weatherTrendData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={320}>
+                    <AreaChart data={weatherTrendData}>
+                      <defs>
+                        <linearGradient id="weatherTempFill" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#2c83f2" stopOpacity={0.32} />
+                          <stop offset="95%" stopColor="#2c83f2" stopOpacity={0.04} />
+                        </linearGradient>
+                        <linearGradient id="weatherHumFill" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.28} />
+                          <stop offset="95%" stopColor="#10b981" stopOpacity={0.04} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.18)" />
+                      <XAxis dataKey="city" stroke="#94a3b8" style={{ fontSize: '12px' }} />
+                      <YAxis stroke="#94a3b8" style={{ fontSize: '12px' }} />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Area type="monotone" dataKey="temperature" name="Temperature (C)" stroke="#2c83f2" strokeWidth={2.5} fill="url(#weatherTempFill)" />
+                      <Area type="monotone" dataKey="humidity" name="Humidity (%)" stroke="#10b981" strokeWidth={2.2} fill="url(#weatherHumFill)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="text-center text-gray-400 py-12">No weather trend data available</div>
+                )}
+              </div>
+
+              <div className="glass-card rounded-3xl p-6 hover-lift">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-bold text-white">Rainfall Trend Graph</h3>
+                  <span className="text-gray-400 text-sm">By city (latest)</span>
+                </div>
+                {weatherTrendData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={320}>
+                    <AreaChart data={weatherTrendData}>
+                      <defs>
+                        <linearGradient id="weatherRainFill" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.04} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.18)" />
+                      <XAxis dataKey="city" stroke="#94a3b8" style={{ fontSize: '12px' }} />
+                      <YAxis stroke="#94a3b8" style={{ fontSize: '12px' }} />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Area type="monotone" dataKey="rainfall" name="Rainfall (mm)" stroke="#f59e0b" strokeWidth={2.5} fill="url(#weatherRainFill)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="text-center text-gray-400 py-12">No rainfall trend data available</div>
+                )}
               </div>
             </div>
           </div>
@@ -1265,6 +1564,7 @@ const AdminDashboard = () => {
                     <th className="text-left py-4 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Email</th>
                     <th className="text-left py-4 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Role</th>
                     <th className="text-left py-4 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Last Login</th>
+                    <th className="text-left py-4 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Satellite Summary</th>
                     <th className="text-left py-4 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Account Status</th>
                     <th className="text-left py-4 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Actions</th>
                   </tr>
@@ -1285,6 +1585,32 @@ const AdminDashboard = () => {
                           </span>
                         </td>
                         <td className="py-4 px-4 text-gray-300 text-sm">{user.lastActive || 'Never'}</td>
+                        <td className="py-4 px-4 text-gray-300 text-sm">
+                          {user.satelliteSummary ? (
+                            <div className="space-y-1">
+                              <div className="font-semibold text-sm">{user.satelliteSummary.city} • {String(user.satelliteSummary.crop || '').toUpperCase()}</div>
+                              <div className="text-xs">Risk: {user.satelliteSummary.risk_level || 'Unknown'}</div>
+                              <button
+                                type="button"
+                                onClick={() => navigate(`/admin/user-activity/${user.id}`)}
+                                className="text-xs text-yellow-300 hover:text-yellow-200 underline"
+                              >
+                                View Activity
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="space-y-1">
+                              <div>No satellite run</div>
+                              <button
+                                type="button"
+                                onClick={() => navigate(`/admin/user-activity/${user.id}`)}
+                                className="text-xs text-yellow-300 hover:text-yellow-200 underline"
+                              >
+                                View Activity
+                              </button>
+                            </div>
+                          )}
+                        </td>
                         <td className="py-4 px-4">
                           <span className={`px-3 py-1.5 rounded-full text-xs font-bold ${
                             user.accountStatus === 'active' 
@@ -1335,7 +1661,7 @@ const AdminDashboard = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="6" className="py-12 text-center text-gray-400">
+                      <td colSpan="7" className="py-12 text-center text-gray-400">
                         No users found
                       </td>
                     </tr>
@@ -1349,20 +1675,57 @@ const AdminDashboard = () => {
         {/* Queries/Feedback Tab */}
         {activeTab === 'queries' && (
           <div className="glass-card rounded-3xl p-6 mb-6 hover-lift">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-white">User Queries & Feedback</h3>
-              <div className="flex items-center gap-3">
-                <span className="text-gray-400 text-sm">
-                  {feedbackList.filter(f => f.status === 'pending').length} pending
-                </span>
-                <button
-                  onClick={fetchFeedback}
-                  className="glass-button text-white px-4 py-2 rounded-xl font-medium flex items-center gap-2"
-                  aria-label="Refresh feedback list"
-                >
-                  <RefreshCw size={16} />
-                  <span className="hidden sm:inline">Refresh</span>
-                </button>
+            <div className="flex flex-col gap-4 mb-6">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                <h3 className="text-xl font-bold text-white">User Queries & Feedback</h3>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={fetchFeedback}
+                    className="glass-button text-white px-4 py-2 rounded-xl font-medium flex items-center gap-2"
+                    aria-label="Refresh feedback list"
+                  >
+                    <RefreshCw size={16} />
+                    <span className="hidden sm:inline">Refresh</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="glass-card-lighter rounded-2xl p-4">
+                  <p className="text-gray-400 text-xs uppercase tracking-wide">Total</p>
+                  <p className="text-white text-2xl font-bold mt-1">{feedbackSummary.total}</p>
+                </div>
+                <div className="glass-card-lighter rounded-2xl p-4">
+                  <p className="text-gray-400 text-xs uppercase tracking-wide">Pending</p>
+                  <p className="text-yellow-300 text-2xl font-bold mt-1">{feedbackSummary.pending}</p>
+                </div>
+                <div className="glass-card-lighter rounded-2xl p-4">
+                  <p className="text-gray-400 text-xs uppercase tracking-wide">Resolved</p>
+                  <p className="text-green-300 text-2xl font-bold mt-1">{feedbackSummary.resolved}</p>
+                </div>
+                <div className="glass-card-lighter rounded-2xl p-4">
+                  <p className="text-gray-400 text-xs uppercase tracking-wide">Replied</p>
+                  <p className="text-blue-300 text-2xl font-bold mt-1">{feedbackSummary.replied}</p>
+                </div>
+              </div>
+
+              <div className="glass-card-lighter rounded-2xl p-3 flex items-center gap-3">
+                <Search size={16} className="text-gray-400" />
+                <input
+                  value={querySearch}
+                  onChange={(e) => setQuerySearch(e.target.value)}
+                  placeholder="Search by name, email, or message..."
+                  className="bg-transparent outline-none text-white placeholder-gray-400 text-sm w-full"
+                />
+                {querySearch && (
+                  <button
+                    onClick={() => setQuerySearch('')}
+                    className="text-gray-400 hover:text-white"
+                    aria-label="Clear query search"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
               </div>
             </div>
             <div className="overflow-x-auto">
@@ -1378,13 +1741,15 @@ const AdminDashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {feedbackList && feedbackList.length > 0 ? (
-                    feedbackList.map((feedback) => (
+                  {filteredFeedbackList && filteredFeedbackList.length > 0 ? (
+                    filteredFeedbackList.map((feedback) => (
                       <tr key={feedback._id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                         <td className="py-4 px-4 text-white font-medium">{feedback.name}</td>
                         <td className="py-4 px-4 text-gray-300 text-sm">{feedback.email}</td>
-                        <td className="py-4 px-4 text-gray-300 text-sm max-w-xs truncate">
-                          {feedback.message.substring(0, 50)}{feedback.message.length > 50 ? '...' : ''}
+                        <td className="py-4 px-4 text-gray-300 text-sm max-w-xs">
+                          <div className="line-clamp-2">
+                            {feedback.message.substring(0, 120)}{feedback.message.length > 120 ? '...' : ''}
+                          </div>
                         </td>
                         <td className="py-4 px-4 text-gray-300 text-sm">
                           {new Date(feedback.createdAt).toLocaleDateString()}
@@ -1448,9 +1813,12 @@ const AdminDashboard = () => {
         {/* Reply/View Feedback Modal */}
         {selectedFeedback && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-            <div className="glass-card rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="glass-card rounded-3xl p-8 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-start mb-6">
-                <h3 className="text-2xl font-bold text-white">Feedback Details</h3>
+                <div>
+                  <h3 className="text-2xl font-bold text-white">Query Workspace</h3>
+                  <p className="text-gray-400 text-sm mt-1">Review details and respond professionally</p>
+                </div>
                 <button
                   onClick={() => {
                     setSelectedFeedback(null);
@@ -1462,49 +1830,57 @@ const AdminDashboard = () => {
                 </button>
               </div>
 
-              <div className="space-y-4 mb-6">
-                <div>
-                  <label className="text-gray-400 text-sm font-semibold">Name</label>
-                  <p className="text-white text-lg">{selectedFeedback.name}</p>
-                </div>
-                <div>
-                  <label className="text-gray-400 text-sm font-semibold">Email</label>
-                  <p className="text-white">{selectedFeedback.email}</p>
-                </div>
-                <div>
-                  <label className="text-gray-400 text-sm font-semibold">Submitted On</label>
-                  <p className="text-white">
-                    {new Date(selectedFeedback.createdAt).toLocaleString()}
-                  </p>
-                </div>
-                <div>
-                  <label className="text-gray-400 text-sm font-semibold">Status</label>
-                  <p className={`inline-block px-3 py-1 rounded-full text-xs font-bold mt-1 ${
-                    selectedFeedback.status === 'pending'
-                      ? 'bg-yellow-500/20 text-yellow-300'
-                      : 'bg-green-500/20 text-green-300'
-                  }`}>
-                    {selectedFeedback.status}
-                  </p>
-                </div>
-                <div>
-                  <label className="text-gray-400 text-sm font-semibold">Message</label>
-                  <div className="glass-card-lighter rounded-xl p-4 mt-2">
-                    <p className="text-white whitespace-pre-wrap">{selectedFeedback.message}</p>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
+                <div className="glass-card-lighter rounded-2xl p-5 lg:col-span-1 space-y-4">
+                  <div>
+                    <p className="text-gray-400 text-xs uppercase tracking-wide">Name</p>
+                    <p className="text-white font-semibold mt-1">{selectedFeedback.name}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 text-xs uppercase tracking-wide">Email</p>
+                    <p className="text-white text-sm mt-1 break-all">{selectedFeedback.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 text-xs uppercase tracking-wide">Submitted</p>
+                    <p className="text-white text-sm mt-1">{new Date(selectedFeedback.createdAt).toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 text-xs uppercase tracking-wide">Status</p>
+                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold mt-2 ${
+                      selectedFeedback.status === 'pending'
+                        ? 'bg-yellow-500/20 text-yellow-300'
+                        : 'bg-green-500/20 text-green-300'
+                    }`}>
+                      {selectedFeedback.status}
+                    </span>
+                    {hasReply(selectedFeedback) && (
+                      <span className="inline-block ml-2 px-3 py-1 rounded-full text-xs font-bold mt-2 bg-blue-500/20 text-blue-300">
+                        replied
+                      </span>
+                    )}
                   </div>
                 </div>
 
-                {selectedFeedback.reply && (
+                <div className="lg:col-span-2 space-y-4">
                   <div>
-                    <label className="text-gray-400 text-sm font-semibold">Your Reply</label>
-                    <div className="glass-card-lighter rounded-xl p-4 mt-2 bg-green-500/10 border border-green-500/20">
-                      <p className="text-white whitespace-pre-wrap">{selectedFeedback.reply}</p>
-                      <p className="text-gray-400 text-xs mt-2">
-                        Replied on: {new Date(selectedFeedback.repliedAt).toLocaleString()}
-                      </p>
+                    <label className="text-gray-400 text-sm font-semibold">User Message</label>
+                    <div className="glass-card-lighter rounded-xl p-4 mt-2">
+                      <p className="text-white whitespace-pre-wrap">{selectedFeedback.message}</p>
                     </div>
                   </div>
-                )}
+
+                  {selectedFeedback.reply && (
+                    <div>
+                      <label className="text-gray-400 text-sm font-semibold">Admin Reply</label>
+                      <div className="glass-card-lighter rounded-xl p-4 mt-2 bg-green-500/10 border border-green-500/20">
+                        <p className="text-white whitespace-pre-wrap">{selectedFeedback.reply}</p>
+                        <p className="text-gray-400 text-xs mt-2">
+                          Replied on: {new Date(selectedFeedback.repliedAt).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {!selectedFeedback.reply && (
@@ -1545,6 +1921,20 @@ const AdminDashboard = () => {
                       Cancel
                     </button>
                   </div>
+                </div>
+              )}
+
+              {selectedFeedback.reply && (
+                <div className="border-t border-white/10 pt-6 flex justify-end">
+                  <button
+                    onClick={() => {
+                      setSelectedFeedback(null);
+                      setReplyMessage('');
+                    }}
+                    className="glass-button text-gray-300 px-6 py-3 rounded-xl font-medium"
+                  >
+                    Close
+                  </button>
                 </div>
               )}
             </div>
@@ -1590,67 +1980,37 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {/* System Health & Model Performance */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* System Health */}
-          {activeTab === 'system' && (
-            <div className="glass-card rounded-3xl p-6 hover-lift">
-              <h3 className="text-xl font-bold text-white mb-6">System Health</h3>
-              <div className="space-y-4">
-                {dashboardData?.services.map((service, index) => (
-                  <div key={index} className="glass-card-lighter rounded-2xl p-4 flex justify-between items-center">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-3 h-3 rounded-full ${
-                        service.status === 'up' ? 'bg-green-400' : 'bg-red-400'
-                      }`} style={{
-                        boxShadow: service.status === 'up' 
-                          ? '0 0 12px rgba(74, 222, 128, 0.6)' 
-                          : '0 0 12px rgba(248, 113, 113, 0.6)'
-                      }}></div>
-                      <div>
-                        <h4 className="text-white font-semibold text-sm">{service.name}</h4>
-                        <p className="text-gray-400 text-xs mt-0.5">{service.description}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-white font-bold text-sm">{service.response_time}</p>
-                      <p className="text-gray-400 text-xs uppercase">{service.status}</p>
+        {/* System Health */}
+        {activeTab === 'system' && (
+          <div className="glass-card rounded-3xl p-6 hover-lift">
+            <h3 className="text-xl font-bold text-white mb-6">System Health</h3>
+            <div className="space-y-4">
+              {dashboardData?.services.map((service, index) => (
+                <div key={index} className="glass-card-lighter rounded-2xl p-4 flex justify-between items-center">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-3 h-3 rounded-full ${
+                      service.status === 'up' ? 'bg-green-400' : 'bg-red-400'
+                    }`} style={{
+                      boxShadow: service.status === 'up' 
+                        ? '0 0 12px rgba(74, 222, 128, 0.6)' 
+                        : '0 0 12px rgba(248, 113, 113, 0.6)'
+                    }}></div>
+                    <div>
+                      <h4 className="text-white font-semibold text-sm">{service.name}</h4>
+                      <p className="text-gray-400 text-xs mt-0.5">{service.description}</p>
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Model Performance */}
-          {(activeTab === 'system' || activeTab === 'models') && (
-            <div className="glass-card rounded-3xl p-6 hover-lift">
-              <h3 className="text-xl font-bold text-white mb-6">Model Performance</h3>
-              <div className="space-y-5">
-                {dashboardData?.modelPerformance.map((model, index) => (
-                  <div key={index} className="border-l-4 border-green-400 pl-4">
-                    <div className="flex justify-between items-center mb-3">
-                      <h4 className="text-white font-semibold">{model.name}</h4>
-                      <span className="px-3 py-1 rounded-lg bg-green-500/20 text-green-300 text-xs font-bold">
-                        {model.accuracy.toFixed(1)}% accuracy
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-sm text-gray-400 mb-3">
-                      <span>Predictions: {model.predictions}</span>
-                      <span>Avg Confidence: {model.avg_confidence}</span>
-                    </div>
-                    <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full progress-glow transition-all duration-1000"
-                        style={{ width: `${model.accuracy}%` }}
-                      ></div>
-                    </div>
+                  <div className="text-right">
+                    <p className="text-white font-bold text-sm">
+                      {service.response_time != null ? `${Math.round(service.response_time)} ms` : 'N/A'}
+                    </p>
+                    <p className="text-gray-400 text-xs uppercase">{service.status}</p>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Model Performance Chart - Models Tab */}
         {activeTab === 'models' && (
@@ -1712,25 +2072,78 @@ const AdminDashboard = () => {
               </div>
             </div>
 
-            {/* Model Accuracy Chart - Full Width */}
+            {/* Graphs */}
+            <div className="grid grid-cols-1 gap-6 mb-6">
+              <div className="glass-card rounded-3xl p-6 hover-lift">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-bold text-white">Model Accuracy Trend</h3>
+                  <span className="text-gray-400 text-sm">Last 24 hours</span>
+                </div>
+                <ResponsiveContainer width="100%" height={320}>
+                  <AreaChart data={modelTrendData}>
+                    <defs>
+                      <linearGradient id="modelAccuracyFill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#2c83f2" stopOpacity={0.32} />
+                        <stop offset="95%" stopColor="#2c83f2" stopOpacity={0.04} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.18)" />
+                    <XAxis dataKey="model" stroke="#94a3b8" style={{ fontSize: '12px' }} />
+                    <YAxis stroke="#94a3b8" style={{ fontSize: '12px' }} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Area type="monotone" dataKey="accuracy" stroke="#2c83f2" strokeWidth={2.5} fill="url(#modelAccuracyFill)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="glass-card rounded-3xl p-6 hover-lift">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-bold text-white">Prediction Load Trend</h3>
+                  <span className="text-gray-400 text-sm">Last 24 hours</span>
+                </div>
+                <ResponsiveContainer width="100%" height={320}>
+                  <AreaChart data={modelTrendData}>
+                    <defs>
+                      <linearGradient id="modelLoadFill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.25} />
+                        <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.03} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.18)" />
+                    <XAxis dataKey="model" stroke="#94a3b8" style={{ fontSize: '12px' }} />
+                    <YAxis stroke="#94a3b8" style={{ fontSize: '12px' }} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Area type="monotone" dataKey="load" stroke="#f59e0b" strokeWidth={2.5} fill="url(#modelLoadFill)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Model Performance (at end) */}
             <div className="glass-card rounded-3xl p-6 hover-lift">
-              <h3 className="text-xl font-bold text-white mb-6">Model Accuracy Comparison</h3>
-              <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={dashboardData?.modelPerformance}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                  <XAxis dataKey="name" stroke="#9ca3af" style={{ fontSize: '12px' }} />
-                  <YAxis stroke="#9ca3af" style={{ fontSize: '12px' }} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend />
-                  <Bar 
-                    dataKey="accuracy" 
-                    fill="#10b981" 
-                    radius={[8, 8, 0, 0]}
-                    name="Accuracy (%)"
-                    animationDuration={1000}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+              <h3 className="text-xl font-bold text-white mb-6">Model Performance</h3>
+              <div className="space-y-5">
+                {dashboardData?.modelPerformance.map((model, index) => (
+                  <div key={index} className="border-l-4 border-green-400 pl-4">
+                    <div className="flex justify-between items-center mb-3">
+                      <h4 className="text-white font-semibold">{model.name}</h4>
+                      <span className="px-3 py-1 rounded-lg bg-green-500/20 text-green-300 text-xs font-bold">
+                        {model.accuracy.toFixed(1)}% accuracy
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm text-gray-400 mb-3">
+                      <span>Predictions: {model.predictions}</span>
+                      <span>Avg Confidence: {model.avg_confidence}</span>
+                    </div>
+                    <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full progress-glow transition-all duration-1000"
+                        style={{ width: `${model.accuracy}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}

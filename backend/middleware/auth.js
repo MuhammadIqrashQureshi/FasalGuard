@@ -71,3 +71,52 @@ exports.authorize = (...roles) => {
     next();
   };
 };
+
+// Optional protect - attach user when token exists, otherwise continue
+exports.optionalProtect = async (req, res, next) => {
+  let token;
+
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+
+  if (!token) {
+    return next();
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id).select('-password');
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Token is not valid. User not found.'
+      });
+    }
+
+    if (user.accountStatus === 'suspended') {
+      return res.status(403).json({
+        success: false,
+        message: 'Your account has been suspended. Please contact support.',
+        accountStatus: 'suspended'
+      });
+    }
+
+    if (user.accountStatus === 'banned') {
+      return res.status(403).json({
+        success: false,
+        message: 'Your account has been permanently banned.',
+        accountStatus: 'banned'
+      });
+    }
+
+    req.user = user;
+    return next();
+  } catch (error) {
+    return res.status(401).json({
+      success: false,
+      message: 'Token is not valid.'
+    });
+  }
+};

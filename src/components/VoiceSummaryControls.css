@@ -1,0 +1,119 @@
+.voice-summary {
+  margin: 1.2rem 0;
+  padding: 1rem 1.1rem;
+  border-radius: 16px;
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.voice-summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.voice-summary-kicker {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #1f2937;
+}
+
+.voice-summary-sub {
+  font-size: 0.78rem;
+  color: #64748b;
+  margin-top: 0.2rem;
+}
+
+.voice-summary-status {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #16a34a;
+}
+
+.voice-summary-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.voice-btn {
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  background: #f0faf3;
+  color: #14532d;
+  padding: 0.45rem 0.85rem;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.voice-btn.primary {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 6px 16px rgba(34, 197, 94, 0.35);
+}
+
+.voice-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.voice-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 120px;
+}
+
+.voice-control label {
+  font-size: 0.72rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.voice-control select {
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  border-radius: 10px;
+  padding: 0.4rem 0.5rem;
+  font-size: 0.82rem;
+  color: #1f2937;
+  background: #ffffff;
+}
+
+.voice-summary-script {
+  margin-top: 1rem;
+  padding-top: 0.9rem;
+  border-top: 1px dashed rgba(148, 163, 184, 0.35);
+  display: grid;
+  gap: 0.7rem;
+}
+
+.voice-summary-section {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.voice-summary-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #22c55e;
+}
+
+.voice-summary-text {
+  font-size: 0.85rem;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.voice-summary-note {
+  margin-top: 0.8rem;
+  font-size: 0.8rem;
+  color: #ef4444;
+}

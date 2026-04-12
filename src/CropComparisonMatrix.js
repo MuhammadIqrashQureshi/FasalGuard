@@ -1,5 +1,6 @@
 // components/EnhancedCropComparison.jsx
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { BarChart3, TrendingUp, Droplets, AlertTriangle, CheckCircle, Filter, Leaf, Clock } from 'lucide-react';
 import {
   Chart as ChartJS,
@@ -31,6 +32,7 @@ ChartJS.register(
 );
 
 export default function EnhancedCropComparison({ predictionData, city }) {
+  const navigate = useNavigate();
   const [comparisonData, setComparisonData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [sortBy, setSortBy] = useState('score');
@@ -112,7 +114,7 @@ export default function EnhancedCropComparison({ predictionData, city }) {
     plugins: {
       legend: { 
         labels: {
-          color: '#e2e8f0',
+          color: '#334155',
           font: {
             size: 13,
             family: "'Inter', sans-serif"
@@ -122,10 +124,10 @@ export default function EnhancedCropComparison({ predictionData, city }) {
       tooltip: { 
         mode: 'index', 
         intersect: false,
-        backgroundColor: 'rgba(15, 23, 42, 0.95)',
-        titleColor: '#e2e8f0',
-        bodyColor: '#cbd5e1',
-        borderColor: '#334155',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        titleColor: '#0f172a',
+        bodyColor: '#334155',
+        borderColor: '#e2e8f0',
         borderWidth: 1,
         cornerRadius: 8,
         padding: 12
@@ -134,11 +136,11 @@ export default function EnhancedCropComparison({ predictionData, city }) {
     scales: {
       x: {
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
+          color: 'rgba(15, 23, 42, 0.08)',
           drawBorder: false
         },
         ticks: {
-          color: '#94a3b8',
+          color: '#64748b',
           font: {
             size: 11,
             family: "'Inter', sans-serif"
@@ -148,11 +150,11 @@ export default function EnhancedCropComparison({ predictionData, city }) {
       y: { 
         beginAtZero: true,
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
+          color: 'rgba(15, 23, 42, 0.08)',
           drawBorder: false
         },
         ticks: {
-          color: '#94a3b8',
+          color: '#64748b',
           font: {
             size: 11,
             family: "'Inter', sans-serif"
@@ -223,17 +225,17 @@ export default function EnhancedCropComparison({ predictionData, city }) {
     plugins: {
       legend: { 
         labels: {
-          color: '#e2e8f0',
+          color: '#334155',
           font: {
             size: 12
           }
         }
       },
       tooltip: { 
-        backgroundColor: 'rgba(15, 23, 42, 0.95)',
-        titleColor: '#e2e8f0',
-        bodyColor: '#cbd5e1',
-        borderColor: '#334155',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        titleColor: '#0f172a',
+        bodyColor: '#334155',
+        borderColor: '#e2e8f0',
         borderWidth: 1,
         cornerRadius: 8,
         padding: 12
@@ -242,20 +244,20 @@ export default function EnhancedCropComparison({ predictionData, city }) {
     scales: {
       r: {
         angleLines: {
-          color: 'rgba(255, 255, 255, 0.1)'
+          color: 'rgba(15, 23, 42, 0.08)'
         },
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)'
+          color: 'rgba(15, 23, 42, 0.08)'
         },
         pointLabels: {
-          color: '#94a3b8',
+          color: '#64748b',
           font: {
             size: 11,
             family: "'Inter', sans-serif"
           }
         },
         ticks: {
-          color: '#94a3b8',
+          color: '#64748b',
           backdropColor: 'transparent',
           showLabelBackdrop: false
         },
@@ -275,32 +277,55 @@ export default function EnhancedCropComparison({ predictionData, city }) {
     <div id="comparison" style={{
       minHeight: '100vh',
       padding: '2rem',
-      background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)'
+      background: 'linear-gradient(135deg, #f7fbf8 0%, #eef6f0 100%)'
     }}>
       <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '1.5rem'
+        }}>
+          <button
+            onClick={() => navigate('/prediction-results')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              background: '#ffffff',
+              border: '1px solid rgba(34, 197, 94, 0.3)',
+              color: '#22c55e',
+              padding: '0.75rem 1.25rem',
+              borderRadius: '12px',
+              cursor: 'pointer',
+              fontSize: '0.95rem',
+              fontWeight: '600',
+              boxShadow: '0 6px 16px rgba(15, 23, 42, 0.08)'
+            }}
+          >
+            ← Back to Results
+          </button>
+        </div>
         {/* Header */}
         <div style={{
           textAlign: 'center',
           marginBottom: '3rem',
           padding: '2rem',
-          background: 'rgba(15, 23, 42, 0.6)',
+          background: '#ffffff',
           borderRadius: '20px',
           border: '1px solid rgba(34, 197, 94, 0.2)',
-          backdropFilter: 'blur(20px)'
+          boxShadow: '0 12px 28px rgba(15, 23, 42, 0.08)'
         }}>
           <h1 style={{
             fontSize: '3rem',
-            fontWeight: 'bold',
-            background: 'linear-gradient(135deg, #f59e0b 0%, #22c55e 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
+            fontWeight: '700',
+            color: '#0f172a',
             marginBottom: '1rem'
           }}>
             Crop Comparison Dashboard
           </h1>
           <p style={{
-            color: '#94a3b8',
+            color: '#64748b',
             fontSize: '1.1rem',
             maxWidth: '600px',
             margin: '0 auto',
@@ -313,18 +338,18 @@ export default function EnhancedCropComparison({ predictionData, city }) {
         {/* Top Crops Grid */}
         <div style={{ 
           display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
-          gap: '2rem',
-          marginBottom: '3rem'
+          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', 
+          gap: '1.5rem',
+          marginBottom: '2.5rem'
         }}>
           {sortedData.slice(0, 5).map((crop, index) => (
             <div key={crop.cropKey} style={{
-              background: 'rgba(30, 41, 59, 0.7)',
-              padding: '2rem',
-              borderRadius: '20px',
+              background: '#ffffff',
+              padding: '1.5rem',
+              borderRadius: '18px',
               border: '1px solid rgba(34, 197, 94, 0.2)',
               position: 'relative',
-              backdropFilter: 'blur(10px)',
+              boxShadow: '0 10px 22px rgba(15, 23, 42, 0.08)',
               transition: 'all 0.3s ease',
               cursor: 'pointer'
             }}
@@ -360,33 +385,33 @@ export default function EnhancedCropComparison({ predictionData, city }) {
               <div style={{ 
                 display: 'flex', 
                 alignItems: 'center', 
-                gap: '1rem', 
-                marginBottom: '1.5rem' 
+                gap: '0.75rem', 
+                marginBottom: '1.25rem' 
               }}>
                 <div style={{
                   background: 'rgba(34, 197, 94, 0.2)',
-                  width: '60px',
-                  height: '60px',
-                  borderRadius: '15px',
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '12px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   color: '#22c55e'
                 }}>
-                  <Leaf size={32} />
+                  <Leaf size={26} />
                 </div>
                 <div>
                   <h3 style={{ 
-                    margin: 0, 
-                    fontSize: '1.8rem', 
-                    fontWeight: 'bold',
-                    color: '#f1f5f9' 
+                    margin: 0,
+                    color: '#0f172a',
+                    fontSize: '1.25rem',
+                    fontWeight: '700'
                   }}>
                     {crop.crop}
                   </h3>
                   <div style={{ 
                     fontSize: '0.9rem', 
-                    color: '#94a3b8',
+                    color: '#64748b',
                     marginTop: '0.25rem' 
                   }}>
                     {crop.cropKey} • Score: <span style={{ 
@@ -400,8 +425,8 @@ export default function EnhancedCropComparison({ predictionData, city }) {
               <div style={{ 
                 display: 'grid', 
                 gridTemplateColumns: '1fr 1fr', 
-                gap: '1.5rem',
-                fontSize: '1rem'
+                gap: '1.25rem',
+                fontSize: '0.95rem'
               }}>
                 <div>
                   <div style={{ 
@@ -411,10 +436,10 @@ export default function EnhancedCropComparison({ predictionData, city }) {
                     marginBottom: '0.5rem' 
                   }}>
                     <TrendingUp size={18} color="#22c55e" />
-                    <span style={{ color: '#94a3b8' }}>Yield</span>
+                    <span style={{ color: '#64748b' }}>Yield</span>
                   </div>
                   <div style={{ 
-                    fontSize: '1.8rem', 
+                    fontSize: '1.5rem', 
                     fontWeight: 'bold', 
                     color: '#22c55e' 
                   }}>
@@ -430,10 +455,10 @@ export default function EnhancedCropComparison({ predictionData, city }) {
                     marginBottom: '0.5rem' 
                   }}>
                     <Clock size={18} color="#3b82f6" />
-                    <span style={{ color: '#94a3b8' }}>Duration</span>
+                    <span style={{ color: '#64748b' }}>Duration</span>
                   </div>
                   <div style={{ 
-                    fontSize: '1.8rem', 
+                    fontSize: '1.5rem', 
                     fontWeight: 'bold', 
                     color: '#3b82f6' 
                   }}>
@@ -449,10 +474,10 @@ export default function EnhancedCropComparison({ predictionData, city }) {
                     marginBottom: '0.5rem' 
                   }}>
                     <Droplets size={18} color="#0ea5e9" />
-                    <span style={{ color: '#94a3b8' }}>Water Eff.</span>
+                    <span style={{ color: '#64748b' }}>Water Eff.</span>
                   </div>
                   <div style={{ 
-                    fontSize: '1.5rem', 
+                    fontSize: '1.25rem', 
                     fontWeight: 'bold', 
                     color: getEfficiencyColor(crop.water_efficiency)
                   }}>
@@ -468,10 +493,10 @@ export default function EnhancedCropComparison({ predictionData, city }) {
                     marginBottom: '0.5rem' 
                   }}>
                     <AlertTriangle size={18} color="#ef4444" />
-                    <span style={{ color: '#94a3b8' }}>Risk Level</span>
+                    <span style={{ color: '#64748b' }}>Risk Level</span>
                   </div>
                   <div style={{ 
-                    fontSize: '1.5rem', 
+                    fontSize: '1.25rem', 
                     fontWeight: 'bold', 
                     color: crop.composite_score >= 70 ? '#10b981' :
                            crop.composite_score >= 50 ? '#f59e0b' : '#ef4444'
@@ -491,15 +516,15 @@ export default function EnhancedCropComparison({ predictionData, city }) {
           gridTemplateColumns: '1fr 1fr', 
           gap: '2rem',
           marginBottom: '3rem',
-          height: '500px'
+          height: '650px'
         }}>
           {/* Yield Comparison Chart */}
           <div style={{
-            background: 'rgba(30, 41, 59, 0.7)',
+            background: '#ffffff',
             padding: '2rem',
             borderRadius: '20px',
             border: '1px solid rgba(34, 197, 94, 0.2)',
-            backdropFilter: 'blur(10px)'
+            boxShadow: '0 12px 28px rgba(15, 23, 42, 0.08)'
           }}>
             <div style={{ 
               display: 'flex', 
@@ -521,23 +546,23 @@ export default function EnhancedCropComparison({ predictionData, city }) {
               </div>
               <div>
                 <h3 style={{ 
-                  margin: 0, 
-                  fontSize: '1.5rem', 
-                  fontWeight: '600',
-                  color: '#f1f5f9' 
+                  margin: 0,
+                  color: '#0f172a',
+                  fontSize: '1.3rem',
+                  fontWeight: '600'
                 }}>
                   Yield Comparison (tons/ha)
                 </h3>
                 <p style={{ 
                   margin: '0.25rem 0 0 0', 
-                  color: '#94a3b8',
+                  color: '#64748b',
                   fontSize: '0.9rem' 
                 }}>
                   Predicted yield for each crop
                 </p>
               </div>
             </div>
-            <div style={{ height: '320px' }}>
+            <div style={{ height: '400px' }}>
               <Bar
                 key={`bar-${chartKey}`}
                 data={{
@@ -562,11 +587,11 @@ export default function EnhancedCropComparison({ predictionData, city }) {
 
           {/* Radar Chart */}
           <div style={{
-            background: 'rgba(30, 41, 59, 0.7)',
+            background: '#ffffff',
             padding: '2rem',
             borderRadius: '20px',
             border: '1px solid rgba(34, 197, 94, 0.2)',
-            backdropFilter: 'blur(10px)'
+            boxShadow: '0 12px 28px rgba(15, 23, 42, 0.08)'
           }}>
             <div style={{ 
               display: 'flex', 
@@ -588,23 +613,23 @@ export default function EnhancedCropComparison({ predictionData, city }) {
               </div>
               <div>
                 <h3 style={{ 
-                  margin: 0, 
-                  fontSize: '1.5rem', 
-                  fontWeight: '600',
-                  color: '#f1f5f9' 
+                  margin: 0,
+                  color: '#0f172a',
+                  fontSize: '1.3rem',
+                  fontWeight: '600'
                 }}>
                   Performance Radar
                 </h3>
                 <p style={{ 
                   margin: '0.25rem 0 0 0', 
-                  color: '#94a3b8',
+                  color: '#64748b',
                   fontSize: '0.9rem' 
                 }}>
                   Composite score vs water efficiency
                 </p>
               </div>
             </div>
-            <div style={{ height: '320px' }}>
+            <div style={{ height: '416px' }}>
               <Radar
                 key={`radar-${chartKey}`} // ADD KEY for proper refresh
                 data={radarData}
@@ -616,11 +641,11 @@ export default function EnhancedCropComparison({ predictionData, city }) {
 
         {/* Detailed Comparison Table */}
         <div style={{
-          background: 'rgba(30, 41, 59, 0.7)',
+          background: '#ffffff',
           padding: '2rem',
           borderRadius: '20px',
           border: '1px solid rgba(34, 197, 94, 0.2)',
-          backdropFilter: 'blur(10px)',
+          boxShadow: '0 12px 28px rgba(15, 23, 42, 0.08)',
           marginBottom: '3rem',
           overflowX: 'auto'
         }}>
@@ -635,13 +660,13 @@ export default function EnhancedCropComparison({ predictionData, city }) {
                 margin: 0, 
                 fontSize: '1.8rem', 
                 fontWeight: 'bold',
-                color: '#f1f5f9' 
+                color: '#0f172a' 
               }}>
                 Detailed Comparison Table
               </h3>
               <p style={{ 
                 margin: '0.5rem 0 0 0', 
-                color: '#94a3b8',
+                color: '#64748b',
                 fontSize: '0.9rem' 
               }}>
                 Complete breakdown of all crop metrics and scores
@@ -649,7 +674,7 @@ export default function EnhancedCropComparison({ predictionData, city }) {
             </div>
             
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-              <Filter size={18} color="#94a3b8" />
+              <Filter size={18} color="#64748b" />
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
@@ -657,8 +682,8 @@ export default function EnhancedCropComparison({ predictionData, city }) {
                   padding: '0.75rem 1rem',
                   borderRadius: '10px',
                   border: '1px solid rgba(34, 197, 94, 0.3)',
-                  background: 'rgba(30, 41, 59, 0.8)',
-                  color: '#e2e8f0',
+                  background: '#ffffff',
+                  color: '#334155',
                   fontSize: '0.9rem',
                   fontWeight: '500',
                   minWidth: '160px',
@@ -695,7 +720,7 @@ export default function EnhancedCropComparison({ predictionData, city }) {
                       padding: '1.25rem', 
                       textAlign: 'left', 
                       fontWeight: '600',
-                      color: '#e2e8f0',
+                      color: '#334155',
                       fontSize: '0.95rem',
                       textTransform: 'uppercase',
                       letterSpacing: '0.5px'
@@ -708,29 +733,29 @@ export default function EnhancedCropComparison({ predictionData, city }) {
               <tbody>
                 {sortedData.map((crop, index) => (
                   <tr key={crop.cropKey} style={{ 
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                    background: index % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'rgba(255, 255, 255, 0.05)',
+                    borderBottom: '1px solid rgba(148, 163, 184, 0.2)',
+                    background: index % 2 === 0 ? '#ffffff' : '#f8fafc',
                     transition: 'all 0.3s ease'
                   }}
                   onMouseEnter={(e) => {
                     e.target.style.background = 'rgba(34, 197, 94, 0.1)';
                   }}
                   onMouseLeave={(e) => {
-                    e.target.style.background = index % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'rgba(255, 255, 255, 0.05)';
+                    e.target.style.background = index % 2 === 0 ? '#ffffff' : '#f8fafc';
                   }}
                   >
                     <td style={{ 
                       padding: '1.25rem',
                       fontWeight: 'bold',
                       fontSize: '1.1rem',
-                      color: '#f1f5f9'
+                      color: '#0f172a'
                     }}>
                       #{index + 1}
                     </td>
                     <td style={{ 
                       padding: '1.25rem',
                       fontWeight: '600',
-                      color: '#f1f5f9',
+                      color: '#0f172a',
                       fontSize: '1.1rem'
                     }}>
                       {crop.crop}
@@ -794,7 +819,7 @@ export default function EnhancedCropComparison({ predictionData, city }) {
                     <td style={{ 
                       padding: '1.25rem',
                       textAlign: 'left',
-                      color: '#94a3b8',
+                      color: '#64748b',
                       fontWeight: '600'
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -946,12 +971,12 @@ export default function EnhancedCropComparison({ predictionData, city }) {
                   </h4>
                 </div>
                 <p style={{ 
-                  color: '#e2e8f0', 
+                  color: '#475569', 
                   fontSize: '1rem', 
                   lineHeight: '1.6',
                   marginBottom: '1rem'
                 }}>
-                  <strong style={{ color: '#f1f5f9' }}>{sortedData[0].crop}</strong> is the best overall choice with a 
+                  <strong style={{ color: '#0f172a' }}>{sortedData[0].crop}</strong> is the best overall choice with a 
                   score of <strong style={{ color: '#22c55e' }}>{Math.round(sortedData[0].normalized_score)}%</strong>. 
                   It offers excellent yield potential of <strong>{sortedData[0].predicted_yield?.toFixed(1)} tons/ha</strong> 
                   with <strong>{sortedData[0].water_efficiency}</strong> water efficiency.
@@ -1016,23 +1041,23 @@ export default function EnhancedCropComparison({ predictionData, city }) {
               </div>
               {sortedData.find(c => c.water_efficiency === 'Excellent') ? (
                 <p style={{ 
-                  color: '#e2e8f0', 
+                  color: '#475569', 
                   fontSize: '1rem', 
                   lineHeight: '1.6',
                   marginBottom: '1rem'
                 }}>
-                  <strong style={{ color: '#f1f5f9' }}>{sortedData.find(c => c.water_efficiency === 'Excellent')?.crop}</strong> 
+                  <strong style={{ color: '#0f172a' }}>{sortedData.find(c => c.water_efficiency === 'Excellent')?.crop}</strong> 
                   offers <strong style={{ color: '#10b981' }}>Excellent</strong> water efficiency, making it ideal for 
                   regions with limited water resources or drought conditions.
                 </p>
               ) : (
                 <p style={{ 
-                  color: '#e2e8f0', 
+                  color: '#475569', 
                   fontSize: '1rem', 
                   lineHeight: '1.6',
                   marginBottom: '1rem'
                 }}>
-                  <strong style={{ color: '#f1f5f9' }}>{sortedData.find(c => c.water_efficiency === 'Good')?.crop || sortedData[1]?.crop}</strong> 
+                  <strong style={{ color: '#0f172a' }}>{sortedData.find(c => c.water_efficiency === 'Good')?.crop || sortedData[1]?.crop}</strong> 
                   offers good water efficiency with balanced yield performance.
                 </p>
               )}
@@ -1097,12 +1122,12 @@ export default function EnhancedCropComparison({ predictionData, city }) {
                 const quickCrop = [...sortedData].sort((a, b) => a.growth_duration - b.growth_duration)[0];
                 return (
                   <p style={{ 
-                    color: '#e2e8f0', 
+                    color: '#475569', 
                     fontSize: '1rem', 
                     lineHeight: '1.6',
                     marginBottom: '1rem'
                   }}>
-                    <strong style={{ color: '#f1f5f9' }}>{quickCrop?.crop}</strong> has the shortest growing period 
+                    <strong style={{ color: '#0f172a' }}>{quickCrop?.crop}</strong> has the shortest growing period 
                     of <strong style={{ color: '#3b82f6' }}>{quickCrop?.growth_duration} days</strong>, allowing for 
                     quicker harvests and potential multiple cropping cycles per year.
                   </p>
