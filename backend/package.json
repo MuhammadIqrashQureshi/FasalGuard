@@ -6,7 +6,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "start:clean": "powershell -ExecutionPolicy Bypass -File .\\scripts\\start-server-clean.ps1",
     "dev": "nodemon server.js",
+    "dev:clean": "powershell -ExecutionPolicy Bypass -File .\\scripts\\start-server-clean.ps1 -UseNodemon",
     "rice:sweep": "powershell -ExecutionPolicy Bypass -File .\\scripts\\rice_sweep.ps1",
     "maize:sweep": "powershell -ExecutionPolicy Bypass -File .\\scripts\\maize_sweep.ps1"
   },
@@ -20,9 +22,11 @@
     "dotenv": "^16.6.1",
     "express": "^4.22.1",
     "express-validator": "^7.0.1",
+    "form-data": "^4.0.5",
     "google-auth-library": "^9.15.1",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.20.2",
+    "multer": "^2.1.1",
     "node-cache": "^5.1.2",
     "node-fetch": "^2.6.7",
     "nodemailer": "^7.0.6",

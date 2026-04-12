@@ -71,6 +71,11 @@ const CROPS = [
 const MAP_MAX_ZOOM = 19;
 
 const API_BASE = 'http://localhost:5000';
+const VOICE_REPORT_LANGUAGES = [
+  { id: 'en-US', label: 'English' },
+  { id: 'hi-IN', label: 'Hindi' },
+  { id: 'ur-PK', label: 'اردو' },
+];
 
 const SAT_OUTCOME_SESSION_KEY = 'sat_outcome_session_id';
 const SAT_LAST_RESULT_KEY = 'sat_last_result_state_v1';
@@ -182,6 +187,153 @@ const extractTopTasks = (result) => {
     'Inspect weak patches and treat only hotspots.',
   ];
   return [...tasks, ...fallback].slice(0, 3);
+};
+
+const localizeRiskLabel = (risk, languageCode) => {
+  const normalizedRisk = String(risk || 'Low');
+  const isUrdu = String(languageCode || '').toLowerCase().startsWith('ur');
+  const isHindi = String(languageCode || '').toLowerCase().startsWith('hi');
+  const key = normalizedRisk.toLowerCase();
+  if (isUrdu) {
+    if (key.includes('high')) return 'زیادہ';
+    if (key.includes('moderate')) return 'درمیانہ';
+    return 'کم';
+  }
+  if (isHindi) {
+    if (key.includes('high')) return 'उच्च';
+    if (key.includes('moderate')) return 'मध्यम';
+    return 'कम';
+  }
+  return normalizedRisk;
+};
+
+const localizeSimpleLine = (line, languageCode) => {
+  const source = String(line || '').trim();
+  if (!source) return '';
+  const normalized = String(languageCode || '').toLowerCase();
+  if (normalized.startsWith('ur')) {
+    return source
+      .replace(/irrigate/gi, 'آبپاشی کریں')
+      .replace(/prioritize/gi, 'ترجیح دیں')
+      .replace(/dry|driest/gi, 'خشک')
+      .replace(/patches/gi, 'حصے')
+      .replace(/apply/gi, 'استعمال کریں')
+      .replace(/early morning/gi, 'صبح سویرے')
+      .replace(/evening/gi, 'شام')
+      .replace(/reduce evaporation losses/gi, 'بخاراتی نقصان کم کریں')
+      .replace(/because soil is sandy/gi, 'کیونکہ مٹی ریتلی ہے')
+      .replace(/split into two lighter irrigations if possible/gi, 'ممکن ہو تو دو ہلکی آبپاشیوں میں تقسیم کریں')
+      .replace(/avoid heavy fertilizer before rain windows/gi, 'بارش سے پہلے زیادہ کھاد نہ دیں')
+      .replace(/inspect weak patches and treat only hotspots/gi, 'کمزور حصے چیک کریں اور صرف متاثرہ جگہوں پر علاج کریں');
+  }
+  if (normalized.startsWith('hi')) {
+    return source
+      .replace(/irrigate/gi, 'सिंचाई करें')
+      .replace(/prioritize/gi, 'प्राथमिकता दें')
+      .replace(/dry|driest/gi, 'सूखे')
+      .replace(/patches/gi, 'हिस्सों')
+      .replace(/apply/gi, 'उपयोग करें')
+      .replace(/early morning/gi, 'सुबह जल्दी')
+      .replace(/evening/gi, 'शाम')
+      .replace(/reduce evaporation losses/gi, 'वाष्पीकरण नुकसान कम करें')
+      .replace(/because soil is sandy/gi, 'क्योंकि मिट्टी रेतीली है')
+      .replace(/split into two lighter irrigations if possible/gi, 'संभव हो तो दो हल्की सिंचाइयों में बांटें')
+      .replace(/avoid heavy fertilizer before rain windows/gi, 'बारिश से पहले भारी खाद न दें')
+      .replace(/inspect weak patches and treat only hotspots/gi, 'कमजोर हिस्सों की जांच करें और सिर्फ प्रभावित हिस्सों का उपचार करें');
+  }
+  return source;
+};
+
+const localizeIrrigationWindow = (value, languageCode) => {
+  const raw = String(value || '').trim();
+  if (!raw) return raw;
+  const normalized = String(languageCode || '').toLowerCase();
+  if (normalized.startsWith('ur')) {
+    return raw
+      .replace(/within\s*24\s*-?\s*48\s*hours?/gi, '24 سے 48 گھنٹوں میں')
+      .replace(/today/gi, 'آج')
+      .replace(/tomorrow/gi, 'کل')
+      .replace(/after\s*(\d+)\s*days?/gi, '$1 دن بعد');
+  }
+  if (normalized.startsWith('hi')) {
+    return raw
+      .replace(/within\s*24\s*-?\s*48\s*hours?/gi, '24 से 48 घंटों में')
+      .replace(/today/gi, 'आज')
+      .replace(/tomorrow/gi, 'कल')
+      .replace(/after\s*(\d+)\s*days?/gi, '$1 दिन बाद');
+  }
+  return raw;
+};
+
+const buildFarmerVoiceReport = ({ analysisResult, languageCode = 'en-US' }) => {
+  if (!analysisResult) return '';
+
+  const isUrdu = String(languageCode || '').toLowerCase().startsWith('ur');
+  const isHindi = String(languageCode || '').toLowerCase().startsWith('hi');
+  const crop = String(analysisResult?.crop || 'crop');
+  const city = analysisResult?.city || analysisResult?.soil_context?.district || 'your area';
+  const field = analysisResult?.field_report || {};
+  const risk = normalizeRiskLevel(field?.risk_level || analysisResult?.risk_level || 'Low');
+  const localizedRisk = localizeRiskLabel(risk, languageCode);
+  const expectedYield = Number(field?.estimated_yield?.maunds_per_acre);
+  const potentialLoss = Number(field?.estimated_yield?.potential_loss_maunds);
+  const irrigationWindowRaw = analysisResult?.farmer_summary?.irrigation?.timing_window || 'within 24-48 hours';
+  const irrigationWindow = localizeIrrigationWindow(irrigationWindowRaw, languageCode);
+  const actionLines = extractTopTasks(analysisResult)
+    .slice(0, 3)
+    .map((line) => localizeSimpleLine(line, languageCode));
+
+  if (isUrdu) {
+    return [
+      'یہ آپ کی سیٹلائٹ رپورٹ کا آسان خلاصہ ہے۔',
+      `فصل: ${crop}۔ جگہ: ${city}۔`,
+      `فیلڈ رسک لیول: ${localizedRisk}۔`,
+      Number.isFinite(expectedYield)
+        ? `متوقع پیداوار تقریباً ${expectedYield.toFixed(1)} من فی ایکڑ ہے۔`
+        : 'متوقع پیداوار کے اعداد ابھی محدود ہیں۔',
+      Number.isFinite(potentialLoss) && potentialLoss > 0
+        ? `اگر ایکشن نہ لیا جائے تو ممکنہ نقصان ${potentialLoss.toFixed(1)} من فی ایکڑ ہو سکتا ہے۔`
+        : 'اس وقت فوری بڑے نقصان کا اشارہ نہیں، مگر باقاعدہ نگرانی ضروری ہے۔',
+      `آبپاشی کا بہتر وقت: ${irrigationWindow}۔`,
+      'آسان ایکشن پلان:',
+      ...actionLines.map((line, index) => `${index + 1}. ${line}`),
+      'مشورہ: پہلے فوری ایکشن کریں، پھر 2 سے 3 دن بعد دوبارہ فیلڈ چیک کریں۔',
+    ].join('\n');
+  }
+
+  if (isHindi) {
+    return [
+      'यह आपकी सैटेलाइट रिपोर्ट का आसान सार है।',
+      `फसल: ${crop}। स्थान: ${city}।`,
+      `फील्ड जोखिम स्तर: ${localizedRisk}।`,
+      Number.isFinite(expectedYield)
+        ? `अनुमानित पैदावार लगभग ${expectedYield.toFixed(1)} maund प्रति acre है।`
+        : 'अनुमानित पैदावार का डेटा अभी सीमित है।',
+      Number.isFinite(potentialLoss) && potentialLoss > 0
+        ? `अगर समय पर कार्य न किया जाए, तो संभावित नुकसान ${potentialLoss.toFixed(1)} maund प्रति acre हो सकता है।`
+        : 'अभी बड़े नुकसान का संकेत कम है, फिर भी नियमित निगरानी जरूरी है।',
+      `सिंचाई की बेहतर विंडो: ${irrigationWindow}।`,
+      'सरल कार्य योजना:',
+      ...actionLines.map((line, index) => `${index + 1}. ${line}`),
+      'सलाह: पहले जरूरी काम करें, फिर 2-3 दिन बाद खेत को दोबारा जांचें।',
+    ].join('\n');
+  }
+
+  return [
+    'Here is your satellite report in simple words.',
+    `Crop: ${crop}. Area: ${city}.`,
+    `Field risk level: ${risk}.`,
+    Number.isFinite(expectedYield)
+      ? `Expected yield is about ${expectedYield.toFixed(1)} maunds per acre.`
+      : 'Expected yield data is limited right now.',
+    Number.isFinite(potentialLoss) && potentialLoss > 0
+      ? `If no action is taken, possible loss can reach ${potentialLoss.toFixed(1)} maunds per acre.`
+      : 'No major immediate loss signal, but regular monitoring is still important.',
+    `Best irrigation window: ${irrigationWindow}.`,
+    'Simple action plan:',
+    ...actionLines.map((line, index) => `${index + 1}. ${line}`),
+    'Advice: complete urgent actions first, then recheck the field in 2 to 3 days.',
+  ].join('\n');
 };
 
 const toDateInputValue = (date) => {
@@ -383,6 +535,7 @@ const SatelliteAnalysis = () => {
   const originalLoadedLocationRef = useRef(null);
   const drawAttentionTimerRef = useRef(null);
   const analysisInFlightRef = useRef(false);
+  const voiceReportPlayerRef = useRef(null);
   const [outcomeSessionId] = useState(() => ensureOutcomeSessionId());
   const [outcomeHistory, setOutcomeHistory] = useState([]);
   const [outcomeTrend, setOutcomeTrend] = useState(null);
@@ -480,6 +633,16 @@ const SatelliteAnalysis = () => {
   const [historyReportMode, setHistoryReportMode] = useState(false);
   const [historyOverviewOnly, setHistoryOverviewOnly] = useState(false);
   const [reportSavedNotice, setReportSavedNotice] = useState('');
+  const [showVoiceReportPanel, setShowVoiceReportPanel] = useState(false);
+  const [voiceReportLanguage, setVoiceReportLanguage] = useState(() => {
+    if (language === 'ur') return 'ur-PK';
+    return 'en-US';
+  });
+  const [voiceReportPlaying, setVoiceReportPlaying] = useState(false);
+  const [voiceReportLoading, setVoiceReportLoading] = useState(false);
+  const [translatedVoiceReportText, setTranslatedVoiceReportText] = useState('');
+  const [voiceReportTranslating, setVoiceReportTranslating] = useState(false);
+  const translationCacheRef = useRef(new Map());
   const lastCostPersistSignatureRef = useRef('');
   const costTrackerStorageKey = `${SAT_COST_TRACKER_KEY}:${selectedLocationId || 'session'}:${outcomeSessionId}`;
   const cropScopedSavedLocations = useMemo(() => {
@@ -492,6 +655,169 @@ const SatelliteAnalysis = () => {
   const heatmapAlertText = heatmapAlertLevel === 'High'
     ? tr('High Alert', 'شدید الرٹ')
     : tr('Moderate Alert', 'درمیانی الرٹ');
+
+  const voiceReportText = useMemo(() => buildFarmerVoiceReport({
+    analysisResult: result,
+    languageCode: voiceReportLanguage,
+  }), [result, voiceReportLanguage]);
+  const effectiveVoiceReportText = translatedVoiceReportText || voiceReportText;
+  const voiceReportLines = useMemo(
+    () => String(effectiveVoiceReportText || '').split('\n').map((line) => line.trim()).filter(Boolean),
+    [effectiveVoiceReportText],
+  );
+  const voiceReportDir = String(voiceReportLanguage || '').toLowerCase().startsWith('ur') ? 'rtl' : 'ltr';
+  const vtr = useCallback((en, ur, hi) => {
+    const normalized = String(voiceReportLanguage || '').toLowerCase();
+    if (normalized.startsWith('ur')) return ur;
+    if (normalized.startsWith('hi')) return hi;
+    return en;
+  }, [voiceReportLanguage]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const translateReport = async () => {
+      const lang = String(voiceReportLanguage || '').toLowerCase();
+      if (!showVoiceReportPanel || !voiceReportText) {
+        setTranslatedVoiceReportText('');
+        setVoiceReportTranslating(false);
+        return;
+      }
+
+      if (lang.startsWith('en')) {
+        setTranslatedVoiceReportText('');
+        setVoiceReportTranslating(false);
+        return;
+      }
+
+      const cacheKey = `${lang}:${voiceReportText}`;
+      const cached = translationCacheRef.current.get(cacheKey);
+      if (cached) {
+        setTranslatedVoiceReportText(cached);
+        setVoiceReportTranslating(false);
+        return;
+      }
+
+      setVoiceReportTranslating(true);
+      try {
+        const response = await fetch(`${API_BASE}/api/voice/translate`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            text: voiceReportText,
+            targetLanguage: voiceReportLanguage,
+            sourceLanguage: 'en-US',
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Translation failed');
+        }
+
+        const payload = await response.json();
+        const translated = String(payload?.text || '').trim();
+        if (cancelled) return;
+        if (translated) {
+          translationCacheRef.current.set(cacheKey, translated);
+          setTranslatedVoiceReportText(translated);
+        } else {
+          setTranslatedVoiceReportText('');
+        }
+      } catch {
+        if (!cancelled) {
+          setTranslatedVoiceReportText('');
+        }
+      } finally {
+        if (!cancelled) {
+          setVoiceReportTranslating(false);
+        }
+      }
+    };
+
+    translateReport();
+    return () => {
+      cancelled = true;
+    };
+  }, [showVoiceReportPanel, voiceReportLanguage, voiceReportText]);
+
+  const stopVoiceReportAudio = useCallback(() => {
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    if (voiceReportPlayerRef.current) {
+      voiceReportPlayerRef.current.pause();
+      if (voiceReportPlayerRef.current.src) {
+        URL.revokeObjectURL(voiceReportPlayerRef.current.src);
+      }
+      voiceReportPlayerRef.current = null;
+    }
+    setVoiceReportPlaying(false);
+  }, []);
+
+  const playVoiceReportAudio = useCallback(async () => {
+    if (!effectiveVoiceReportText) return;
+    stopVoiceReportAudio();
+    setVoiceReportLoading(true);
+
+    const playBrowserFallback = () => {
+      if (typeof window === 'undefined' || !window.speechSynthesis) return;
+      const utterance = new SpeechSynthesisUtterance(effectiveVoiceReportText);
+      utterance.lang = voiceReportLanguage;
+      utterance.rate = 1;
+      utterance.onstart = () => setVoiceReportPlaying(true);
+      utterance.onend = () => setVoiceReportPlaying(false);
+      utterance.onerror = () => setVoiceReportPlaying(false);
+      window.speechSynthesis.speak(utterance);
+    };
+
+    try {
+      const response = await fetch(`${API_BASE}/api/voice/synthesize`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: effectiveVoiceReportText,
+          language: voiceReportLanguage,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Voice synthesis failed');
+      }
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      voiceReportPlayerRef.current = audio;
+      audio.onended = () => {
+        URL.revokeObjectURL(audioUrl);
+        if (voiceReportPlayerRef.current === audio) {
+          voiceReportPlayerRef.current = null;
+        }
+        setVoiceReportPlaying(false);
+      };
+      audio.onerror = () => {
+        URL.revokeObjectURL(audioUrl);
+        if (voiceReportPlayerRef.current === audio) {
+          voiceReportPlayerRef.current = null;
+        }
+        setVoiceReportPlaying(false);
+        playBrowserFallback();
+      };
+
+      await audio.play();
+      setVoiceReportPlaying(true);
+    } catch {
+      playBrowserFallback();
+    } finally {
+      setVoiceReportLoading(false);
+    }
+  }, [effectiveVoiceReportText, stopVoiceReportAudio, voiceReportLanguage]);
+
+  useEffect(() => () => stopVoiceReportAudio(), [stopVoiceReportAudio]);
 
   const resolvedCoords = useMemo(() => {
     if (Array.isArray(markerPos) && markerPos.length === 2) {
@@ -6547,6 +6873,24 @@ const SatelliteAnalysis = () => {
                 </div>
                 )}
 
+                <div className="sat-voice-report-cta">
+                  <div>
+                    <div className="sat-voice-report-title">
+                      {tr('Need a simple farmer explanation?', 'کیا آسان کسان وضاحت چاہیے؟')}
+                    </div>
+                    <div className="sat-voice-report-subtitle">
+                      {tr('Open an easy full-report summary and listen in English, Hindi, or Urdu.', 'آسان مکمل رپورٹ خلاصہ کھولیں اور اسے انگریزی، ہندی یا اردو میں سنیں۔')}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className="sat-action-btn sat-voice-report-open-btn"
+                    onClick={() => setShowVoiceReportPanel(true)}
+                  >
+                    {tr('Understand Report', 'رپورٹ آسان الفاظ میں')}
+                  </button>
+                </div>
+
                 {/* ── Non-field / post-harvest result ── */}
                 {result.is_field === false && (
                   result.status === 'post_harvest' ? (
@@ -6742,6 +7086,88 @@ const SatelliteAnalysis = () => {
           )}
 
           {/* Delete Location Confirmation Modal */}
+          {showVoiceReportPanel && result && (
+            <div className="sat-modal-overlay" onClick={() => { stopVoiceReportAudio(); setShowVoiceReportPanel(false); }}>
+              <div className="sat-modal-card sat-voice-report-modal" onClick={(e) => e.stopPropagation()}>
+                <div className="sat-modal-header">
+                  <h3 className="sat-modal-title">
+                    {tr('Satellite Report in Easy Words', 'سیٹلائٹ رپورٹ آسان الفاظ میں')}
+                  </h3>
+                  <button
+                    className="sat-modal-close-btn"
+                    onClick={() => { stopVoiceReportAudio(); setShowVoiceReportPanel(false); }}
+                    type="button"
+                    aria-label={tr('Close', 'بند کریں')}
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="sat-modal-body sat-voice-report-body">
+                  <div className="sat-voice-report-hero">
+                    <div className="sat-voice-report-hero-title">
+                      {vtr('Satellite Report in Easy Words', 'سیٹلائٹ رپورٹ آسان الفاظ میں', 'सैटेलाइट रिपोर्ट आसान शब्दों में')}
+                    </div>
+                    <div className="sat-voice-report-hero-subtitle">
+                      {vtr(
+                        'Farmer-friendly summary with clear next actions.',
+                        'کسان دوست خلاصہ، واضح اگلے اقدامات کے ساتھ۔',
+                        'किसान के लिए आसान सार, स्पष्ट अगले कदमों के साथ।',
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="sat-voice-report-language-row" role="group" aria-label={tr('Voice language', 'آواز کی زبان')}>
+                    {VOICE_REPORT_LANGUAGES.map((langOption) => (
+                      <button
+                        key={langOption.id}
+                        type="button"
+                        className={`sat-lang-btn ${voiceReportLanguage === langOption.id ? 'active' : ''}`}
+                        onClick={() => setVoiceReportLanguage(langOption.id)}
+                      >
+                        {langOption.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {voiceReportTranslating && (
+                    <div className="sat-voice-report-subtitle">
+                      {vtr('Translating report...', 'رپورٹ ترجمہ ہو رہی ہے...', 'रिपोर्ट का अनुवाद हो रहा है...')}
+                    </div>
+                  )}
+
+                  <div className="sat-voice-report-text" dir={voiceReportDir}>
+                    {voiceReportLines.map((line, idx) => (
+                      <p key={`voice-line-${idx}`} className={`sat-voice-report-line ${idx === 0 ? 'lead' : ''}`}>
+                        {line}
+                      </p>
+                    ))}
+                  </div>
+
+                  <div className="sat-voice-report-controls">
+                    <button
+                      type="button"
+                      className="sat-action-btn"
+                      onClick={playVoiceReportAudio}
+                      disabled={voiceReportLoading || voiceReportTranslating || !effectiveVoiceReportText}
+                    >
+                      {voiceReportLoading
+                        ? tr('Preparing audio...', 'آڈیو تیار ہو رہی ہے...')
+                        : tr('Read Full Report Aloud', 'مکمل رپورٹ سنائیں')}
+                    </button>
+                    <button
+                      type="button"
+                      className="sat-action-btn secondary"
+                      onClick={stopVoiceReportAudio}
+                      disabled={!voiceReportPlaying}
+                    >
+                      {tr('Stop Audio', 'آڈیو روکیں')}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {deleteConfirmLocationId && (
             <div className="sat-modal-overlay" onClick={() => setDeleteConfirmLocationId(null)}>
               <div className="sat-modal-card sat-delete-confirm-modal" onClick={(e) => e.stopPropagation()}>

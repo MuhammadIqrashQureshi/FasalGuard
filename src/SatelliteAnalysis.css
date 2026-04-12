@@ -10251,3 +10251,165 @@ main {
     padding: 0.48rem 0.6rem;
   }
 }
+
+.sat-voice-report-cta {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.9rem;
+  border: 1px solid #cde8d5;
+  background: linear-gradient(135deg, #f2fbf5 0%, #eef7ff 100%);
+  border-radius: 14px;
+}
+
+.sat-voice-report-title {
+  font-weight: 800;
+  color: #14532d;
+  font-size: 0.92rem;
+}
+
+.sat-voice-report-subtitle {
+  margin-top: 0.2rem;
+  color: #3f5f4f;
+  font-size: 0.8rem;
+}
+
+.sat-voice-report-open-btn {
+  white-space: nowrap;
+}
+
+.sat-voice-report-modal {
+  width: min(1320px, 98vw) !important;
+  max-width: min(1320px, 98vw) !important;
+  height: min(92vh, 960px);
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px;
+  border: 1px solid #cfe2d4;
+  box-shadow: 0 30px 70px rgba(15, 23, 42, 0.28);
+  overflow: hidden;
+}
+
+.sat-voice-report-modal .sat-modal-header {
+  padding: 18px 22px;
+  background: linear-gradient(120deg, #f3fbf6 0%, #eef6ff 100%);
+  border-bottom: 1px solid #cfe0ea;
+}
+
+.sat-voice-report-modal .sat-modal-title {
+  font-size: 1.22rem;
+  font-weight: 800;
+  color: #103729;
+  letter-spacing: 0.01em;
+}
+
+.sat-voice-report-modal .sat-modal-body {
+  padding: 16px 20px 14px;
+  background: #f9fcfa;
+}
+
+.sat-voice-report-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  height: 100%;
+}
+
+.sat-voice-report-hero {
+  border: 1px solid #cce4d5;
+  background: linear-gradient(120deg, #f2fbf5 0%, #eaf4ff 100%);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+}
+
+.sat-voice-report-hero-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #11352a;
+}
+
+.sat-voice-report-hero-subtitle {
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+  color: #3e5b4b;
+}
+
+.sat-voice-report-language-row {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.sat-voice-report-language-row .sat-lang-btn {
+  min-width: 86px;
+  font-weight: 700;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #cfdae7;
+  background: #ffffff;
+}
+
+.sat-voice-report-language-row .sat-lang-btn.active {
+  border-color: #89c6a2;
+  background: #e9f8ef;
+  color: #164733;
+}
+
+.sat-voice-report-text {
+  margin: 0;
+  border: 1px solid #d4e2df;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+  color: #1f2937;
+  padding: 1.05rem 1.15rem;
+  white-space: normal;
+  line-height: 1.7;
+  font-family: "Google Sans", "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 1rem;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.sat-voice-report-line {
+  margin: 0 0 0.6rem;
+}
+
+.sat-voice-report-line.lead {
+  font-weight: 700;
+  color: #0f2e24;
+  font-size: 0.98rem;
+}
+
+.sat-voice-report-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  padding-top: 0.2rem;
+}
+
+.sat-voice-report-controls .sat-action-btn {
+  min-height: 42px;
+  padding: 0.7rem 1rem;
+  border-radius: 12px;
+  font-weight: 800;
+}
+
+@media (max-width: 980px) {
+  .sat-voice-report-modal {
+    width: min(96vw, 96vw) !important;
+    max-width: 96vw !important;
+    height: 92vh;
+  }
+
+  .sat-voice-report-modal .sat-modal-title {
+    font-size: 1.08rem;
+  }
+
+  .sat-voice-report-text {
+    font-size: 0.92rem;
+    padding: 0.9rem;
+  }
+}

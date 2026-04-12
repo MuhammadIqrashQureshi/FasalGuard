@@ -32,6 +32,7 @@ const analysisRoutes = require('./routes/analysisRoutes'); // Added this line
 const WeatherController = require('./controllers/weatherController');
 const soilAnalysisRoutes = require('./routes/soilAnalysisRoutes');
 const satelliteRoutes = require('./routes/satelliteRoutes');
+const voiceRoutes = require('./routes/voiceRoutes');
 const soilAnalysisService = require('./services/soilAnalysisService');
 const { buildDistrictSoilTrendSummary } = require('./utils/soilTrendHelper');
 
@@ -87,6 +88,7 @@ app.use('/api/feedback', feedbackRoutes);
 app.use('/api/analysis', analysisRoutes); // Added this line
 app.use('/api/soil', soilAnalysisRoutes);
 app.use('/api/satellite', satelliteRoutes);
+app.use('/api/voice', voiceRoutes);
 
 
 // Weather API endpoint
@@ -166,11 +168,22 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
   console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
   console.log(`🔧 Analysis routes: http://localhost:${PORT}/api/analysis/*`);
+});
+
+server.on('error', (err) => {
+  if (err && err.code === 'EADDRINUSE') {
+    console.error(`❌ Port ${PORT} is already in use.`);
+    console.error('💡 Close the old backend process or run: npm run start:clean');
+    process.exit(1);
+  }
+
+  console.error('❌ Server startup failed:', err?.message || err);
+  process.exit(1);
 });
 
 module.exports = app;
