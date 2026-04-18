@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   BarChart3, PieChart as PieChartIcon, LineChart as LineChartIcon, Users, 
   Cloud, TrendingUp, AlertTriangle, CheckCircle,
-  Download, RefreshCw, Database,
+  Download, RefreshCw, Database, Server,
   Crop, Thermometer, Droplets, Wind,
   Calendar, Clock, Activity, Layers,
   ChevronDown, Filter, Settings, Eye, Loader2, LogOut,
-  Search, X, ChevronLeft, ChevronRight, Ban, UserCheck, Trash2
+  Search, X, ChevronLeft, ChevronRight, Ban, UserCheck, Trash2, MessageSquare
 } from 'lucide-react';
 import {
   PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, 
@@ -42,17 +42,6 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const itemsPerPage = 5;
   const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes cache
-  const REQUEST_TIMEOUT_MS = 3500;
-
-  const fetchWithTimeout = async (url, options = {}, timeoutMs = REQUEST_TIMEOUT_MS) => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-    try {
-      return await fetch(url, { ...options, signal: controller.signal });
-    } finally {
-      clearTimeout(timeoutId);
-    }
-  };
 
   // User action handlers
   const handleSuspendUser = (userId, userName) => {
@@ -281,100 +270,73 @@ const AdminDashboard = () => {
     setError(null);
     try {
       const token = localStorage.getItem('token');
-      
-      const authHeaders = {
-        'Authorization': `Bearer ${token}`
+      const withTimeout = async (url, options = {}, timeoutMs = 2500) => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+        const startedAt = Date.now();
+        try {
+          const response = await fetch(url, { ...options, signal: controller.signal });
+          return { response, ms: Date.now() - startedAt, ok: response.ok };
+        } catch {
+          return { response: null, ms: Date.now() - startedAt, ok: false };
+        } finally {
+          clearTimeout(timeoutId);
+        }
       };
 
-      const [
-        dashboardRes,
-        userStatsRes,
-        usersRes,
-        satelliteSummaryRes,
-        modelsRes,
-        weatherRes,
-        analyticsRes,
-      ] = await Promise.all([
-        fetchWithTimeout('http://localhost:5000/api/admin/dashboard', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...authHeaders,
-          },
-          body: JSON.stringify({ timeRange })
+      // Demo mode: use lightweight endpoints only (skip /api/admin/dashboard and model checks).
+      const [userStatsTimed, usersTimed, satelliteSummaryTimed, weatherTimed, analyticsTimed] = await Promise.all([
+        fetch('http://localhost:5000/api/admin/user-stats?days=30', {
+          headers: { 'Authorization': `Bearer ${token}` },
         }),
-        fetchWithTimeout('http://localhost:5000/api/admin/user-stats?days=30', {
-          headers: authHeaders,
+        fetch('http://localhost:5000/api/admin/users?all=true', {
+          headers: { 'Authorization': `Bearer ${token}` },
         }),
-        fetchWithTimeout('http://localhost:5000/api/admin/users?all=true', {
-          headers: authHeaders,
+        fetch('http://localhost:5000/api/admin/users/satellite-summary', {
+          headers: { 'Authorization': `Bearer ${token}` },
         }),
-        fetchWithTimeout('http://localhost:5000/api/admin/users/satellite-summary', {
-          headers: authHeaders,
+        fetch('http://localhost:5000/api/admin/weather-stats?days=7', {
+          headers: { 'Authorization': `Bearer ${token}` },
         }),
-        fetchWithTimeout('http://localhost:5000/api/admin/models', {
-          headers: authHeaders,
-        }),
-        fetchWithTimeout('http://localhost:5000/api/admin/weather-stats?days=7', {
-          headers: authHeaders,
-        }),
-        fetchWithTimeout('http://localhost:5000/api/admin/analytics?groupBy=month&metric=count', {
-          headers: authHeaders,
+        fetch('http://localhost:5000/api/admin/analytics?groupBy=month&metric=count', {
+          headers: { 'Authorization': `Bearer ${token}` },
         }),
       ]);
 
-      if (!dashboardRes.ok) {
-        throw new Error('Failed to fetch dashboard data');
-      }
+      const userStatsRes = userStatsTimed;
+      const usersRes = usersTimed;
+      const satelliteSummaryRes = satelliteSummaryTimed;
+      const weatherRes = weatherTimed;
+      const analyticsRes = analyticsTimed;
 
-      const dashboardData = await dashboardRes.json();
       const userStats = userStatsRes.ok ? await userStatsRes.json() : { total_users: 0, active_users: 0 };
       const usersData = usersRes.ok ? await usersRes.json() : { users: [] };
       const satelliteSummaryData = satelliteSummaryRes.ok ? await satelliteSummaryRes.json() : { summaries: {} };
       const satelliteByUser = satelliteSummaryData.summaries || {};
-
-      // Predictions removed - no longer fetching
-
-      const modelsData = modelsRes.ok ? await modelsRes.json() : { models: [], summary: {} };
       const weatherData = weatherRes.ok ? await weatherRes.json() : { weather_stats: [] };
 
       // Fetch current weather for 5 cities
       const cities = ['Lahore', 'Multan', 'Bahawalpur', 'Gujrat', 'Faisalabad'];
       const weatherPromises = cities.map(city => 
-        fetchWithTimeout(`http://localhost:5000/api/weather?city=${encodeURIComponent(city)}&days=1`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }, 5000).then(res => res.ok ? res.json() : null).catch(() => null)
+        fetch(`http://localhost:5000/api/weather?city=${encodeURIComponent(city)}&days=1`)
+          .then(res => res.ok ? res.json() : null)
+          .catch(() => null)
       );
-      const weatherSettled = await Promise.allSettled(weatherPromises);
-      const weatherResults = weatherSettled.map((item) => (item.status === 'fulfilled' ? item.value : null));
+      const weatherResults = await Promise.all(weatherPromises);
       console.log('Weather results:', weatherResults.filter(r => r).length, 'cities fetched');
 
       const analyticsData = analyticsRes.ok ? await analyticsRes.json() : { analytics: [] };
 
-      // Process crop distribution from top_crops
-      const cropColors = {
-        'Wheat': '#10b981',
-        'Rice': '#34d399',
-        'Cotton': '#6ee7b7',
-        'Maize': '#a7f3d0',
-        'Sugarcane': '#d1fae5'
-      };
-
-      const cropDistribution = dashboardData.top_crops.map((crop, index) => ({
-        name: crop.crop,
-        value: crop.count,
-        color: cropColors[crop.crop] || '#f4c430'
-      }));
-
-      // Process prediction trends from analytics
-      const predictionTrends = analyticsData.analytics.slice(-12).map(item => ({
-        month: item.date.split('-').slice(1).join('-'),
-        predictions: parseInt(item.value) || 0,
-        accuracy: null
-      }));
+      // Service checks for demo dashboard (5 services).
+      const [coreApiCheck, weatherServiceCheck, satelliteServiceCheck, cropServiceCheck, soilServiceCheck] = await Promise.all([
+        withTimeout('http://localhost:5000/api/health', {}, 2200),
+        withTimeout('http://localhost:5000/api/weather?city=Lahore&days=1', {}, 2200),
+        withTimeout('http://localhost:5000/api/admin/users/satellite-summary', {
+          headers: { 'Authorization': `Bearer ${token}` },
+        }, 2200),
+        withTimeout('http://localhost:5000/api/predict/ml-health', {}, 2200),
+        withTimeout('http://localhost:5000/api/soil/health', {}, 2200),
+      ]);
 
       // Process weather trends from API responses
       const weatherTrends = [];
@@ -385,8 +347,7 @@ const AdminDashboard = () => {
         
         // Try different paths to get weather data
         const forecast = result.forecast || result.weather_data?.forecast || result.data?.forecast || [];
-        const summary = result.summary || result.weather_data?.summary || result.data?.summary || {};
-        const currentWeather = result.currentWeather || result.weather_data?.currentWeather || result.data?.currentWeather || {};
+        const currentWeather = result.currentWeather || result.weather_data?.currentWeather || result.data?.currentWeather;
         
         // Get first day data
         const firstDay = forecast[0] || currentWeather || {};
@@ -394,11 +355,11 @@ const AdminDashboard = () => {
         console.log(`${cities[i]} raw data:`, JSON.stringify(firstDay));
         
         weatherTrends.push({
-          city: summary.city || cities[i],
-          temperature: parseFloat(firstDay.T2M ?? summary.avgTemp ?? currentWeather.temp) || 0,
-          humidity: parseFloat(firstDay.RH2M ?? currentWeather.humidity) || 0,
-          rainfall: parseFloat(firstDay.PRECTOTCORR ?? summary.totalRainfall ?? currentWeather.rainfall) || 0,
-          description: firstDay.weatherDescription || currentWeather.weatherDescription || 'N/A'
+          city: cities[i],
+          temperature: parseFloat(firstDay.T2M) || 0,
+          humidity: parseFloat(firstDay.RH2M) || 0,
+          rainfall: parseFloat(firstDay.PRECTOTCORR) || 0,
+          description: firstDay.weatherDescription || 'N/A'
         });
       }
 
@@ -439,65 +400,60 @@ const AdminDashboard = () => {
         };
       }) : [];
 
-      // Process model performance - use real data from backend or fallback
-      const modelPerformance = modelsData.models && modelsData.models.length > 0
-        ? modelsData.models.map(model => ({
-            name: model.name,
-            predictions: model.predictions,
-            accuracy: parseFloat(model.avg_accuracy) || 0,
-            avg_confidence: model.avg_confidence
-          }))
-        : [
-            {
-              name: 'LSTM_Wheat',
-              predictions: 1250,
-              accuracy: 92,
-              avg_confidence: '88%'
-            },
-            {
-              name: 'GRU_Rice',
-              predictions: 980,
-              accuracy: 88,
-              avg_confidence: '84%'
-            },
-            {
-              name: 'LSTM_Cotton',
-              predictions: 760,
-              accuracy: 90,
-              avg_confidence: '86%'
-            },
-            {
-              name: 'GRU_Maize',
-              predictions: 640,
-              accuracy: 87,
-              avg_confidence: '82%'
-            },
-            {
-              name: 'LSTM_Sugarcane',
-              predictions: 520,
-              accuracy: 89,
-              avg_confidence: '83%'
-            }
-          ];
-
-      // Calculate average model accuracy from actual models
-      const avgModelAccuracy = modelPerformance.length > 0
-        ? modelPerformance.reduce((sum, m) => sum + m.accuracy, 0) / modelPerformance.length
-        : 0;
+      // Demo mode: skip model loading to keep admin fast.
+      const modelPerformance = [];
 
       // Combine all data
       const combinedData = {
-        total_predictions: dashboardData.total_predictions || 0,
+        total_predictions: Array.isArray(analyticsData.analytics)
+          ? analyticsData.analytics.reduce((sum, item) => sum + (parseInt(item.value, 10) || 0), 0)
+          : 0,
         active_users: userStats.active_users || 0,
         total_users: userStats.total_users || 0,
-        model_accuracy: avgModelAccuracy,
-        weather_requests: weatherData.total_requests || dashboardData.weather_requests || 0,
-        system_health: dashboardData.system_health,
-        avg_response_time: dashboardData.avg_response_time,
+        model_accuracy: null,
+        weather_requests: weatherData.total_requests || 0,
+        system_health: [coreApiCheck, weatherServiceCheck, satelliteServiceCheck, cropServiceCheck, soilServiceCheck].every((item) => item.ok) ? 'Healthy' : 'Degraded',
+        avg_response_time: (() => {
+          const values = [coreApiCheck.ms, weatherServiceCheck.ms, satelliteServiceCheck.ms, cropServiceCheck.ms, soilServiceCheck.ms]
+            .filter((value) => Number.isFinite(value));
+          if (values.length === 0) return null;
+          return values.reduce((sum, value) => sum + value, 0) / values.length;
+        })(),
         weatherTrends,
         users,
-        services: dashboardData.services || [],
-        modelPerformance: modelPerformance.length > 0 ? modelPerformance : []
+        services: [
+          {
+            name: 'Core API',
+            status: coreApiCheck.ok ? 'up' : 'down',
+            response_time: coreApiCheck.ms,
+            description: 'Backend API core availability',
+          },
+          {
+            name: 'Weather Service',
+            status: weatherServiceCheck.ok ? 'up' : 'down',
+            response_time: weatherServiceCheck.ms,
+            description: 'City weather ingestion and forecast',
+          },
+          {
+            name: 'Satellite Service',
+            status: satelliteServiceCheck.ok ? 'up' : 'down',
+            response_time: satelliteServiceCheck.ms,
+            description: 'Satellite activity tracking and outcomes',
+          },
+          {
+            name: 'Crop Prediction Service',
+            status: cropServiceCheck.ok ? 'up' : 'down',
+            response_time: cropServiceCheck.ms,
+            description: 'Crop prediction health endpoint',
+          },
+          {
+            name: 'Soil Prediction Service',
+            status: soilServiceCheck.ok ? 'up' : 'down',
+            response_time: soilServiceCheck.ms,
+            description: 'Soil analysis health endpoint',
+          },
+        ],
+        modelPerformance
       };
 
       console.log('=== COMBINED DATA SUMMARY ===');
@@ -530,6 +486,12 @@ const AdminDashboard = () => {
   useEffect(() => {
     fetchDashboardData(true);
   }, [timeRange]);
+
+  useEffect(() => {
+    if (!dashboardData) {
+      fetchDashboardData();
+    }
+  }, []);
 
   useEffect(() => {
     if (activeTab === 'queries') {
@@ -576,13 +538,17 @@ const AdminDashboard = () => {
     },
     {
       id: 3,
-      title: 'ML Accuracy',
-      value: dashboardData?.model_accuracy ? `${dashboardData.model_accuracy.toFixed(1)}%` : 'N/A',
-      icon: <TrendingUp size={22} />,
-      color: '#059669',
-      trend: dashboardData?.accuracy_trend || '0%',
-      description: 'Average prediction accuracy',
-      trendUp: dashboardData?.accuracy_trend?.startsWith('+')
+      title: 'Active Services',
+      value: Array.isArray(dashboardData?.services)
+        ? dashboardData.services.filter((service) => service.status === 'up').length
+        : 0,
+      icon: <Server size={22} />,
+      color: '#3b82f6',
+      trend: Array.isArray(dashboardData?.services)
+        ? `${dashboardData.services.length} total`
+        : 'N/A',
+      description: 'Services currently online',
+      trendUp: true
     },
     {
       id: 4,
@@ -643,18 +609,14 @@ const AdminDashboard = () => {
 
   const RadialGauge = ({ value, label, detail, color }) => {
     const safeValue = value == null ? 0 : clampPercent(value);
-    const size = 176;
-    const stroke = 14;
+    const size = 220;
+    const stroke = 16;
     const radius = (size - stroke) / 2;
     const circumference = 2 * Math.PI * radius;
     const offset = circumference - (safeValue / 100) * circumference;
 
     return (
-      <div className="glass-card-lighter rounded-2xl p-4 flex flex-col items-center text-center dashboard-gauge-card">
-        <div className="dashboard-gauge-head w-full">
-          <span className="dashboard-gauge-head-label">{label}</span>
-          <span className="dashboard-gauge-head-dot" style={{ background: color }} />
-        </div>
+      <div className="glass-card-lighter rounded-2xl p-4 flex flex-col items-center text-center">
         <svg width={size} height={size}>
           <circle
             cx={size / 2}
@@ -678,16 +640,17 @@ const AdminDashboard = () => {
           />
           <text
             x="50%"
-            y="53%"
+            y="50%"
             textAnchor="middle"
-            dominantBaseline="middle"
-            fontSize="32"
-            fontWeight="600"
+            dominantBaseline="central"
+            fontSize="30"
+            fontWeight="700"
             fill="#111827"
           >
             {value == null ? 'N/A' : `${Math.round(safeValue)}%`}
           </text>
         </svg>
+        <div className="text-base font-semibold text-gray-300 mt-2">{label}</div>
         <div className="text-sm text-gray-400 mt-1">{detail}</div>
       </div>
     );
@@ -698,55 +661,55 @@ const AdminDashboard = () => {
       title: 'SLA & Response Tracker',
       description: 'Pending older than 24h, response time, resolved rate.',
       path: '/admin/ops/sla',
-      icon: '⏱️'
+      tintA: '#2563eb',
+      tintB: '#0891b2',
     },
     {
       title: 'High-Risk Farmer Queue',
       description: 'Prioritize users with critical risk windows.',
       path: '/admin/ops/high-risk',
-      icon: '⚠️'
+      tintA: '#dc2626',
+      tintB: '#f97316',
     },
     {
-      title: 'Query Resolution Graph',
+      title: 'Action Completion Analytics',
       description: 'Pending vs done by week and crop.',
       path: '/admin/ops/action-completion',
-      icon: '📊'
+      tintA: '#7c3aed',
+      tintB: '#db2777',
     },
     {
       title: 'User Engagement Health',
       description: 'Login heatmap and feature usage split.',
       path: '/admin/ops/engagement',
-      icon: '👥'
+      tintA: '#0f766e',
+      tintB: '#10b981',
     },
     {
       title: 'Geography Operations',
       description: 'City risk distribution and unresolved queries.',
       path: '/admin/ops/geography',
-      icon: '🗺️'
+      tintA: '#ca8a04',
+      tintB: '#eab308',
     }
   ];
 
-  const modelPerfList = dashboardData?.modelPerformance || [];
-  const maxPredictions = Math.max(1, ...modelPerfList.map((m) => Number(m.predictions) || 0));
-  const modelTrendData = modelPerfList.map((model, idx) => {
-    const confidenceNum = Number.parseFloat(String(model.avg_confidence || '').replace('%', '')) || 0;
-    const predictionLoad = ((Number(model.predictions) || 0) / maxPredictions) * 100;
-    return {
-      slot: idx + 1,
-      model: model.name,
-      accuracy: Number(model.accuracy) || 0,
-      confidence: confidenceNum,
-      load: Number(predictionLoad.toFixed(1)),
-    };
-  });
+  const weatherChartData = useMemo(() => (
+    (dashboardData?.weatherTrends || []).map((entry, index) => ({
+      x: `${String(index + 1).padStart(2, '0')}:00`,
+      city: entry.city,
+      temperature: Number(entry.temperature) || 0,
+      humidity: Number(entry.humidity) || 0,
+      rainfall: Number(entry.rainfall) || 0,
+    }))
+  ), [dashboardData?.weatherTrends]);
 
-  const weatherTrendData = (dashboardData?.weatherTrends || []).map((item, idx) => ({
-    slot: idx + 1,
-    city: item.city,
-    temperature: Number(item.temperature) || 0,
-    humidity: Number(item.humidity) || 0,
-    rainfall: Number(item.rainfall) || 0,
-  }));
+  const navTabs = [
+    { id: 'system', label: 'System', icon: Activity, accent: '#14b8a6' },
+    { id: 'weather', label: 'Weather', icon: Cloud, accent: '#2563eb' },
+    { id: 'users', label: 'Users', icon: Users, accent: '#16a34a' },
+    { id: 'queries', label: 'Queries', icon: MessageSquare, accent: '#f59e0b' },
+  ];
 
   // Loading overlay
   if (loading && !dashboardData) {
@@ -900,65 +863,6 @@ const AdminDashboard = () => {
         .animate-slideIn {
           animation: slideIn 0.3s ease-out forwards;
         }
-
-        .admin-ops-link-card {
-          border: 1px solid rgba(16, 185, 129, 0.18);
-          position: relative;
-          overflow: hidden;
-          animation: fadeUp 0.45s ease both;
-        }
-
-        .admin-ops-link-card:hover {
-          border-color: rgba(16, 185, 129, 0.45);
-          transform: translateY(-3px);
-          box-shadow: 0 18px 32px rgba(16, 185, 129, 0.16);
-        }
-
-        .admin-ops-link-card::after {
-          content: '';
-          position: absolute;
-          inset: auto -15% -35% -15%;
-          height: 120px;
-          background: radial-gradient(circle, rgba(244, 196, 48, 0.2) 0%, rgba(244, 196, 48, 0) 70%);
-          pointer-events: none;
-        }
-
-        @keyframes fadeUp {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .dashboard-gauge-card {
-          border: 1px solid rgba(15, 23, 42, 0.09);
-          box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
-        }
-
-        .dashboard-gauge-head {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 6px;
-          padding: 0 2px;
-        }
-
-        .dashboard-gauge-head-label {
-          color: #64748b;
-          font-size: 12px;
-          font-weight: 600;
-        }
-
-        .dashboard-gauge-head-dot {
-          width: 10px;
-          height: 10px;
-          border-radius: 999px;
-          display: inline-block;
-        }
       `}</style>
 
       <div className="max-w-[1600px] mx-auto">
@@ -1004,27 +908,56 @@ const AdminDashboard = () => {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="glass-card rounded-3xl mb-6 p-2">
-          <div className="flex gap-2 overflow-x-auto">
-            {['system', 'models', 'weather', 'users', 'queries'].map((tab) => (
+        <div
+          className="rounded-3xl mb-6 p-2 md:p-2.5"
+          style={{
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.96) 0%, rgba(248,250,252,0.98) 55%, rgba(241,245,249,0.94) 100%)',
+            border: '1px solid rgba(148,163,184,0.28)',
+            boxShadow: '0 14px 30px rgba(15,23,42,0.08), inset 0 1px 0 rgba(255,255,255,0.9)',
+            backdropFilter: 'blur(10px)',
+          }}
+        >
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            {navTabs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
               <button
-                key={tab}
+                key={tab.id}
                 onClick={() => {
-                  setActiveTab(tab);
+                  setActiveTab(tab.id);
                   setCurrentPage(1);
                 }}
-                className={`px-6 py-3 rounded-2xl font-medium text-sm whitespace-nowrap transition-all ${
-                  activeTab === tab
-                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg shadow-green-500/30'
-                    : 'text-gray-300 hover:bg-white/5'
+                className={`group relative rounded-2xl px-3 py-3 md:px-4 md:py-3.5 text-sm transition-all duration-300 ${
+                  isActive
+                    ? 'text-slate-900 shadow-lg -translate-y-0.5'
+                    : 'text-slate-700 hover:text-slate-900 hover:bg-white/70'
                 }`}
-                aria-label={`Switch to ${tab} tab`}
+                style={isActive ? {
+                  background: `linear-gradient(135deg, ${tab.accent}2b 0%, ${tab.accent}52 100%)`,
+                  border: `1px solid ${tab.accent}7d`,
+                  boxShadow: `0 10px 20px ${tab.accent}2e`,
+                } : {
+                  border: '1px solid rgba(148,163,184,0.24)',
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.94) 0%, rgba(248,250,252,0.9) 100%)',
+                }}
+                aria-label={`Switch to ${tab.label} tab`}
                 role="tab"
-                aria-selected={activeTab === tab}
+                aria-selected={isActive}
               >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                <div className="flex items-center justify-center gap-2 md:gap-2.5">
+                  <Icon size={16} style={{ opacity: isActive ? 1 : 0.86 }} />
+                  <span className="font-semibold tracking-wide">{tab.label}</span>
+                </div>
+                {isActive && (
+                  <span
+                    className="absolute left-1/2 -translate-x-1/2 -bottom-1 h-1.5 w-14 rounded-full"
+                    style={{ background: tab.accent }}
+                  />
+                )}
               </button>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -1069,14 +1002,12 @@ const AdminDashboard = () => {
                   {stat.description}
                 </p>
                 {/* Progress bar for accuracy and response time */}
-                {(stat.title === 'ML Accuracy' || stat.title === 'Response Time') && (
+                {(stat.title === 'Response Time') && (
                   <div className="mt-4 h-2 bg-white/10 rounded-full overflow-hidden">
                     <div 
                       className="h-full rounded-full transition-all duration-1000"
                       style={{ 
-                        width: stat.title === 'ML Accuracy' 
-                          ? `${dashboardData?.model_accuracy || 0}%` 
-                          : `${Math.max(0, 100 - (dashboardData?.avg_response_time || 0) / 3)}%`,
+                        width: `${Math.max(0, 100 - (dashboardData?.avg_response_time || 0) / 3)}%`,
                         background: `linear-gradient(90deg, ${stat.color}, ${stat.color}dd)`
                       }}
                     ></div>
@@ -1095,22 +1026,26 @@ const AdminDashboard = () => {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <RadialGauge
-                value={dashboardData?.model_accuracy}
-                label="ML Accuracy"
-                detail={dashboardData?.model_accuracy != null ? `${dashboardData.model_accuracy.toFixed(1)}% avg` : 'No model data'}
-                color="#2c83f2"
+                value={Array.isArray(dashboardData?.services) && dashboardData.services.length > 0
+                  ? (dashboardData.services.filter((service) => service.status === 'up').length / dashboardData.services.length) * 100
+                  : null}
+                label="Service Uptime"
+                detail={Array.isArray(dashboardData?.services)
+                  ? `${dashboardData.services.filter((service) => service.status === 'up').length}/${dashboardData.services.length} services up`
+                  : 'No service data'}
+                color="#16a34a"
               />
               <RadialGauge
                 value={dashboardData?.avg_response_time != null ? Math.max(0, 100 - dashboardData.avg_response_time / 5) : null}
                 label="Response Time"
                 detail={dashboardData?.avg_response_time != null ? `${Math.round(dashboardData.avg_response_time)} ms` : 'No response data'}
-                color="#1f7a4d"
+                color="#2563eb"
               />
               <RadialGauge
                 value={dashboardData?.system_health === 'Healthy' ? 100 : dashboardData?.system_health === 'Degraded' ? 60 : 20}
                 label="System Health"
                 detail={dashboardData?.system_health || 'Unknown'}
-                color="#2c83f2"
+                color="#d9a300"
               />
             </div>
           </div>
@@ -1125,14 +1060,25 @@ const AdminDashboard = () => {
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {opsPages.map((item) => (
+              {opsPages.map((item, index) => (
                 <button
                   key={item.path}
                   type="button"
                   onClick={() => navigate(item.path)}
-                  className="glass-card-lighter rounded-2xl p-5 text-left hover:bg-white/80 transition-all admin-ops-link-card"
+                  className="glass-card-lighter rounded-2xl p-5 text-left transition-all hover:-translate-y-1 hover:shadow-xl"
+                  style={{
+                    background: `linear-gradient(135deg, ${item.tintA}16 0%, ${item.tintB}14 100%)`,
+                    borderColor: `${item.tintA}33`,
+                    boxShadow: `0 8px 24px ${item.tintA}22`,
+                    animationDelay: `${index * 60}ms`,
+                  }}
                 >
-                  <h4 className="text-white font-semibold mb-2">{item.icon ? `${item.icon} ` : ''}{item.title}</h4>
+                  <div className="mb-2 inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-bold tracking-wide"
+                    style={{ background: `${item.tintA}22`, color: item.tintA }}
+                  >
+                    OPS
+                  </div>
+                  <h4 className="text-white font-semibold mb-2">{item.title}</h4>
                   <p className="text-gray-400 text-sm">{item.description}</p>
                 </button>
               ))}
@@ -1214,6 +1160,50 @@ const AdminDashboard = () => {
         {/* Weather Tab */}
         {activeTab === 'weather' && (
           <div className="grid grid-cols-1 gap-6 mb-6">
+            <div className="glass-card rounded-3xl p-6 hover-lift">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-white">Temperature Trend</h3>
+                <span className="text-gray-400 text-sm">Last sampled cities</span>
+              </div>
+              <ResponsiveContainer width="100%" height={280}>
+                <AreaChart data={weatherChartData}>
+                  <defs>
+                    <linearGradient id="weatherTempFill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#2563eb" stopOpacity={0.22} />
+                      <stop offset="95%" stopColor="#2563eb" stopOpacity={0.02} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.22)" />
+                  <XAxis dataKey="x" stroke="#94a3b8" style={{ fontSize: '12px' }} />
+                  <YAxis stroke="#94a3b8" style={{ fontSize: '12px' }} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area type="monotone" dataKey="temperature" name="Temp (C)" stroke="#2563eb" strokeWidth={3} fill="url(#weatherTempFill)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="glass-card rounded-3xl p-6 hover-lift">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-white">Humidity Trend</h3>
+                <span className="text-gray-400 text-sm">Last sampled cities</span>
+              </div>
+              <ResponsiveContainer width="100%" height={280}>
+                <AreaChart data={weatherChartData}>
+                  <defs>
+                    <linearGradient id="weatherHumFill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.22} />
+                      <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.02} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.22)" />
+                  <XAxis dataKey="x" stroke="#94a3b8" style={{ fontSize: '12px' }} />
+                  <YAxis stroke="#94a3b8" style={{ fontSize: '12px' }} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area type="monotone" dataKey="humidity" name="Humidity (%)" stroke="#f59e0b" strokeWidth={3} fill="url(#weatherHumFill)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+
             <div className="glass-card rounded-3xl p-6 hover-lift">
               <h3 className="text-xl font-bold text-white mb-6">Current Weather - Major Cities</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1303,65 +1293,6 @@ const AdminDashboard = () => {
                     </p>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-6">
-              <div className="glass-card rounded-3xl p-6 hover-lift">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-bold text-white">Weather Statistics Graph</h3>
-                  <span className="text-gray-400 text-sm">By city (latest)</span>
-                </div>
-                {weatherTrendData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={320}>
-                    <AreaChart data={weatherTrendData}>
-                      <defs>
-                        <linearGradient id="weatherTempFill" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#2c83f2" stopOpacity={0.32} />
-                          <stop offset="95%" stopColor="#2c83f2" stopOpacity={0.04} />
-                        </linearGradient>
-                        <linearGradient id="weatherHumFill" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.28} />
-                          <stop offset="95%" stopColor="#10b981" stopOpacity={0.04} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.18)" />
-                      <XAxis dataKey="city" stroke="#94a3b8" style={{ fontSize: '12px' }} />
-                      <YAxis stroke="#94a3b8" style={{ fontSize: '12px' }} />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Area type="monotone" dataKey="temperature" name="Temperature (C)" stroke="#2c83f2" strokeWidth={2.5} fill="url(#weatherTempFill)" />
-                      <Area type="monotone" dataKey="humidity" name="Humidity (%)" stroke="#10b981" strokeWidth={2.2} fill="url(#weatherHumFill)" />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="text-center text-gray-400 py-12">No weather trend data available</div>
-                )}
-              </div>
-
-              <div className="glass-card rounded-3xl p-6 hover-lift">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-bold text-white">Rainfall Trend Graph</h3>
-                  <span className="text-gray-400 text-sm">By city (latest)</span>
-                </div>
-                {weatherTrendData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={320}>
-                    <AreaChart data={weatherTrendData}>
-                      <defs>
-                        <linearGradient id="weatherRainFill" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.04} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.18)" />
-                      <XAxis dataKey="city" stroke="#94a3b8" style={{ fontSize: '12px' }} />
-                      <YAxis stroke="#94a3b8" style={{ fontSize: '12px' }} />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Area type="monotone" dataKey="rainfall" name="Rainfall (mm)" stroke="#f59e0b" strokeWidth={2.5} fill="url(#weatherRainFill)" />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="text-center text-gray-400 py-12">No rainfall trend data available</div>
-                )}
               </div>
             </div>
           </div>
@@ -1982,7 +1913,7 @@ const AdminDashboard = () => {
 
         {/* System Health */}
         {activeTab === 'system' && (
-          <div className="glass-card rounded-3xl p-6 hover-lift">
+          <div className="glass-card rounded-3xl p-6 hover-lift mb-6">
             <h3 className="text-xl font-bold text-white mb-6">System Health</h3>
             <div className="space-y-4">
               {dashboardData?.services.map((service, index) => (
@@ -1991,8 +1922,8 @@ const AdminDashboard = () => {
                     <div className={`w-3 h-3 rounded-full ${
                       service.status === 'up' ? 'bg-green-400' : 'bg-red-400'
                     }`} style={{
-                      boxShadow: service.status === 'up' 
-                        ? '0 0 12px rgba(74, 222, 128, 0.6)' 
+                      boxShadow: service.status === 'up'
+                        ? '0 0 12px rgba(74, 222, 128, 0.6)'
                         : '0 0 12px rgba(248, 113, 113, 0.6)'
                     }}></div>
                     <div>
@@ -2072,55 +2003,28 @@ const AdminDashboard = () => {
               </div>
             </div>
 
-            {/* Graphs */}
-            <div className="grid grid-cols-1 gap-6 mb-6">
-              <div className="glass-card rounded-3xl p-6 hover-lift">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-bold text-white">Model Accuracy Trend</h3>
-                  <span className="text-gray-400 text-sm">Last 24 hours</span>
-                </div>
-                <ResponsiveContainer width="100%" height={320}>
-                  <AreaChart data={modelTrendData}>
-                    <defs>
-                      <linearGradient id="modelAccuracyFill" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#2c83f2" stopOpacity={0.32} />
-                        <stop offset="95%" stopColor="#2c83f2" stopOpacity={0.04} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.18)" />
-                    <XAxis dataKey="model" stroke="#94a3b8" style={{ fontSize: '12px' }} />
-                    <YAxis stroke="#94a3b8" style={{ fontSize: '12px' }} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Area type="monotone" dataKey="accuracy" stroke="#2c83f2" strokeWidth={2.5} fill="url(#modelAccuracyFill)" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="glass-card rounded-3xl p-6 hover-lift">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-bold text-white">Prediction Load Trend</h3>
-                  <span className="text-gray-400 text-sm">Last 24 hours</span>
-                </div>
-                <ResponsiveContainer width="100%" height={320}>
-                  <AreaChart data={modelTrendData}>
-                    <defs>
-                      <linearGradient id="modelLoadFill" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.25} />
-                        <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.03} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.18)" />
-                    <XAxis dataKey="model" stroke="#94a3b8" style={{ fontSize: '12px' }} />
-                    <YAxis stroke="#94a3b8" style={{ fontSize: '12px' }} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Area type="monotone" dataKey="load" stroke="#f59e0b" strokeWidth={2.5} fill="url(#modelLoadFill)" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
+            {/* Model Accuracy Chart - Full Width */}
+            <div className="glass-card rounded-3xl p-6 hover-lift">
+              <h3 className="text-xl font-bold text-white mb-6">Model Accuracy Comparison</h3>
+              <ResponsiveContainer width="100%" height={350}>
+                <BarChart data={dashboardData?.modelPerformance}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                  <XAxis dataKey="name" stroke="#9ca3af" style={{ fontSize: '12px' }} />
+                  <YAxis stroke="#9ca3af" style={{ fontSize: '12px' }} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend />
+                  <Bar 
+                    dataKey="accuracy" 
+                    fill="#10b981" 
+                    radius={[8, 8, 0, 0]}
+                    name="Accuracy (%)"
+                    animationDuration={1000}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
 
-            {/* Model Performance (at end) */}
-            <div className="glass-card rounded-3xl p-6 hover-lift">
+            <div className="glass-card rounded-3xl p-6 hover-lift mt-6">
               <h3 className="text-xl font-bold text-white mb-6">Model Performance</h3>
               <div className="space-y-5">
                 {dashboardData?.modelPerformance.map((model, index) => (

@@ -12,6 +12,7 @@
     "cesium": "^1.139.1",
     "chart.js": "^4.5.1",
     "framer-motion": "^12.23.25",
+    "jspdf": "^4.2.1",
     "leaflet": "^1.9.4",
     "leaflet-draw": "^1.0.4",
     "lucide-react": "^0.544.0",

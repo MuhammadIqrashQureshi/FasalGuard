@@ -6,6 +6,7 @@ import 'leaflet-draw/dist/leaflet.draw.css';
 import { EditControl } from 'react-leaflet-draw';
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
+import jsPDF from 'jspdf';
 import './SatelliteAnalysis.css';
 import { useLanguage } from './context/LanguageContext';
 import CompactWeatherInfo from './components/CompactWeatherInfo';
@@ -73,7 +74,6 @@ const MAP_MAX_ZOOM = 19;
 const API_BASE = 'http://localhost:5000';
 const VOICE_REPORT_LANGUAGES = [
   { id: 'en-US', label: 'English' },
-  { id: 'hi-IN', label: 'Hindi' },
   { id: 'ur-PK', label: 'اردو' },
 ];
 
@@ -588,7 +588,7 @@ const SatelliteAnalysis = () => {
   }, [selectedLocationId]);
 
   useEffect(() => {
-    const timer = setTimeout(() => setPageLoading(false), 3200);
+    const timer = setTimeout(() => setPageLoading(false), 2200);
     return () => clearTimeout(timer);
   }, []);
 
@@ -655,6 +655,17 @@ const SatelliteAnalysis = () => {
   const heatmapAlertText = heatmapAlertLevel === 'High'
     ? tr('High Alert', 'شدید الرٹ')
     : tr('Moderate Alert', 'درمیانی الرٹ');
+  const hasActionableAnalysisReport = Boolean(
+    result
+    && result.is_field !== false
+    && (
+      result.field_report
+      || result.diagnosis
+      || result.stage_checklist
+      || (Array.isArray(result.recommendations) && result.recommendations.length > 0)
+      || (result.heatmap && result.heatmap.fetched)
+    )
+  );
 
   const voiceReportText = useMemo(() => buildFarmerVoiceReport({
     analysisResult: result,
@@ -2007,6 +2018,167 @@ const SatelliteAnalysis = () => {
     jumpToMapAndShowSavedNotice();
   }, [jumpToMapAndShowSavedNotice]);
 
+  const handleDownloadDetailedReport = () => {
+    if (!result) return;
+
+    const reportDate = result?.field?.analysis_date
+      || (result?.timestamp ? String(result.timestamp).slice(0, 10) : toDateInputValue(new Date()));
+    const cropLabel = String(result?.crop || selectedCrop || 'crop').toUpperCase();
+    const cityLabel = result?.city || result?.field?.city || selectedCity || 'Unknown area';
+    const riskLabel = result?.field_report?.risk_level || result?.risk_level || 'Unknown';
+    const stressProbability = Number(
+      result?.metrics?.stress_probability
+      ?? result?.field_report?.stress_probability
+      ?? result?.heatmap?.summary?.avg_stress_probability
+    );
+    const expectedLoss = Number(
+      result?.field_report?.economic_impact?.expected_loss_pkr_per_acre
+      ?? result?.metrics?.expected_loss_pkr_per_acre
+      ?? result?.economic_impact?.expected_loss_pkr_per_acre
+    );
+    const expectedYield = Number(result?.field_report?.estimated_yield?.maunds_per_acre);
+    const potentialLossMaunds = Number(result?.field_report?.estimated_yield?.potential_loss_maunds);
+    const summary = result?.diagnosis?.urgency || result?.field_report?.status_summary || 'N/A';
+    const weatherContext = result?.weather_context || {};
+    const weatherSummary = weatherContext?.summary || {};
+    const weatherDay = (Array.isArray(result?.weather_data) && result.weather_data[0])
+      || (Array.isArray(miniWeather?.forecast) && miniWeather.forecast[0])
+      || {};
+    const weatherTemperature = Number(
+      weatherContext?.temperature_c
+      ?? weatherSummary?.avg_temp
+      ?? weatherDay?.T2M
+    );
+    const weatherHumidity = Number(
+      weatherContext?.humidity_pct
+      ?? weatherSummary?.avg_humidity
+      ?? weatherDay?.RH2M
+    );
+    const weatherRain48 = Number(
+      weatherContext?.rain_mm_next_48h
+      ?? weatherContext?.rain_next_48h
+      ?? weatherSummary?.total_rainfall
+      ?? weatherDay?.PRECTOTCORR
+    );
+    const recommendations = Array.isArray(result?.recommendations) ? result.recommendations : [];
+    const stageChecklist = Array.isArray(result?.stage_checklist?.items) ? result.stage_checklist.items : [];
+    const fertilizerPlanBuilt = buildFertilizerPlan(result);
+    const fertilizerPlan = Array.isArray(fertilizerPlanBuilt?.products) ? fertilizerPlanBuilt.products : [];
+    const irrigationPlanBuilt = buildIrrigationSchedule(result);
+    const irrigationActions = Array.isArray(irrigationPlanBuilt?.plan)
+      ? irrigationPlanBuilt.plan.map((step) => `${step.when}: ${step.action}`)
+      : (Array.isArray(result?.farmer_summary?.irrigation?.actions)
+        ? result.farmer_summary.irrigation.actions
+        : []);
+    const trackedCosts = Array.isArray(inputCosts) ? inputCosts : [];
+
+    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 42;
+    const contentWidth = pageWidth - (margin * 2);
+    let y = 52;
+
+    const ensureSpace = (needed = 26) => {
+      if (y + needed <= pageHeight - 40) return;
+      doc.addPage();
+      y = 52;
+    };
+
+    const writeTitle = (text) => {
+      ensureSpace(36);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(18);
+      doc.text(text, margin, y);
+      y += 24;
+    };
+
+    const writeSection = (text) => {
+      ensureSpace(28);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.text(text, margin, y);
+      y += 18;
+      doc.setDrawColor(220, 220, 220);
+      doc.line(margin, y, pageWidth - margin, y);
+      y += 14;
+    };
+
+    const writeLine = (text) => {
+      const safe = String(text || '');
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(11);
+      const lines = doc.splitTextToSize(safe, contentWidth);
+      lines.forEach((line) => {
+        ensureSpace(16);
+        doc.text(line, margin, y);
+        y += 14;
+      });
+    };
+
+    const writeList = (items, fallback) => {
+      const list = Array.isArray(items) && items.length > 0 ? items : [fallback];
+      list.forEach((item, idx) => writeLine(`${idx + 1}. ${item}`));
+    };
+
+    writeTitle('FasalGuard Satellite Analysis - Detailed Report');
+    writeLine(`Generated At: ${new Date().toLocaleString('en-PK')}`);
+    writeLine(`Analysis Date: ${reportDate}`);
+    writeLine(`Crop: ${cropLabel}`);
+    writeLine(`City/Area: ${cityLabel}`);
+
+    writeSection('Executive Summary');
+    writeLine(`Risk Level: ${riskLabel}`);
+    writeLine(`Status Summary: ${summary}`);
+    writeLine(`Stress Probability: ${Number.isFinite(stressProbability) ? `${(stressProbability * 100).toFixed(1)}%` : 'N/A'}`);
+    writeLine(`Expected Yield: ${Number.isFinite(expectedYield) ? `${expectedYield.toFixed(2)} maunds/acre` : 'N/A'}`);
+    writeLine(`Potential Yield Loss: ${Number.isFinite(potentialLossMaunds) ? `${potentialLossMaunds.toFixed(2)} maunds/acre` : 'N/A'}`);
+    writeLine(`Expected Economic Loss: ${Number.isFinite(expectedLoss) ? `PKR ${Math.round(expectedLoss).toLocaleString('en-PK')} per acre` : 'N/A'}`);
+
+    writeSection('Weather Context');
+    writeLine(`Temperature: ${Number.isFinite(weatherTemperature) ? `${weatherTemperature.toFixed(1)} C` : 'N/A'}`);
+    writeLine(`Humidity: ${Number.isFinite(weatherHumidity) ? `${weatherHumidity.toFixed(0)}%` : 'N/A'}`);
+    writeLine(`Rainfall Forecast: ${Number.isFinite(weatherRain48) ? `${weatherRain48.toFixed(1)} mm` : 'N/A'}`);
+
+    writeSection('Top Recommendations');
+    writeList(
+      recommendations.slice(0, 10).map((rec) => {
+        const title = rec?.action || rec?.recommendation || rec?.type || 'Recommended action';
+        const reason = rec?.reason || rec?.detail || '';
+        return `${title}${reason ? ` | Reason: ${reason}` : ''}`;
+      }),
+      'No recommendation data available.'
+    );
+
+    writeSection('Stage Checklist');
+    writeList(
+      stageChecklist.slice(0, 15).map((item) => `${item?.window ? `[${item.window}] ` : ''}${item?.task || 'Task'}`),
+      'No stage checklist available.'
+    );
+
+    writeSection('Fertilizer Plan');
+    writeList(
+      fertilizerPlan.slice(0, 12).map((item) => `${item?.label || item?.name || item?.type || 'Input'}: ${item?.dose || item?.amount || 'as advised'}${item?.cost ? ` | ${item.cost}` : ''}`),
+      'No fertilizer plan available.'
+    );
+
+    writeSection('Irrigation Actions');
+    writeList(irrigationActions.slice(0, 12), 'No irrigation action details available.');
+
+    writeSection('Input Cost Tracker');
+    writeList(
+      trackedCosts.map((item) => `${item?.item || item?.name || 'Input'}${item?.category ? ` (${item.category})` : ''}: PKR ${Number(item?.amount || item?.cost || 0).toLocaleString('en-PK')}${item?.date ? ` on ${item.date}` : ''}`),
+      'No tracked input costs entered.'
+    );
+
+    const safeCrop = String(result?.crop || selectedCrop || 'crop').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const safeDate = String(reportDate || toDateInputValue(new Date())).replace(/[^0-9-]+/g, '');
+    const fileName = `fasalguard-detailed-report-${safeCrop}-${safeDate}.pdf`;
+    doc.save(fileName);
+
+    setReportSavedNotice(tr('Detailed PDF report downloaded.', 'تفصیلی پی ڈی ایف رپورٹ ڈاؤن لوڈ ہو گئی۔'));
+  };
+
   const loadOutcomeHistory = useCallback(async ({ fieldSignature = '', locationId = '', fallbackPayload = null } = {}) => {
     if (!fieldSignature && !locationId && !fallbackPayload) return;
 
@@ -2368,41 +2540,6 @@ const SatelliteAnalysis = () => {
       const requestedDate = analysisDate || todayInput;
       let finalResponse = await analyzeWithDate(requestedDate);
       let responsePayload = finalResponse.data;
-      let usedFallbackDate = null;
-
-      // Fallback for current-date false non-field results: retry recent dates before showing non-field.
-      if (responsePayload?.success && responsePayload?.is_field === false && requestedDate === todayInput) {
-        const fallbackOffsets = [3, 7, 10, 14, 21];
-        const triedDates = new Set([requestedDate]);
-
-        for (const daysBack of fallbackOffsets) {
-          const candidateDate = new Date(`${todayInput}T00:00:00`);
-          candidateDate.setDate(candidateDate.getDate() - daysBack);
-          const rawCandidate = toDateInputValue(candidateDate);
-          const normalizedCandidate = normalizeSeasonalAnalysisDate(rawCandidate, todayInput, selectedCrop);
-          if (triedDates.has(normalizedCandidate)) continue;
-          triedDates.add(normalizedCandidate);
-
-          try {
-            const fallbackResp = await analyzeWithDate(normalizedCandidate);
-            if (fallbackResp?.data?.success && fallbackResp?.data?.is_field !== false) {
-              responsePayload = {
-                ...fallbackResp.data,
-                fallback_note: tr(
-                  `Latest image looked uncertain for today. Showing nearest valid image from ${normalizedCandidate}.`,
-                  `آج کی تصویر غیر واضح تھی۔ ${normalizedCandidate} کی قریب ترین درست تصویر دکھائی جا رہی ہے۔`
-                ),
-                requested_analysis_date: requestedDate,
-                resolved_analysis_date: normalizedCandidate,
-              };
-              usedFallbackDate = normalizedCandidate;
-              break;
-            }
-          } catch {
-            // Ignore fallback probe errors and keep trying older dates.
-          }
-        }
-      }
 
       if (responsePayload.success) {
         const cleanResult = stripEmojiDeep(responsePayload);
@@ -2444,10 +2581,6 @@ const SatelliteAnalysis = () => {
           setShowSaveLocationPrompt(false);
         }
 
-        if (usedFallbackDate) {
-          setAnalysisDate(usedFallbackDate);
-        }
-        
         // Scroll to results
         setTimeout(() => {
           document.getElementById('sat-results-anchor')?.scrollIntoView({ behavior: 'smooth' });
@@ -6789,6 +6922,15 @@ const SatelliteAnalysis = () => {
                         </button>
                       </div>
                     )}
+                    {hasActionableAnalysisReport && result.is_field !== false && (
+                      <button
+                        type="button"
+                        className="sat-action-btn secondary sat-report-new-analysis-btn"
+                        onClick={handleDownloadDetailedReport}
+                      >
+                        {tr('Download Detailed Report', 'تفصیلی رپورٹ ڈاؤن لوڈ کریں')}
+                      </button>
+                    )}
                     <button
                       type="button"
                       className="sat-action-btn secondary sat-report-new-analysis-btn"
@@ -6811,12 +6953,12 @@ const SatelliteAnalysis = () => {
                       {tr('Viewing saved report from history', 'ہسٹری سے محفوظ رپورٹ دیکھ رہے ہیں')}
                     </div>
                   )}
-                  {result.simulated_note && (
+                  {result.is_field !== false && result.simulated_note && (
                     <div className="sat-simulated-notice">
                       {tr('Live satellite image was not available in this window. This result is an estimated advisory, so please recheck when a fresh image is available.', 'اس وقت کی ونڈو میں لائیو سیٹلائٹ تصویر دستیاب نہیں تھی۔ یہ تخمینی مشورہ ہے، نئی تصویر آنے پر دوبارہ چیک کریں۔')}
                     </div>
                   )}
-                  {result.fallback_note && (
+                  {result.is_field !== false && result.fallback_note && (
                     <div className="sat-simulated-notice sat-fallback-notice">
                       {result.fallback_note}
                     </div>
@@ -6873,13 +7015,14 @@ const SatelliteAnalysis = () => {
                 </div>
                 )}
 
+                {hasActionableAnalysisReport && (
                 <div className="sat-voice-report-cta">
                   <div>
                     <div className="sat-voice-report-title">
                       {tr('Need a simple farmer explanation?', 'کیا آسان کسان وضاحت چاہیے؟')}
                     </div>
                     <div className="sat-voice-report-subtitle">
-                      {tr('Open an easy full-report summary and listen in English, Hindi, or Urdu.', 'آسان مکمل رپورٹ خلاصہ کھولیں اور اسے انگریزی، ہندی یا اردو میں سنیں۔')}
+                      {tr('Open an easy full-report summary and listen in English or Urdu.', 'آسان مکمل رپورٹ خلاصہ کھولیں اور اسے انگریزی یا اردو میں سنیں۔')}
                     </div>
                   </div>
                   <button
@@ -6890,6 +7033,7 @@ const SatelliteAnalysis = () => {
                     {tr('Understand Report', 'رپورٹ آسان الفاظ میں')}
                   </button>
                 </div>
+                )}
 
                 {/* ── Non-field / post-harvest result ── */}
                 {result.is_field === false && (
@@ -7086,7 +7230,7 @@ const SatelliteAnalysis = () => {
           )}
 
           {/* Delete Location Confirmation Modal */}
-          {showVoiceReportPanel && result && (
+          {showVoiceReportPanel && result && hasActionableAnalysisReport && (
             <div className="sat-modal-overlay" onClick={() => { stopVoiceReportAudio(); setShowVoiceReportPanel(false); }}>
               <div className="sat-modal-card sat-voice-report-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="sat-modal-header">
