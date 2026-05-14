@@ -3,6 +3,7 @@ import React from 'react';
 const OpsInsightCard = ({ title, text, highlights }) => {
   const titleKey = String(title || '').toLowerCase();
 
+  //CARD
   const renderVisual = () => {
     if (titleKey.includes('query')) {
       return (

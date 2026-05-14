@@ -1,18 +1,25 @@
 # FasalGuard - Agricultural Monitoring System
 
-A complete authentication system for FasalGuard with React frontend and Node.js backend.
+FasalGuard is a full-stack agricultural monitoring and advisory platform with a React frontend, Node/Express API, and a Python ML microservice for prediction workflows.
 
 ## Features
 
-- ✅ User Registration and Login
-- ✅ JWT Token Authentication
-- ✅ Password Hashing with bcrypt
-- ✅ MongoDB Database Integration
-- ✅ Responsive UI with Dark Mode
-- ✅ Protected Routes
-- ✅ User Dashboard
-- ✅ Form Validation
-- ✅ Error Handling
+- ✅ User registration and login
+- ✅ JWT-based authentication and protected routes
+- ✅ Password hashing with bcrypt
+- ✅ MongoDB integration via Mongoose
+- ✅ User dashboard and profile management
+- ✅ Weather insights and visualization pages
+- ✅ Crop recommendation and prediction flows
+- ✅ Crop comparison matrix
+- ✅ Soil analysis insights
+- ✅ Satellite analysis workflows
+- ✅ Actionable recommendations for farmers
+- ✅ Farmer history view and reports
+- ✅ Voice assistant for farmer-friendly guidance
+- ✅ Form validation and structured error handling
+- ✅ Modular backend controllers and routes
+- ✅ Optional ML microservice for model-based forecasts
 
 ## Project Structure
 
@@ -30,6 +37,8 @@ fasal-guard/
 │   ├── routes/           # API Routes
 │   ├── server.js         # Express Server
 │   └── package.json      # Backend Dependencies
+│   ├── ml_service/        # Python ML microservice (Flask)
+│   └── ml_models/         # Trained model files
 └── package.json          # Frontend Dependencies
 ```
 
@@ -104,6 +113,16 @@ npm start
 The application will be available at:
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:5000
+
+### 6. Optional: Start the ML Microservice
+
+```bash
+cd backend/ml_service
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+python app.py
+```
 
 ## API Endpoints
 
